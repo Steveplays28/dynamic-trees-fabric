@@ -15,6 +15,7 @@ import com.ferreusveritas.dynamictrees.client.BlockColorMultipliers;
 import com.ferreusveritas.dynamictrees.client.TextureUtils;
 import com.ferreusveritas.dynamictrees.entities.render.FallingTreeRenderer;
 import com.ferreusveritas.dynamictrees.entities.render.LingeringEffectorRenderer;
+import com.ferreusveritas.dynamictrees.resources.treepack.TreePackLoader;
 import com.ferreusveritas.dynamictrees.trees.Family;
 import com.ferreusveritas.dynamictrees.trees.Species;
 import net.minecraft.block.BlockState;
@@ -74,6 +75,8 @@ public class DTClient {
 
         LeavesProperties.postInitClient();
         cleanup();
+
+        TreePackLoader.registerTreePackAssetsFinder();
     }
 
     @OnlyIn(Dist.CLIENT)

@@ -1,5 +1,6 @@
-package com.ferreusveritas.dynamictrees.resources;
+package com.ferreusveritas.dynamictrees.resources.treepack;
 
+import com.ferreusveritas.dynamictrees.resources.Resources;
 import net.minecraftforge.forgespi.locating.IModFile;
 
 import java.nio.file.Path;
@@ -8,12 +9,12 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * A {@link FlatTreeResourcePack} for loading resources packaged with mods. This
+ * A {@link FolderTreeResourcePack} for loading resources packaged with mods. This
  * will load resources from the {@code trees} folder under their resources, given that it exists.
  *
  * @author Harley O'Connor
  */
-public final class ModTreeResourcePack extends FlatTreeResourcePack {
+public final class ModTreeResourcePack extends FolderTreeResourcePack {
 
     private final IModFile modFile;
 

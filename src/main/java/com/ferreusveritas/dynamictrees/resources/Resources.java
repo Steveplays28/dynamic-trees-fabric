@@ -8,12 +8,10 @@ import com.ferreusveritas.dynamictrees.data.DTRecipes;
 import com.ferreusveritas.dynamictrees.growthlogic.GrowthLogicKit;
 import com.ferreusveritas.dynamictrees.growthlogic.GrowthLogicKitConfiguration;
 import com.ferreusveritas.dynamictrees.init.DTConfigs;
-import com.ferreusveritas.dynamictrees.resources.loader.BiomeDatabaseResourceLoader;
-import com.ferreusveritas.dynamictrees.resources.loader.FamilyResourceLoader;
-import com.ferreusveritas.dynamictrees.resources.loader.JoCodeResourceLoader;
-import com.ferreusveritas.dynamictrees.resources.loader.LeavesPropertiesResourceLoader;
-import com.ferreusveritas.dynamictrees.resources.loader.SoilPropertiesResourceLoader;
-import com.ferreusveritas.dynamictrees.resources.loader.SpeciesResourceLoader;
+import com.ferreusveritas.dynamictrees.resources.loader.*;
+import com.ferreusveritas.dynamictrees.resources.treepack.TreePackLoader;
+import com.ferreusveritas.dynamictrees.resources.treepack.ModTreeResourcePack;
+import com.ferreusveritas.dynamictrees.resources.treepack.RequiredFolderTreeResourcePack;
 import com.ferreusveritas.dynamictrees.systems.fruit.FruitResourceLoader;
 import com.ferreusveritas.dynamictrees.systems.genfeatures.GenFeature;
 import com.ferreusveritas.dynamictrees.systems.genfeatures.GenFeatureConfiguration;
@@ -89,6 +87,7 @@ public final class Resources {
 
         registerModTreePacks();
         registerFlatTreePack();
+        registerTreePacks();
 
         LogManager.getLogger().debug("Successfully loaded " + MANAGER.listPacks().count() + " tree packs.");
     }
@@ -133,7 +132,7 @@ public final class Resources {
 
     private static void registerFlatTreePack() {
         final File mainTreeFolder = getTreeFolder();
-        MANAGER.addPack(new FlatTreeResourcePack(mainTreeFolder.toPath().toAbsolutePath()));
+        MANAGER.addPack(new RequiredFolderTreeResourcePack(mainTreeFolder.toPath().toAbsolutePath()));
     }
 
     private static File getTreeFolder() {
@@ -144,6 +143,10 @@ public final class Resources {
             throw new RuntimeException("Failed to create \"trees\" folder in your Minecraft directory.");
         }
         return mainTreeFolder;
+    }
+
+    private static void registerTreePacks() {
+        MANAGER.addPacks(TreePackLoader.loadTreePacks());
     }
 
     @SubscribeEvent

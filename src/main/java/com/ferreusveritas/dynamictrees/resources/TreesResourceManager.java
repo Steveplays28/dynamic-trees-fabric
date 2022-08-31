@@ -5,6 +5,9 @@ import com.ferreusveritas.dynamictrees.api.resource.ResourceManager;
 import com.ferreusveritas.dynamictrees.api.resource.TreeResourcePack;
 import com.ferreusveritas.dynamictrees.api.resource.loading.ApplierResourceLoader;
 import com.ferreusveritas.dynamictrees.api.resource.loading.ResourceLoader;
+import com.ferreusveritas.dynamictrees.resources.treepack.ModTreeResourcePack;
+import com.ferreusveritas.dynamictrees.resources.treepack.RequiredFolderTreeResourcePack;
+import com.ferreusveritas.dynamictrees.resources.treepack.TreePackLoader;
 import com.ferreusveritas.dynamictrees.util.CommonCollectors;
 import com.google.common.collect.Lists;
 import net.minecraft.resources.IResource;
@@ -12,10 +15,16 @@ import net.minecraft.resources.IResourceManager;
 import net.minecraft.resources.IResourcePack;
 import net.minecraft.resources.SimpleResource;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.ModList;
+import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
+import net.minecraftforge.forgespi.locating.IModFile;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -33,6 +42,63 @@ public final class TreesResourceManager implements IResourceManager, ResourceMan
 
     private final List<TreeResourcePack> resourcePacks = Lists.newArrayList();
     private final List<ResourceLoader<?>> resourceLoaders = Lists.newArrayList();
+
+    public TreesResourceManager() {
+        addModTreePacks();
+        addFlatTreePack();
+        addTreePacks();
+    }
+
+    private void addModTreePacks() {
+        // Register all mod tree packs. Gets the mods in an ordered list so that add-ons will come after DT.
+        // This means that add-ons will take priority over DT.
+        ModList.get().getMods().forEach(this::addModResourcePack);
+    }
+
+    private void addModResourcePack(ModInfo modInfo) {
+        final IModFile modFile = ModList.get().getModFileById(modInfo.getModId()).getFile();
+        if (modFile.getLocator().isValid(modFile)) {
+            addModResourcePack(modFile);
+        }
+    }
+
+    private void addModResourcePack(IModFile modFile) {
+        final Path treesPath = modFile.getLocator()
+                .findPath(modFile, Resources.TREES)
+                .toAbsolutePath();
+
+        if (Files.exists(treesPath)) {
+            addPack(new ModTreeResourcePack(treesPath, modFile));
+        }
+    }
+
+    private void addFlatTreePack() {
+        final File mainTreeFolder = getFlatTreePackFolder();
+        addPack(new RequiredFolderTreeResourcePack(mainTreeFolder.toPath().toAbsolutePath()));
+    }
+
+    private File getFlatTreePackFolder() {
+        final File flatTreePackFolder = new File(Resources.TREES + "/");
+        // Create the trees folder if it doesn't already exist, crash if failed.
+        if (!flatTreePackFolder.exists() && !flatTreePackFolder.mkdir()) {
+            throw new RuntimeException("Failed to create \"trees\" folder in your Minecraft directory.");
+        }
+        return flatTreePackFolder;
+    }
+
+    private void addTreePacks() {
+        addPacks(TreePackLoader.loadTreePacks());
+    }
+
+    @Override
+    public void addPack(TreeResourcePack pack) {
+        this.resourcePacks.add(pack);
+    }
+
+    @Override
+    public void addPacks(Collection<TreeResourcePack> packs) {
+        this.resourcePacks.addAll(packs);
+    }
 
     @Override
     public void addLoader(ResourceLoader<?> loader) {
@@ -92,19 +158,20 @@ public final class TreesResourceManager implements IResourceManager, ResourceMan
      */
     @Override
     public void reload(final CompletableFuture<?>[] futures) {
+        reloadTreePacks();
         for (int i = 0; i < futures.length; i++) {
             this.reload(this.resourceLoaders.get(i), futures[i]);
         }
     }
 
+    private void reloadTreePacks() {
+        resourcePacks.removeIf(pack -> !pack.isRequired());
+        addTreePacks();
+    }
+
     @SuppressWarnings("unchecked")
     private <R> void reload(final ResourceLoader<R> loader, final CompletableFuture<?> future) {
         loader.reload((CompletableFuture<ResourceAccessor<R>>) future, this);
-    }
-
-    @Override
-    public void addPack(TreeResourcePack pack) {
-        this.resourcePacks.add(pack);
     }
 
     @Override

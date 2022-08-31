@@ -4,6 +4,7 @@ import com.ferreusveritas.dynamictrees.api.resource.loading.ResourceLoader;
 import net.minecraft.resources.IResourceManager;
 import net.minecraft.resources.IResourcePack;
 
+import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.stream.Stream;
@@ -34,6 +35,8 @@ public interface ResourceManager extends IResourceManager {
     void reload(CompletableFuture<?>[] futures);
 
     void addPack(TreeResourcePack pack);
+
+    void addPacks(Collection<TreeResourcePack> packs);
 
     @Override
     Stream<IResourcePack> listPacks();

@@ -18,6 +18,8 @@ public interface TreeResourcePack extends IResourcePack {
 
     String FOLDER = "trees";
 
+    boolean isRequired();
+
     @SuppressWarnings("ConstantConditions")
     default InputStream getResource(ResourceLocation location) throws IOException {
         return this.getResource(null, location);

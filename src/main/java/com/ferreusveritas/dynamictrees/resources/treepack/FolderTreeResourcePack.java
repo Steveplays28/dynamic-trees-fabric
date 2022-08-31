@@ -1,6 +1,5 @@
-package com.ferreusveritas.dynamictrees.resources;
+package com.ferreusveritas.dynamictrees.resources.treepack;
 
-import com.ferreusveritas.dynamictrees.api.resource.TreeResourcePack;
 import com.ferreusveritas.dynamictrees.util.CommonCollectors;
 import com.google.common.base.Joiner;
 import net.minecraft.resources.ResourcePack;
@@ -26,13 +25,19 @@ import java.util.function.Predicate;
  *
  * @author Harley O'Connor
  */
-public class FlatTreeResourcePack extends ResourcePack implements TreeResourcePack {
+public class FolderTreeResourcePack extends ResourcePack
+        implements com.ferreusveritas.dynamictrees.api.resource.TreeResourcePack {
 
     protected final Path path;
 
-    public FlatTreeResourcePack(final Path path) {
+    public FolderTreeResourcePack(final Path path) {
         super(new File("dummy"));
         this.path = path;
+    }
+
+    @Override
+    public boolean isRequired() {
+        return true;
     }
 
     @Override
