@@ -9,9 +9,6 @@ import com.ferreusveritas.dynamictrees.growthlogic.GrowthLogicKit;
 import com.ferreusveritas.dynamictrees.growthlogic.GrowthLogicKitConfiguration;
 import com.ferreusveritas.dynamictrees.init.DTConfigs;
 import com.ferreusveritas.dynamictrees.resources.loader.*;
-import com.ferreusveritas.dynamictrees.resources.treepack.TreePackLoader;
-import com.ferreusveritas.dynamictrees.resources.treepack.ModTreeResourcePack;
-import com.ferreusveritas.dynamictrees.resources.treepack.RequiredFolderTreeResourcePack;
 import com.ferreusveritas.dynamictrees.systems.fruit.FruitResourceLoader;
 import com.ferreusveritas.dynamictrees.systems.genfeatures.GenFeature;
 import com.ferreusveritas.dynamictrees.systems.genfeatures.GenFeatureConfiguration;
@@ -26,15 +23,9 @@ import net.minecraft.resources.IResourceManager;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
-import net.minecraftforge.forgespi.locating.IModFile;
 import org.apache.logging.log4j.LogManager;
 
-import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -85,10 +76,6 @@ public final class Resources {
         Hooks.onAddResourceLoaders(MANAGER);
         MANAGER.registerAppliers();
 
-        registerModTreePacks();
-        registerFlatTreePack();
-        registerTreePacks();
-
         LogManager.getLogger().debug("Successfully loaded " + MANAGER.listPacks().count() + " tree packs.");
     }
 
@@ -105,48 +92,6 @@ public final class Resources {
                 JO_CODE_LOADER,
                 BIOME_DATABASE_LOADER
         );
-    }
-
-    private static void registerModTreePacks() {
-        // Register all mod tree packs. Gets the mods in an ordered list so that add-ons will come after DT.
-        // This means that add-ons will take priority over DT.
-        ModList.get().getMods().forEach(Resources::addModResourcePack);
-    }
-
-    private static void addModResourcePack(ModInfo modInfo) {
-        final IModFile modFile = ModList.get().getModFileById(modInfo.getModId()).getFile();
-        if (modFile.getLocator().isValid(modFile)) {
-            addModResourcePack(modFile);
-        }
-    }
-
-    private static void addModResourcePack(IModFile modFile) {
-        final Path treesPath = modFile.getLocator()
-                .findPath(modFile, TREES)
-                .toAbsolutePath();
-
-        if (Files.exists(treesPath)) {
-            MANAGER.addPack(new ModTreeResourcePack(treesPath, modFile));
-        }
-    }
-
-    private static void registerFlatTreePack() {
-        final File mainTreeFolder = getTreeFolder();
-        MANAGER.addPack(new RequiredFolderTreeResourcePack(mainTreeFolder.toPath().toAbsolutePath()));
-    }
-
-    private static File getTreeFolder() {
-        final File mainTreeFolder = new File("trees/");
-
-        // Create the trees folder if it doesn't already exist, crash if failed.
-        if (!mainTreeFolder.exists() && !mainTreeFolder.mkdir()) {
-            throw new RuntimeException("Failed to create \"trees\" folder in your Minecraft directory.");
-        }
-        return mainTreeFolder;
-    }
-
-    private static void registerTreePacks() {
-        MANAGER.addPacks(TreePackLoader.loadTreePacks());
     }
 
     @SubscribeEvent

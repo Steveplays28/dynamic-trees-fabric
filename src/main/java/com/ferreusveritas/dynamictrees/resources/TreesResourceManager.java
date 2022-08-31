@@ -90,13 +90,11 @@ public final class TreesResourceManager implements IResourceManager, ResourceMan
         addPacks(TreePackLoader.loadTreePacks());
     }
 
-    @Override
-    public void addPack(TreeResourcePack pack) {
+    private void addPack(TreeResourcePack pack) {
         this.resourcePacks.add(pack);
     }
 
-    @Override
-    public void addPacks(Collection<TreeResourcePack> packs) {
+    private void addPacks(Collection<TreeResourcePack> packs) {
         this.resourcePacks.addAll(packs);
     }
 
