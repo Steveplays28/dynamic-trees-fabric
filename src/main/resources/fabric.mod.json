@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "id": "dynamic-trees-fabric",
+  "version": "${version}",
+  "name": "Dynamic Trees",
+  "description": "Trees that are dynamic. Soontm on Fabric.",
+  "authors": [
+    "Steveplays28"
+  ],
+  "contact": {
+    "homepage": "https://modrinth.com/mod/dynamic-trees-fabric",
+    "sources": "https://github.com/steveplays28/dynamic-trees-fabric",
+    "issues": "https://github.com/steveplays28/dynamic-trees-fabric/issues"
+  },
+  "custom": {
+    "modmenu": {
+      "links": {
+        "modmenu.discord": "https://discord.gg/KbWxgGg"
+      }
+    },
+    "mc-publish": {
+      "quilt": true,
+      "curseforge": -1,
+      "modrinth": "-1"
+    }
+  },
+  "license": "MIT",
+  "icon": "assets/dynamictreesfabric/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "io.github.steveplays28.dynamictreesfabric.DynamicTreesFabric"
+    ]
+  },
+  "mixins": [
+    "dynamic-trees-fabric.mixins.json"
+  ],
+  "depends": {
+    "minecraft": ">=1.19.0",
+    "fabricloader": ">=0.14.0",
+    "fabric": ">=0.48.0"
+  },
+  "accessWidener": "dynamic-trees-fabric.accesswidener"
+}

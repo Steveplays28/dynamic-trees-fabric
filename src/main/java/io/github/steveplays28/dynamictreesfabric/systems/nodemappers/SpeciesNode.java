@@ -1,0 +1,46 @@
+package io.github.steveplays28.dynamictreesfabric.systems.nodemappers;
+
+import io.github.steveplays28.dynamictreesfabric.api.TreeHelper;
+import io.github.steveplays28.dynamictreesfabric.api.network.NodeInspector;
+import io.github.steveplays28.dynamictreesfabric.api.treedata.TreePart;
+import io.github.steveplays28.dynamictreesfabric.trees.Species;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.state.BlockState;
+
+public class SpeciesNode implements NodeInspector {
+
+    private Species determination = Species.NULL_SPECIES;
+
+    @Override
+    public boolean run(BlockState blockState, LevelAccessor world, BlockPos pos, Direction fromDir) {
+
+        TreePart treePart = TreeHelper.getTreePart(blockState);
+
+        switch (treePart.getTreePartType()) {
+            case BRANCH:
+                if (determination == Species.NULL_SPECIES) {
+                    determination = TreeHelper.getBranch(treePart).getFamily().getCommonSpecies();
+                }
+                break;
+            case ROOT:
+                determination = TreeHelper.getRooty(treePart).getSpecies(world.getBlockState(pos), world, pos);
+                break;
+            default:
+                break;
+        }
+
+        return true;
+    }
+
+    @Override
+    public boolean returnRun(BlockState blockState, LevelAccessor world, BlockPos pos, Direction fromDir) {
+        return false;
+    }
+
+    public Species getSpecies() {
+        return determination;
+    }
+
+}
