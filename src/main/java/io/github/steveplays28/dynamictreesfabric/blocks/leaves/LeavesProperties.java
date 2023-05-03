@@ -53,7 +53,8 @@ import net.minecraft.world.BlockRenderView;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
-
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 /**
  * This class provides a means of holding individual properties for leaves.  This is necessary since leaves can contain
  * sub blocks that may behave differently.  Each leaves properties object must have a reference to a tree family.
@@ -171,8 +172,7 @@ public class LeavesProperties extends RegistryEntry<LeavesProperties> implements
 	// PRIMITIVE LEAVES BLOCK
 	///////////////////////////////////////////
 	private boolean canGrowOnGround = false;
-	import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+
 
 @Environment(EnvType.CLIENT)
 	private BlockColorProvider colorMultiplier;
