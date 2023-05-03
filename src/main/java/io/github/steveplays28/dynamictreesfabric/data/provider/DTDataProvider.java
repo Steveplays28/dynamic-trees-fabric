@@ -8,7 +8,6 @@ import net.minecraft.util.Identifier;
  * @author Harley O'Connor
  */
 public interface DTDataProvider {
-
 	default Identifier block(Identifier blockLocation) {
 		return prefix(blockLocation, "block/");
 	}
@@ -16,5 +15,4 @@ public interface DTDataProvider {
 	default Identifier item(Identifier resourceLocation) {
 		return prefix(resourceLocation, "item/");
 	}
-
 }

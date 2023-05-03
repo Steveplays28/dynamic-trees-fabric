@@ -12,7 +12,6 @@ import net.minecraft.data.DataGenerator;
  * @author Harley O'Connor
  */
 public class DTItemModelProvider extends ItemModelProvider implements DTDataProvider {
-
 	private final List<Registry<?>> registries;
 
 	public DTItemModelProvider(DataGenerator generator, String modId, ExistingFileHelper existingFileHelper, List<Registry<?>> registries) {
@@ -28,5 +27,4 @@ public class DTItemModelProvider extends ItemModelProvider implements DTDataProv
 				)
 		);
 	}
-
 }

@@ -1,11 +1,10 @@
 package io.github.steveplays28.dynamictreesfabric.data.provider;
 
-import org.jetbrains.annotations.Nullable;
-
 import io.github.steveplays28.dynamictreesfabric.data.DTItemTags;
 import io.github.steveplays28.dynamictreesfabric.trees.Family;
 import io.github.steveplays28.dynamictreesfabric.trees.Species;
 import net.minecraftforge.common.data.ExistingFileHelper;
+import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.server.tag.vanilla.VanillaBlockTagProvider;
@@ -16,7 +15,6 @@ import net.minecraft.registry.tag.ItemTags;
  * @author Harley O'Connor
  */
 public class DTItemTagsProvider extends VanillaItemTagProvider {
-
 	public DTItemTagsProvider(DataGenerator dataGenerator, String modId, VanillaBlockTagProvider blockTagsProvider, @Nullable ExistingFileHelper existingFileHelper) {
 		super(dataGenerator, blockTagsProvider, modId, existingFileHelper);
 	}
@@ -64,5 +62,4 @@ public class DTItemTagsProvider extends VanillaItemTagProvider {
 	public String getName() {
 		return modId + " DT Block Tags";
 	}
-
 }

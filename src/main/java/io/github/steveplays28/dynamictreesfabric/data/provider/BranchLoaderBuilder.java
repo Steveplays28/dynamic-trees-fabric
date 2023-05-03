@@ -16,7 +16,6 @@ import net.minecraft.util.Identifier;
  * @author Harley O'Connor
  */
 public final class BranchLoaderBuilder extends CustomLoaderBuilder<BlockModelBuilder> {
-
 	private final Map<String, String> textures = new LinkedHashMap<>();
 
 	public BranchLoaderBuilder(Identifier loaderId, BlockModelBuilder parent, ExistingFileHelper existingFileHelper) {
@@ -41,11 +40,9 @@ public final class BranchLoaderBuilder extends CustomLoaderBuilder<BlockModelBui
 		json = super.toJson(json);
 
 		final JsonObject textures = new JsonObject();
-		this.textures.forEach((key, location) ->
-				textures.add(key, new JsonPrimitive(location)));
+		this.textures.forEach((key, location) -> textures.add(key, new JsonPrimitive(location)));
 		json.add("textures", textures);
 
 		return json;
 	}
-
 }

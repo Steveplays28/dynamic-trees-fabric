@@ -32,3 +32,8 @@ accessWidener	v2 named
 #accessible method net/minecraft/util/random/WeightedRandomList f_146325_ # items
 #accessible method net/minecraft/world/level/PathNavigationRegion m_47185 (Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/level/chunk/ChunkAccess; # getChunk
 #accessible method net/minecraft/world/level/biome/Biome m_47567 ()Lnet/minecraft/world/level/biome/Biome$BiomeCategory; # getBiomeCategory
+
+# For dynamictreesfabric/data
+accessible method net/minecraft/registry/tag/BlockTags of (Ljava/lang/String;)Lnet/minecraft/registry/tag/TagKey;
+accessible method net/minecraft/registry/tag/ItemTags of (Ljava/lang/String;)Lnet/minecraft/registry/tag/TagKey;
+accessible field net/minecraft/loot/context/LootContextTypes MAP Lcom/google/common/collect/BiMap;

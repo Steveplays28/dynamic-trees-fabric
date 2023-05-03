@@ -27,7 +27,6 @@ import net.minecraft.util.collection.DefaultedList;
  * @author Harley O'Connor
  */
 public final class DTRecipes {
-
 	public static void registerDirtBucketRecipes(final Map<Identifier, Recipe<?>> craftingRecipes) {
 		for (final Species species : Species.REGISTRY.getAll()) {
 			// If the species doesn't have a seed it doesn't need any recipes.
@@ -88,5 +87,4 @@ public final class DTRecipes {
 		if (items.length == 0) return new Ingredient[]{Ingredient.EMPTY};
 		return Arrays.stream(items).map(item -> Ingredient.ofStacks(new ItemStack(item))).collect(Collectors.toSet()).toArray(new Ingredient[]{});
 	}
-
 }

@@ -27,8 +27,9 @@ public final class DTItemTags {
 	 */
 	public static final TagKey<Item> ENHANCED_FERTILIZER = bind("enhanced_fertilizer");
 
+	// TODO: FABRIC PORT: Check which toString() method is needed
 	private static TagKey<Item> bind(String identifier) {
-		return ItemTags.create(new Identifier(io.github.steveplays28.dynamictreesfabric.DynamicTreesFabric.MOD_ID, identifier));
+		return ItemTags.of(new Identifier(io.github.steveplays28.dynamictreesfabric.DynamicTreesFabric.MOD_ID, identifier).toString());
 	}
 
 }

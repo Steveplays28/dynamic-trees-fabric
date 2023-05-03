@@ -2,8 +2,6 @@ package io.github.steveplays28.dynamictreesfabric.data.provider;
 
 import java.util.Optional;
 
-import org.jetbrains.annotations.Nullable;
-
 import io.github.steveplays28.dynamictreesfabric.blocks.leaves.LeavesProperties;
 import io.github.steveplays28.dynamictreesfabric.data.DTBlockTags;
 import io.github.steveplays28.dynamictreesfabric.init.DTRegistries;
@@ -11,6 +9,7 @@ import io.github.steveplays28.dynamictreesfabric.init.DTTrees;
 import io.github.steveplays28.dynamictreesfabric.trees.Family;
 import io.github.steveplays28.dynamictreesfabric.trees.Species;
 import net.minecraftforge.common.data.ExistingFileHelper;
+import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
@@ -25,7 +24,6 @@ import net.minecraft.registry.tag.TagKey;
  * @author Harley O'Connor
  */
 public class DTBlockTagsProvider extends VanillaBlockTagProvider {
-
 	public DTBlockTagsProvider(DataGenerator dataGenerator, String modId, @Nullable ExistingFileHelper existingFileHelper) {
 		super(dataGenerator, modId, existingFileHelper);
 	}

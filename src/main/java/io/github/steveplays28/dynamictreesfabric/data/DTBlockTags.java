@@ -1,5 +1,7 @@
 package io.github.steveplays28.dynamictreesfabric.data;
 
+import io.github.steveplays28.dynamictreesfabric.DynamicTreesFabric;
+
 import net.minecraft.block.Block;
 import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.registry.tag.TagKey;
@@ -9,7 +11,6 @@ import net.minecraft.util.Identifier;
  * @author Harley O'Connor
  */
 public final class DTBlockTags {
-
 	public static final TagKey<Block> BRANCHES = bind("branches");
 	public static final TagKey<Block> STRIPPED_BRANCHES = bind("stripped_branches");
 	public static final TagKey<Block> BRANCHES_THAT_BURN = bind("branches_that_burn");
@@ -22,7 +23,8 @@ public final class DTBlockTags {
 	public static final TagKey<Block> SAPLINGS = bind("saplings");
 	public static final TagKey<Block> WART_BLOCKS = bind("wart_blocks");
 
+	// TODO: FABRIC PORT: Check which toString() method is needed
 	private static TagKey<Block> bind(String identifier) {
-		return BlockTags.of(new Identifier(io.github.steveplays28.dynamictreesfabric.DynamicTreesFabric.MOD_ID, identifier));
+		return BlockTags.of(new Identifier(DynamicTreesFabric.MOD_ID, identifier).toString());
 	}
 }

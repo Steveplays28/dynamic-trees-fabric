@@ -14,12 +14,10 @@ import net.minecraft.data.DataGenerator;
  * @author Harley O'Connor
  */
 public class DTBlockStateProvider extends BlockStateProvider implements DTDataProvider {
-
 	private final String modId;
 	private final List<Registry<?>> registries;
 
-	public DTBlockStateProvider(DataGenerator generator, String modId, ExistingFileHelper existingFileHelper,
-	                            Collection<Registry<?>> registries) {
+	public DTBlockStateProvider(DataGenerator generator, String modId, ExistingFileHelper existingFileHelper, Collection<Registry<?>> registries) {
 		super(generator, modId, existingFileHelper);
 		this.modId = modId;
 		this.registries = ImmutableList.copyOf(registries);
@@ -27,11 +25,6 @@ public class DTBlockStateProvider extends BlockStateProvider implements DTDataPr
 
 	@Override
 	protected void registerStatesAndModels() {
-		this.registries.forEach(registry ->
-				registry.dataGenerationStream(this.modId).forEach(entry ->
-						entry.generateStateData(this)
-				)
-		);
+		this.registries.forEach(registry -> registry.dataGenerationStream(this.modId).forEach(entry -> entry.generateStateData(this)));
 	}
-
 }

@@ -1,16 +1,17 @@
 package io.github.steveplays28.dynamictreesfabric.data;
 
+import java.util.function.Consumer;
+
+import io.github.steveplays28.dynamictreesfabric.DynamicTreesFabric;
+
 import net.minecraft.loot.context.LootContextParameters;
 import net.minecraft.loot.context.LootContextType;
 import net.minecraft.loot.context.LootContextTypes;
-
-import java.util.function.Consumer;
 
 /**
  * @author Harley O'Connor
  */
 public final class DTLootParameterSets {
-
 	public static final LootContextType HARVEST = register("harvest", builder ->
 			builder.require(LootContextParameters.BLOCK_STATE)
 					.require(DTLootParameters.SPECIES)
@@ -43,9 +44,8 @@ public final class DTLootParameterSets {
 		builderConsumer.accept(builder);
 
 		final LootContextType paramSet = builder.build();
-		LootContextTypes.MAP.put(io.github.steveplays28.dynamictreesfabric.DynamicTreesFabric.resLoc(path), paramSet);
+		LootContextTypes.MAP.put(DynamicTreesFabric.resLoc(path), paramSet);
 
 		return paramSet;
 	}
-
 }
