@@ -45,6 +45,8 @@ import net.minecraft.util.math.random.Random;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
+import net.fabricmc.api.Environment;
+import net.fabricmc.api.EnvType;
 
 @Mod.EventBusSubscriber(modid = io.github.steveplays28.dynamictreesfabric.DynamicTreesFabric.MOD_ID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class DTClient {
@@ -72,9 +74,6 @@ public class DTClient {
 		cleanup();
 	}
 
-	import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-
 @Environment(EnvType.CLIENT)
 	public static void discoverWoodColors() {
 
@@ -94,8 +93,6 @@ import net.fabricmc.api.Environment;
 		}
 	}
 
-	import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 
 @Environment(EnvType.CLIENT)
 	private static int getFaceColor(BlockState state, Direction face, Function<Identifier, Sprite> textureGetter) {

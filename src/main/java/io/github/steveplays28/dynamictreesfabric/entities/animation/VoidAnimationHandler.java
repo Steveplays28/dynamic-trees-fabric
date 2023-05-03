@@ -3,6 +3,8 @@ package io.github.steveplays28.dynamictreesfabric.entities.animation;
 import io.github.steveplays28.dynamictreesfabric.entities.FallingTreeEntity;
 
 import net.minecraft.client.util.math.MatrixStack;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 
 public class VoidAnimationHandler implements AnimationHandler {
 
@@ -36,8 +38,6 @@ public class VoidAnimationHandler implements AnimationHandler {
 	} //Payload is dropped in initMotion
 
 	@Override
-	import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 
 @Environment(EnvType.CLIENT)
 	public boolean shouldRender(FallingTreeEntity entity) {

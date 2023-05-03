@@ -502,8 +502,6 @@ public class RootyBlock extends BlockWithDynamicHardness implements TreePart, Bl
 		return false;
 	}
 
-	import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 
 @Environment(EnvType.CLIENT)
 	public int rootColor(BlockState state, BlockView blockAccess, BlockPos pos) {
