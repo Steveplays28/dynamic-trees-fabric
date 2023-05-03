@@ -1,5 +1,7 @@
 {
   "type": "water",
   "primitive_soil": "water",
-  "acceptable_soils": [ "water_like" ]
+  "acceptable_soils": [
+    "water_like"
+  ]
 }

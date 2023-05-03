@@ -1,8 +1,12 @@
 package io.github.steveplays28.dynamictreesfabric.api.registry;
 
-import io.github.steveplays28.dynamictreesfabric.api.TreeRegistry;
-import io.github.steveplays28.dynamictreesfabric.deserialisation.JsonDeserialisers;
-import io.github.steveplays28.dynamictreesfabric.resources.Resources;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
+
+import javax.annotation.Nullable;
+
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
@@ -11,15 +15,13 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.util.Identifier;
+import io.github.steveplays28.dynamictreesfabric.api.TreeRegistry;
+import io.github.steveplays28.dynamictreesfabric.deserialisation.JsonDeserialisers;
+import io.github.steveplays28.dynamictreesfabric.resources.Resources;
 import net.minecraftforge.fml.ModLoader;
 import org.apache.logging.log4j.LogManager;
 
-import javax.annotation.Nullable;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
+import net.minecraft.util.Identifier;
 
 /**
  * An extension of {@link SimpleRegistry} that allows for custom {@link EntryType}.
@@ -30,152 +32,152 @@ import java.util.function.Function;
 // TODO: Update Javadoc
 public class TypedRegistry<V extends RegistryEntry<V>> extends SimpleRegistry<V> {
 
-    /**
-     * A {@link Map} of {@link EntryType} objects and their registry names. These handle construction of the {@link
-     * RegistryEntry}. This is useful for other mods to register sub-classes of the registry entry that can then be
-     * referenced from a Json file via a simple resource location.
-     */
-    private final Map<Identifier, EntryType<V>> typeRegistry = new HashMap<>();
+	/**
+	 * A {@link Map} of {@link EntryType} objects and their registry names. These handle construction of the {@link
+	 * RegistryEntry}. This is useful for other mods to register sub-classes of the registry entry that can then be
+	 * referenced from a Json file via a simple resource location.
+	 */
+	private final Map<Identifier, EntryType<V>> typeRegistry = new HashMap<>();
 
-    /**
-     * The default {@link EntryType<V>}, the base {@link TypedRegistry.EntryType} for this registry.
-     */
-    private final EntryType<V> defaultType;
+	/**
+	 * The default {@link EntryType<V>}, the base {@link TypedRegistry.EntryType} for this registry.
+	 */
+	private final EntryType<V> defaultType;
 
-    /**
-     * Constructs a new {@link TypedRegistry} with the name being set to {@link Class#getSimpleName()} of the given
-     * {@link RegistryEntry}.
-     *
-     * @param type        The {@link Class} of the {@link RegistryEntry}.
-     * @param nullValue   A null entry. See {@link #nullValue} for more details.
-     * @param defaultType The default {@link EntryType<V>}.
-     */
-    public TypedRegistry(Class<V> type, V nullValue, EntryType<V> defaultType) {
-        super(type, nullValue);
-        this.defaultType = defaultType.setRegistry(this);
-    }
+	/**
+	 * Constructs a new {@link TypedRegistry} with the name being set to {@link Class#getSimpleName()} of the given
+	 * {@link RegistryEntry}.
+	 *
+	 * @param type        The {@link Class} of the {@link RegistryEntry}.
+	 * @param nullValue   A null entry. See {@link #nullValue} for more details.
+	 * @param defaultType The default {@link EntryType<V>}.
+	 */
+	public TypedRegistry(Class<V> type, V nullValue, EntryType<V> defaultType) {
+		super(type, nullValue);
+		this.defaultType = defaultType.setRegistry(this);
+	}
 
-    /**
-     * Constructs a new {@link TypedRegistry}.
-     *
-     * @param name        The {@link #name} for this {@link SimpleRegistry}.
-     * @param type        The {@link Class} of the {@link RegistryEntry}.
-     * @param nullValue   A null entry. See {@link #nullValue} for more details.
-     * @param defaultType The default {@link EntryType<V>}.
-     */
-    public TypedRegistry(String name, Class<V> type, V nullValue, EntryType<V> defaultType) {
-        super(name, type, nullValue);
-        this.defaultType = defaultType.setRegistry(this);
-    }
+	/**
+	 * Constructs a new {@link TypedRegistry}.
+	 *
+	 * @param name        The {@link #name} for this {@link SimpleRegistry}.
+	 * @param type        The {@link Class} of the {@link RegistryEntry}.
+	 * @param nullValue   A null entry. See {@link #nullValue} for more details.
+	 * @param defaultType The default {@link EntryType<V>}.
+	 */
+	public TypedRegistry(String name, Class<V> type, V nullValue, EntryType<V> defaultType) {
+		super(name, type, nullValue);
+		this.defaultType = defaultType.setRegistry(this);
+	}
 
-    /**
-     * Registers a custom {@link EntryType}, allowing custom sub-classes of the registry entry to be created and then
-     * referenced from Json via the registry name {@link Identifier}.
-     *
-     * @param registryName The registry name {@link Identifier}.
-     * @param type         The {@link EntryType<V>} to register.
-     */
-    public final void registerType(final Identifier registryName, final EntryType<V> type) {
-        this.typeRegistry.put(registryName, type.setRegistry(this));
-    }
+	public static JsonObject putJsonRegistryName(final JsonObject jsonObject, final Identifier registryName) {
+		jsonObject.add(Resources.RESOURCE_LOCATION.toString(), new JsonPrimitive(registryName.toString()));
+		return jsonObject;
+	}
 
-    public final boolean hasType(final Identifier registryName) {
-        return this.typeRegistry.containsKey(registryName);
-    }
+	public static <V extends RegistryEntry<V>> Codec<V> createDefaultCodec(final Function<Identifier, V> constructor) {
+		return RecordCodecBuilder.create(instance -> instance
+				.group(Identifier.CODEC.fieldOf(Resources.RESOURCE_LOCATION.toString()).forGetter(RegistryEntry::getRegistryName))
+				.apply(instance, constructor));
+	}
 
-    @Nullable
-    public final EntryType<V> getType(final Identifier registryName) {
-        return this.typeRegistry.get(registryName);
-    }
+	public static <V extends RegistryEntry<V>> EntryType<V> newType(final Codec<V> codec) {
+		return new EntryType<>(codec);
+	}
 
-    public final EntryType<V> getType(final JsonObject jsonObject, final Identifier registryName) {
-        final AtomicReference<EntryType<V>> type = new AtomicReference<>(this.defaultType);
-        final JsonElement typeElement = jsonObject.get("type");
+	public static <V extends RegistryEntry<V>> EntryType<V> newType(final Function<Identifier, V> constructor) {
+		return newType(createDefaultCodec(constructor));
+	}
 
-        if (typeElement != null) {
-            JsonDeserialisers.RESOURCE_LOCATION.deserialise(typeElement)
-                    .map(resourceLocation -> this.getType(TreeRegistry.processResLoc(resourceLocation)), "Could not find type for '{}' (will use default).")
-                    .ifSuccessOrElse(
-                            type::set,
-                            error -> LogManager.getLogger().error("Error constructing " + this.name + " '" + registryName + "': " + error),
-                            warning -> LogManager.getLogger().warn("Warning whilst constructing " + this.name + " '" + registryName + "': " + warning)
-                    );
-        }
+	/**
+	 * Registers a custom {@link EntryType}, allowing custom sub-classes of the registry entry to be created and then
+	 * referenced from Json via the registry name {@link Identifier}.
+	 *
+	 * @param registryName The registry name {@link Identifier}.
+	 * @param type         The {@link EntryType<V>} to register.
+	 */
+	public final void registerType(final Identifier registryName, final EntryType<V> type) {
+		this.typeRegistry.put(registryName, type.setRegistry(this));
+	}
 
-        return type.get();
-    }
+	public final boolean hasType(final Identifier registryName) {
+		return this.typeRegistry.containsKey(registryName);
+	}
 
-    public final EntryType<V> getDefaultType() {
-        return defaultType;
-    }
+	@Nullable
+	public final EntryType<V> getType(final Identifier registryName) {
+		return this.typeRegistry.get(registryName);
+	}
 
-    /**
-     * Posts a {@link TypeRegistryEvent} to the mod event bus and then calls {@link super#postRegistryEvent()} to
-     * register all entries.
-     */
-    @Override
-    public void postRegistryEvent() {
-        ModLoader.get().postEvent(new TypeRegistryEvent<>(this));
-        super.postRegistryEvent();
-    }
+	public final EntryType<V> getType(final JsonObject jsonObject, final Identifier registryName) {
+		final AtomicReference<EntryType<V>> type = new AtomicReference<>(this.defaultType);
+		final JsonElement typeElement = jsonObject.get("type");
 
-    /**
-     * Handles creation of the registry entry. Custom types can be registered via {@link #registerType(Identifier,
-     * EntryType)}.
-     *
-     * @param <V> The {@link RegistryEntry} sub-class.
-     */
-    public static class EntryType<V extends RegistryEntry<V>> {
+		if (typeElement != null) {
+			JsonDeserialisers.RESOURCE_LOCATION.deserialise(typeElement)
+					.map(resourceLocation -> this.getType(TreeRegistry.processResLoc(resourceLocation)), "Could not find type for '{}' (will use default).")
+					.ifSuccessOrElse(
+							type::set,
+							error -> LogManager.getLogger().error("Error constructing " + this.name + " '" + registryName + "': " + error),
+							warning -> LogManager.getLogger().warn("Warning whilst constructing " + this.name + " '" + registryName + "': " + warning)
+					);
+		}
 
-        private TypedRegistry<V> registry;
-        private final Codec<V> codec;
+		return type.get();
+	}
 
-        public EntryType(Codec<V> codec) {
-            this.codec = codec;
-        }
+	public final EntryType<V> getDefaultType() {
+		return defaultType;
+	}
 
-        public Codec<V> getCodec() {
-            return codec;
-        }
+	/**
+	 * Posts a {@link TypeRegistryEvent} to the mod event bus and then calls {@link super#postRegistryEvent()} to
+	 * register all entries.
+	 */
+	@Override
+	public void postRegistryEvent() {
+		ModLoader.get().postEvent(new TypeRegistryEvent<>(this));
+		super.postRegistryEvent();
+	}
 
-        public EntryType<V> setRegistry(TypedRegistry<V> registry) {
-            this.registry = registry;
-            return this;
-        }
+	/**
+	 * Handles creation of the registry entry. Custom types can be registered via {@link #registerType(Identifier,
+	 * EntryType)}.
+	 *
+	 * @param <V> The {@link RegistryEntry} sub-class.
+	 */
+	public static class EntryType<V extends RegistryEntry<V>> {
 
-        @Nullable
-        public V decode(final JsonObject jsonObject) {
-            final DataResult<Pair<V, JsonElement>> dataResult = this.codec.decode(JsonOps.INSTANCE, jsonObject);
+		private final Codec<V> codec;
+		private TypedRegistry<V> registry;
 
-            if (!dataResult.result().isPresent()) {
-                if (dataResult.error().isPresent()) {
-                    LogManager.getLogger().error("Error constructing " + this.registry.getName() + ": " + dataResult.error().get().message());
-                }
-                return null;
-            }
+		public EntryType(Codec<V> codec) {
+			this.codec = codec;
+		}
 
-            return dataResult.result().get().getFirst();
-        }
+		public Codec<V> getCodec() {
+			return codec;
+		}
 
-    }
+		public EntryType<V> setRegistry(TypedRegistry<V> registry) {
+			this.registry = registry;
+			return this;
+		}
 
-    public static JsonObject putJsonRegistryName(final JsonObject jsonObject, final Identifier registryName) {
-        jsonObject.add(Resources.RESOURCE_LOCATION.toString(), new JsonPrimitive(registryName.toString()));
-        return jsonObject;
-    }
+		@Nullable
+		public V decode(final JsonObject jsonObject) {
+			final DataResult<Pair<V, JsonElement>> dataResult = this.codec.decode(JsonOps.INSTANCE, jsonObject);
 
-    public static <V extends RegistryEntry<V>> Codec<V> createDefaultCodec(final Function<Identifier, V> constructor) {
-        return RecordCodecBuilder.create(instance -> instance
-                .group(Identifier.CODEC.fieldOf(Resources.RESOURCE_LOCATION.toString()).forGetter(RegistryEntry::getRegistryName))
-                .apply(instance, constructor));
-    }
+			if (!dataResult.result().isPresent()) {
+				if (dataResult.error().isPresent()) {
+					LogManager.getLogger().error("Error constructing " + this.registry.getName() + ": " + dataResult.error().get().message());
+				}
+				return null;
+			}
 
-    public static <V extends RegistryEntry<V>> EntryType<V> newType(final Codec<V> codec) {
-        return new EntryType<>(codec);
-    }
+			return dataResult.result().get().getFirst();
+		}
 
-    public static <V extends RegistryEntry<V>> EntryType<V> newType(final Function<Identifier, V> constructor) {
-        return newType(createDefaultCodec(constructor));
-    }
+	}
 
 }

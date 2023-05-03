@@ -8,14 +8,14 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 public class ServerEventHandler {
 
-    @SubscribeEvent
-    public void onServerStart(final ServerStartingEvent event) {
-        SeasonHelper.getSeasonManager().flushMappings();
-    }
+	@SubscribeEvent
+	public void onServerStart(final ServerStartingEvent event) {
+		SeasonHelper.getSeasonManager().flushMappings();
+	}
 
-    @SubscribeEvent
-    public void registerCommands(final RegisterCommandsEvent event) {
-        new DTCommand().registerDTCommand(event.getDispatcher());
-    }
+	@SubscribeEvent
+	public void registerCommands(final RegisterCommandsEvent event) {
+		new DTCommand().registerDTCommand(event.getDispatcher());
+	}
 
 }

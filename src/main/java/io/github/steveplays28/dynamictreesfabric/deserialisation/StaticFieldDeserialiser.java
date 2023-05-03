@@ -1,11 +1,11 @@
 package io.github.steveplays28.dynamictreesfabric.deserialisation;
 
-import io.github.steveplays28.dynamictreesfabric.deserialisation.result.Result;
-import com.google.gson.JsonElement;
-import org.apache.logging.log4j.LogManager;
-
 import java.lang.reflect.Modifier;
 import java.util.stream.Stream;
+
+import com.google.gson.JsonElement;
+import io.github.steveplays28.dynamictreesfabric.deserialisation.result.Result;
+import org.apache.logging.log4j.LogManager;
 
 /**
  * Gets an {@link Object} of type {@link T} from the name of the {@code public static} {@link java.lang.reflect.Field}
@@ -19,30 +19,30 @@ import java.util.stream.Stream;
  */
 public final class StaticFieldDeserialiser<T> implements JsonDeserialiser<T> {
 
-    private final Class<T> type;
+	private final Class<T> type;
 
-    public StaticFieldDeserialiser(final Class<T> type) {
-        this.type = type;
-    }
+	public StaticFieldDeserialiser(final Class<T> type) {
+		this.type = type;
+	}
 
-    @Override
-    public Result<T, JsonElement> deserialise(JsonElement jsonElement) {
-        return JsonDeserialisers.STRING.deserialise(jsonElement)
-                .map(string -> Stream.of(this.type.getFields())
-                                .filter(field -> Modifier.isStatic(field.getModifiers()) && field.getName().equals(string))
-                                .findFirst().map(field -> {
-                                    try {
-                                        final Object obj = field.get(null);
+	@Override
+	public Result<T, JsonElement> deserialise(JsonElement jsonElement) {
+		return JsonDeserialisers.STRING.deserialise(jsonElement)
+				.map(string -> Stream.of(this.type.getFields())
+								.filter(field -> Modifier.isStatic(field.getModifiers()) && field.getName().equals(string))
+								.findFirst().map(field -> {
+									try {
+										final Object obj = field.get(null);
 
-                                        if (this.type.isInstance(obj)) {
-                                            return this.type.cast(obj);
-                                        }
-                                    } catch (final IllegalAccessException e) {
-                                        LogManager.getLogger().warn("Tried to access field '" + field.getName() + "' illegally from class '" + this.type.getName() + "'.", e);
-                                    }
-                                    return null;
-                                }).orElse(null),
-                        "Could not get '" + this.type.getName() + "' from '{previous_value}'.");
-    }
+										if (this.type.isInstance(obj)) {
+											return this.type.cast(obj);
+										}
+									} catch (final IllegalAccessException e) {
+										LogManager.getLogger().warn("Tried to access field '" + field.getName() + "' illegally from class '" + this.type.getName() + "'.", e);
+									}
+									return null;
+								}).orElse(null),
+						"Could not get '" + this.type.getName() + "' from '{previous_value}'.");
+	}
 
 }

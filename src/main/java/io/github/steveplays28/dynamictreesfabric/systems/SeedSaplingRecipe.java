@@ -1,99 +1,102 @@
 package io.github.steveplays28.dynamictreesfabric.systems;
 
-import io.github.steveplays28.dynamictreesfabric.util.Optionals;
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import net.minecraft.block.Block;
-import net.minecraft.item.Item;
-import net.minecraft.registry.Registry;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import io.github.steveplays28.dynamictreesfabric.util.Optionals;
+
+import net.minecraft.block.Block;
+import net.minecraft.item.Item;
+import net.minecraft.registry.Registry;
+
 public class SeedSaplingRecipe {
 
-    @SuppressWarnings("deprecation")
-    public static final Codec<SeedSaplingRecipe> CODEC = RecordCodecBuilder.create(instance ->
-            instance.group(
-                    Registry.BLOCK.getCodec().optionalFieldOf("sapling_block").forGetter(SeedSaplingRecipe::getSaplingBlock),
-                    Registry.ITEM.getCodec().optionalFieldOf("sapling_item").forGetter(SeedSaplingRecipe::getSaplingItem)
-            ).apply(instance, (saplingBlock, saplingItem) -> new SeedSaplingRecipe(
-                    saplingBlock.orElse(null),
-                    saplingItem.orElseGet(() ->
-                            saplingBlock.orElseThrow(() -> new RuntimeException("Seed-Sapling recipe requires " +
-                                            "either a block or item, at least.")).asItem()
-                    )
-            ))
-    );
+	@SuppressWarnings("deprecation")
+	public static final Codec<SeedSaplingRecipe> CODEC = RecordCodecBuilder.create(instance ->
+			instance.group(
+					Registry.BLOCK.getCodec().optionalFieldOf("sapling_block").forGetter(SeedSaplingRecipe::getSaplingBlock),
+					Registry.ITEM.getCodec().optionalFieldOf("sapling_item").forGetter(SeedSaplingRecipe::getSaplingItem)
+			).apply(instance, (saplingBlock, saplingItem) -> new SeedSaplingRecipe(
+					saplingBlock.orElse(null),
+					saplingItem.orElseGet(() ->
+							saplingBlock.orElseThrow(() -> new RuntimeException("Seed-Sapling recipe requires " +
+									"either a block or item, at least.")).asItem()
+					)
+			))
+	);
 
-    private final List<Item> extraIngredientsForSaplingToSeed = new LinkedList<>();
-    private final List<Item> extraIngredientsForSeedToSapling = new LinkedList<>();
-    private Block saplingBlock;
-    private Item saplingItem;
-    private boolean canCraftSaplingToSeed = true;
-    private boolean canCraftSeedToSapling = true;
+	private final List<Item> extraIngredientsForSaplingToSeed = new LinkedList<>();
+	private final List<Item> extraIngredientsForSeedToSapling = new LinkedList<>();
+	private Block saplingBlock;
+	private Item saplingItem;
+	private boolean canCraftSaplingToSeed = true;
+	private boolean canCraftSeedToSapling = true;
 
-    public SeedSaplingRecipe(@Nullable Block saplingBlock, Item saplingItem) {
-        this(saplingItem);
-        this.saplingBlock = saplingBlock;
-    }
+	public SeedSaplingRecipe(@Nullable Block saplingBlock, Item saplingItem) {
+		this(saplingItem);
+		this.saplingBlock = saplingBlock;
+	}
 
-    public SeedSaplingRecipe(Item saplingItem) {
-        setSaplingItem(saplingItem);
-    }
+	public SeedSaplingRecipe(Item saplingItem) {
+		setSaplingItem(saplingItem);
+	}
 
-    public void addExtraIngredientForSaplingToSeed(Item ingredient) {
-        extraIngredientsForSaplingToSeed.add(ingredient);
-    }
+	public void addExtraIngredientForSaplingToSeed(Item ingredient) {
+		extraIngredientsForSaplingToSeed.add(ingredient);
+	}
 
-    public void addExtraIngredientForSeedToSapling(Item ingredient) {
-        extraIngredientsForSeedToSapling.add(ingredient);
-    }
+	public void addExtraIngredientForSeedToSapling(Item ingredient) {
+		extraIngredientsForSeedToSapling.add(ingredient);
+	}
 
-    public void setCanCraftSaplingToSeed(boolean canCraftSaplingToSeed) {
-        this.canCraftSaplingToSeed = canCraftSaplingToSeed;
-    }
+	public void setCanCraftSaplingToSeed(boolean canCraftSaplingToSeed) {
+		this.canCraftSaplingToSeed = canCraftSaplingToSeed;
+	}
 
-    public void setCanCraftSeedToSapling(boolean canCraftSeedToSapling) {
-        this.canCraftSeedToSapling = canCraftSeedToSapling;
-    }
+	public void setCanCraftSeedToSapling(boolean canCraftSeedToSapling) {
+		this.canCraftSeedToSapling = canCraftSeedToSapling;
+	}
 
-    public Optional<Item> getSaplingItem() {
-        return Optionals.ofItem(this.saplingItem);
-    }
+	public Optional<Item> getSaplingItem() {
+		return Optionals.ofItem(this.saplingItem);
+	}
 
-    public SeedSaplingRecipe setSaplingItem(Item saplingItem) {
-        this.saplingItem = saplingItem;
-        return this;
-    }
+	public SeedSaplingRecipe setSaplingItem(Item saplingItem) {
+		this.saplingItem = saplingItem;
+		return this;
+	}
 
-    public boolean isValid() {
-        return this.getSaplingItem().isPresent();
-    }
+	public boolean isValid() {
+		return this.getSaplingItem().isPresent();
+	}
 
-    @Nonnull
-    public Optional<Block> getSaplingBlock() {
-        return Optionals.ofBlock(saplingBlock);
-    }
+	@Nonnull
+	public Optional<Block> getSaplingBlock() {
+		return Optionals.ofBlock(saplingBlock);
+	}
 
-    @Nonnull
-    public List<Item> getIngredientsForSaplingToSeed() {
-        return new LinkedList<>(extraIngredientsForSaplingToSeed);
-    }
+	@Nonnull
+	public List<Item> getIngredientsForSaplingToSeed() {
+		return new LinkedList<>(extraIngredientsForSaplingToSeed);
+	}
 
-    @Nonnull
-    public List<Item> getIngredientsForSeedToSapling() {
-        return new LinkedList<>(extraIngredientsForSeedToSapling);
-    }
+	@Nonnull
+	public List<Item> getIngredientsForSeedToSapling() {
+		return new LinkedList<>(extraIngredientsForSeedToSapling);
+	}
 
-    public boolean canCraftSaplingToSeed() {
-        return canCraftSaplingToSeed;
-    }
+	public boolean canCraftSaplingToSeed() {
+		return canCraftSaplingToSeed;
+	}
 
-    public boolean canCraftSeedToSapling() {
-        return canCraftSeedToSapling;
-    }
+	public boolean canCraftSeedToSapling() {
+		return canCraftSeedToSapling;
+	}
 
 }

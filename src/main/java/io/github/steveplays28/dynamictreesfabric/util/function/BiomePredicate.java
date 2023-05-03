@@ -1,7 +1,9 @@
 package io.github.steveplays28.dynamictreesfabric.util.function;
 
-import io.github.steveplays28.dynamictreesfabric.api.configurations.ConfigurationProperty;
 import java.util.function.Predicate;
+
+import io.github.steveplays28.dynamictreesfabric.api.configurations.ConfigurationProperty;
+
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.world.biome.Biome;
 

@@ -8,18 +8,18 @@ package io.github.steveplays28.dynamictreesfabric.api.treepacks;
  */
 public interface VoidApplier<O, V> extends Applier<O, V> {
 
-    @Override
-    default PropertyApplierResult apply(final O object, final V value) {
-        this.applySuccessful(object, value);
-        return PropertyApplierResult.success();
-    }
+	@Override
+	default PropertyApplierResult apply(final O object, final V value) {
+		this.applySuccessful(object, value);
+		return PropertyApplierResult.success();
+	}
 
-    /**
-     * Applies the given property value to the given object, assuming the application was successful.
-     *
-     * @param object The object to apply the value to.
-     * @param value  The value to apply.
-     */
-    void applySuccessful(final O object, final V value);
+	/**
+	 * Applies the given property value to the given object, assuming the application was successful.
+	 *
+	 * @param object The object to apply the value to.
+	 * @param value  The value to apply.
+	 */
+	void applySuccessful(final O object, final V value);
 
 }

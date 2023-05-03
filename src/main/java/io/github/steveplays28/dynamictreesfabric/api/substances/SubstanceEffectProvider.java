@@ -10,6 +10,6 @@ import net.minecraft.item.ItemStack;
 @FunctionalInterface
 public interface SubstanceEffectProvider {
 
-    SubstanceEffect getSubstanceEffect(ItemStack itemStack);
+	SubstanceEffect getSubstanceEffect(ItemStack itemStack);
 
 }

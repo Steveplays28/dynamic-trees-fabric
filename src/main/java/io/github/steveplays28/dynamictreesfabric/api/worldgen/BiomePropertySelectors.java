@@ -1,15 +1,18 @@
 package io.github.steveplays28.dynamictreesfabric.api.worldgen;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
+import javax.annotation.Nonnull;
+
+import com.google.common.collect.Sets;
 import io.github.steveplays28.dynamictreesfabric.api.TreeRegistry;
 import io.github.steveplays28.dynamictreesfabric.trees.Species;
-import com.google.common.collect.Sets;
-import javax.annotation.Nonnull;
+
 import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.gen.GenerationStep;
-import java.util.ArrayList;
-import java.util.Collection;
 
 /**
  * Provides the forest density for a given biome. Mods should implement this interface and register it via the {@link
@@ -19,168 +22,166 @@ import java.util.Collection;
  */
 public class BiomePropertySelectors {
 
-    @FunctionalInterface
-    public interface ChanceSelector {
-        Chance getChance(Random random, @Nonnull Species species, int radius);
-    }
+	public enum Chance {
+		OK,
+		CANCEL,
+		UNHANDLED
+	}
 
-    @FunctionalInterface
-    public interface DensitySelector {
-        double getDensity(Random random, double noiseDensity);
-    }
+	@FunctionalInterface
+	public interface ChanceSelector {
+		Chance getChance(Random random, @Nonnull Species species, int radius);
+	}
 
-    @FunctionalInterface
-    public interface SpeciesSelector {
-        SpeciesSelection getSpecies(BlockPos pos, BlockState dirt, Random random);
-    }
+	@FunctionalInterface
+	public interface DensitySelector {
+		double getDensity(Random random, double noiseDensity);
+	}
 
-    public static final class FeatureCancellations {
-        private final Collection<String> namespaces = Sets.newHashSet();
-        private final Collection<FeatureCanceller> featureCancellers = Sets.newHashSet();
-        private final Collection<GenerationStep.Feature> stages = Sets.newHashSet();
+	@FunctionalInterface
+	public interface SpeciesSelector {
+		SpeciesSelection getSpecies(BlockPos pos, BlockState dirt, Random random);
+	}
 
-        public void putNamespace(final String namespace) {
-            this.namespaces.add(namespace);
-        }
+	public static final class FeatureCancellations {
+		private final Collection<String> namespaces = Sets.newHashSet();
+		private final Collection<FeatureCanceller> featureCancellers = Sets.newHashSet();
+		private final Collection<GenerationStep.Feature> stages = Sets.newHashSet();
 
-        public boolean shouldCancelNamespace(final String namespace) {
-            return this.namespaces.contains(namespace);
-        }
+		public void putNamespace(final String namespace) {
+			this.namespaces.add(namespace);
+		}
 
-        public void putCanceller(final FeatureCanceller featureCanceller) {
-            this.featureCancellers.add(featureCanceller);
-        }
+		public boolean shouldCancelNamespace(final String namespace) {
+			return this.namespaces.contains(namespace);
+		}
 
-        public void putStage(final GenerationStep.Feature stage) {
-            this.stages.add(stage);
-        }
+		public void putCanceller(final FeatureCanceller featureCanceller) {
+			this.featureCancellers.add(featureCanceller);
+		}
 
-        public void putDefaultStagesIfEmpty() {
-            if (this.stages.size() < 1) {
-                this.stages.add(GenerationStep.Feature.VEGETAL_DECORATION);
-            }
-        }
+		public void putStage(final GenerationStep.Feature stage) {
+			this.stages.add(stage);
+		}
 
-        public void addAllFrom(final FeatureCancellations featureCancellations) {
-            this.namespaces.addAll(featureCancellations.namespaces);
-            this.featureCancellers.addAll(featureCancellations.featureCancellers);
-            this.stages.addAll(featureCancellations.stages);
-        }
+		public void putDefaultStagesIfEmpty() {
+			if (this.stages.size() < 1) {
+				this.stages.add(GenerationStep.Feature.VEGETAL_DECORATION);
+			}
+		}
 
-        public void reset() {
-            this.namespaces.clear();
-            this.featureCancellers.clear();
-            this.stages.clear();
-        }
+		public void addAllFrom(final FeatureCancellations featureCancellations) {
+			this.namespaces.addAll(featureCancellations.namespaces);
+			this.featureCancellers.addAll(featureCancellations.featureCancellers);
+			this.stages.addAll(featureCancellations.stages);
+		}
 
-        public Collection<FeatureCanceller> getFeatureCancellers() {
-            return this.featureCancellers;
-        }
+		public void reset() {
+			this.namespaces.clear();
+			this.featureCancellers.clear();
+			this.stages.clear();
+		}
 
-        public Collection<GenerationStep.Feature> getStages() {
-            return this.stages;
-        }
+		public Collection<FeatureCanceller> getFeatureCancellers() {
+			return this.featureCancellers;
+		}
 
-    }
+		public Collection<GenerationStep.Feature> getStages() {
+			return this.stages;
+		}
 
-    /**
-     * This is the data that represents a species selection. This class was necessary to have an unhandled state.
-     */
-    public static class SpeciesSelection {
-        private final boolean handled;
-        private final Species species;
+	}
 
-        public SpeciesSelection() {
-            handled = false;
-            species = Species.NULL_SPECIES;
-        }
+	/**
+	 * This is the data that represents a species selection. This class was necessary to have an unhandled state.
+	 */
+	public static class SpeciesSelection {
+		private final boolean handled;
+		private final Species species;
 
-        public SpeciesSelection(@Nonnull Species species) {
-            this.species = species;
-            handled = true;
-        }
+		public SpeciesSelection() {
+			handled = false;
+			species = Species.NULL_SPECIES;
+		}
 
-        public boolean isHandled() {
-            return handled;
-        }
+		public SpeciesSelection(@Nonnull Species species) {
+			this.species = species;
+			handled = true;
+		}
 
-        public Species getSpecies() {
-            return species;
-        }
-    }
+		public boolean isHandled() {
+			return handled;
+		}
 
-    public static class StaticSpeciesSelector implements SpeciesSelector {
-        final SpeciesSelection decision;
+		public Species getSpecies() {
+			return species;
+		}
+	}
 
-        public StaticSpeciesSelector(SpeciesSelection decision) {
-            this.decision = decision;
-        }
+	public static class StaticSpeciesSelector implements SpeciesSelector {
+		final SpeciesSelection decision;
 
-        public StaticSpeciesSelector(@Nonnull Species species) {
-            this(new SpeciesSelection(species));
-        }
+		public StaticSpeciesSelector(SpeciesSelection decision) {
+			this.decision = decision;
+		}
 
-        public StaticSpeciesSelector() {
-            this(new SpeciesSelection());
-        }
+		public StaticSpeciesSelector(@Nonnull Species species) {
+			this(new SpeciesSelection(species));
+		}
 
-        @Override
-        public SpeciesSelection getSpecies(BlockPos pos, BlockState dirt, Random random) {
-            return decision;
-        }
-    }
+		public StaticSpeciesSelector() {
+			this(new SpeciesSelection());
+		}
 
-    public static class RandomSpeciesSelector implements SpeciesSelector {
+		@Override
+		public SpeciesSelection getSpecies(BlockPos pos, BlockState dirt, Random random) {
+			return decision;
+		}
+	}
 
-        private class Entry {
-            public Entry(SpeciesSelection d, int w) {
-                decision = d;
-                weight = w;
-            }
+	public static class RandomSpeciesSelector implements SpeciesSelector {
 
-            public SpeciesSelection decision;
-            public int weight;
-        }
+		ArrayList<Entry> decisionTable = new ArrayList<Entry>();
+		int totalWeight;
 
-        ArrayList<Entry> decisionTable = new ArrayList<Entry>();
-        int totalWeight;
+		public int getSize() {
+			return decisionTable.size();
+		}
 
-        public int getSize() {
-            return decisionTable.size();
-        }
+		public RandomSpeciesSelector add(@Nonnull Species species, int weight) {
+			decisionTable.add(new Entry(new SpeciesSelection(species), weight));
+			totalWeight += weight;
+			return this;
+		}
 
-        public RandomSpeciesSelector add(@Nonnull Species species, int weight) {
-            decisionTable.add(new Entry(new SpeciesSelection(species), weight));
-            totalWeight += weight;
-            return this;
-        }
+		public RandomSpeciesSelector add(int weight) {
+			decisionTable.add(new Entry(new SpeciesSelection(), weight));
+			totalWeight += weight;
+			return this;
+		}
 
-        public RandomSpeciesSelector add(int weight) {
-            decisionTable.add(new Entry(new SpeciesSelection(), weight));
-            totalWeight += weight;
-            return this;
-        }
+		@Override
+		public SpeciesSelection getSpecies(BlockPos pos, BlockState dirt, Random random) {
+			int chance = random.nextInt(totalWeight);
 
-        @Override
-        public SpeciesSelection getSpecies(BlockPos pos, BlockState dirt, Random random) {
-            int chance = random.nextInt(totalWeight);
+			for (Entry entry : decisionTable) {
+				if (chance < entry.weight) {
+					return entry.decision;
+				}
+				chance -= entry.weight;
+			}
 
-            for (Entry entry : decisionTable) {
-                if (chance < entry.weight) {
-                    return entry.decision;
-                }
-                chance -= entry.weight;
-            }
+			return decisionTable.get(decisionTable.size() - 1).decision;
+		}
 
-            return decisionTable.get(decisionTable.size() - 1).decision;
-        }
+		private class Entry {
+			public SpeciesSelection decision;
+			public int weight;
+			public Entry(SpeciesSelection d, int w) {
+				decision = d;
+				weight = w;
+			}
+		}
 
-    }
-
-
-    public enum Chance {
-        OK,
-        CANCEL,
-        UNHANDLED
-    }
+	}
 }

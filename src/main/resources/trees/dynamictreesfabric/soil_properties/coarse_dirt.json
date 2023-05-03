@@ -1,4 +1,6 @@
 {
   "primitive_soil": "coarse_dirt",
-  "acceptable_soils": [ "dirt_like" ]
+  "acceptable_soils": [
+    "dirt_like"
+  ]
 }

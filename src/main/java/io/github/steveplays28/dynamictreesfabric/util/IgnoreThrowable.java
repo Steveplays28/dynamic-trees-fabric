@@ -7,10 +7,10 @@ package io.github.steveplays28.dynamictreesfabric.util;
  */
 public final class IgnoreThrowable extends Throwable {
 
-    public static final IgnoreThrowable INSTANCE = new IgnoreThrowable();
+	public static final IgnoreThrowable INSTANCE = new IgnoreThrowable();
 
-    private IgnoreThrowable() {
+	private IgnoreThrowable() {
 
-    }
+	}
 
 }

@@ -18,27 +18,27 @@ import net.minecraft.world.World;
  */
 public class SolidDynamicLeavesBlock extends DynamicLeavesBlock {
 
-    public SolidDynamicLeavesBlock(final LeavesProperties leavesProperties, final Settings properties) {
-        super(leavesProperties, properties);
-    }
+	public SolidDynamicLeavesBlock(final LeavesProperties leavesProperties, final Settings properties) {
+		super(leavesProperties, properties);
+	}
 
-    @Override
-    public VoxelShape getCollisionShape(BlockState state, BlockView worldIn, BlockPos pos, ShapeContext context) {
-        return VoxelShapes.fullCube();
-    }
+	@Override
+	public VoxelShape getCollisionShape(BlockState state, BlockView worldIn, BlockPos pos, ShapeContext context) {
+		return VoxelShapes.fullCube();
+	}
 
-    @Override
-    public boolean addLandingEffects(BlockState state1, ServerWorld worldserver, BlockPos pos, BlockState state2, LivingEntity entity, int numberOfParticles) {
-        return false;
-    }
+	@Override
+	public boolean addLandingEffects(BlockState state1, ServerWorld worldserver, BlockPos pos, BlockState state2, LivingEntity entity, int numberOfParticles) {
+		return false;
+	}
 
-    @Override
-    public void onLandedUpon(World world, BlockState blockstate, BlockPos pos, Entity entity, float fallDistance) {
-        entity.handleFallDamage(fallDistance, 1.0F, DamageSource.FALLING_BLOCK);
-    }
+	@Override
+	public void onLandedUpon(World world, BlockState blockstate, BlockPos pos, Entity entity, float fallDistance) {
+		entity.handleFallDamage(fallDistance, 1.0F, DamageSource.FALLING_BLOCK);
+	}
 
-    @Override
-    public void onEntityCollision(BlockState state, World world, BlockPos pos, Entity entity) {
-    }
+	@Override
+	public void onEntityCollision(BlockState state, World world, BlockPos pos, Entity entity) {
+	}
 
 }

@@ -1,10 +1,10 @@
 package io.github.steveplays28.dynamictreesfabric.systems.substances;
 
-import io.github.steveplays28.dynamictreesfabric.api.substances.SubstanceEffect;
-
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.function.Supplier;
+
+import io.github.steveplays28.dynamictreesfabric.api.substances.SubstanceEffect;
 
 /**
  * Holds lingering {@link SubstanceEffect} classes and a {@link Supplier} to instantiate them with. Stored in a {@link
@@ -16,24 +16,24 @@ import java.util.function.Supplier;
 @SuppressWarnings("unchecked")
 public final class LingeringSubstances {
 
-    public static final LinkedHashMap<Class<SubstanceEffect>, Supplier<SubstanceEffect>> LINGERING_SUBSTANCES = new LinkedHashMap<>();
+	public static final LinkedHashMap<Class<SubstanceEffect>, Supplier<SubstanceEffect>> LINGERING_SUBSTANCES = new LinkedHashMap<>();
 
-    public static <S extends SubstanceEffect> void registerLingeringSubstance(final Class<S> substanceClass, Supplier<S> substanceSupplier) {
-        LINGERING_SUBSTANCES.put((Class<SubstanceEffect>) substanceClass, (Supplier<SubstanceEffect>) substanceSupplier);
-    }
+	static {
+		// It's important that the order in which these are added is equal on the client and server.
+		registerLingeringSubstance(GrowthSubstance.class, GrowthSubstance::new);
+		registerLingeringSubstance(HarvestSubstance.class, HarvestSubstance::new);
+	}
 
-    public static <S extends SubstanceEffect> int indexOf(final Class<S> substanceClass) {
-        return new ArrayList<>(LINGERING_SUBSTANCES.keySet()).indexOf(substanceClass);
-    }
+	public static <S extends SubstanceEffect> void registerLingeringSubstance(final Class<S> substanceClass, Supplier<S> substanceSupplier) {
+		LINGERING_SUBSTANCES.put((Class<SubstanceEffect>) substanceClass, (Supplier<SubstanceEffect>) substanceSupplier);
+	}
 
-    public static <S extends SubstanceEffect> Supplier<S> fromIndex(final int index) {
-        return (Supplier<S>) new ArrayList<>(LINGERING_SUBSTANCES.values()).get(index);
-    }
+	public static <S extends SubstanceEffect> int indexOf(final Class<S> substanceClass) {
+		return new ArrayList<>(LINGERING_SUBSTANCES.keySet()).indexOf(substanceClass);
+	}
 
-    static {
-        // It's important that the order in which these are added is equal on the client and server.
-        registerLingeringSubstance(GrowthSubstance.class, GrowthSubstance::new);
-        registerLingeringSubstance(HarvestSubstance.class, HarvestSubstance::new);
-    }
+	public static <S extends SubstanceEffect> Supplier<S> fromIndex(final int index) {
+		return (Supplier<S>) new ArrayList<>(LINGERING_SUBSTANCES.values()).get(index);
+	}
 
 }

@@ -32,94 +32,94 @@ import net.fabricmc.api.ModInitializer;
 @Mod(io.github.steveplays28.dynamictreesfabric.DynamicTreesFabric.MOD_ID)
 public final class DynamicTreesFabric implements ModInitializer {
 
-    public static final String MOD_ID = "dynamictreesfabric";
-    public static final String NAME = "Dynamic Trees";
+	public static final String MOD_ID = "dynamictreesfabric";
+	public static final String NAME = "Dynamic Trees";
 
-    public static final String MINECRAFT = "minecraft";
-    public static final String FABRIC_API = "fabric";
-    public static final String SERENE_SEASONS = "sereneseasons";
-    public static final String BETTER_WEATHER = "betterweather";
-    public static final String FAST_LEAF_DECAY = "fastleafdecay";
-    public static final String PASSABLE_FOLIAGE = "passablefoliage";
+	public static final String MINECRAFT = "minecraft";
+	public static final String FABRIC_API = "fabric";
+	public static final String SERENE_SEASONS = "sereneseasons";
+	public static final String BETTER_WEATHER = "betterweather";
+	public static final String FAST_LEAF_DECAY = "fastleafdecay";
+	public static final String PASSABLE_FOLIAGE = "passablefoliage";
 
-    public enum AxeDamage {
-        VANILLA,
-        THICKNESS,
-        VOLUME
-    }
+	public DynamicTreesFabric() {
+		final IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
+		final ModLoadingContext loadingContext = ModLoadingContext.get();
 
-    public enum DestroyMode {
-        IGNORE,
-        SLOPPY,
-        SET_RADIUS,
-        HARVEST,
-        ROT,
-        OVERFLOW
-    }
-
-    public enum SwampOakWaterState {
-        ROOTED,
-        SUNK,
-        DISABLED
-    }
-
-    public DynamicTreesFabric() {
-        final IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
-        final ModLoadingContext loadingContext = ModLoadingContext.get();
-
-        loadingContext.registerConfig(ModConfig.Type.SERVER, DTConfigs.SERVER_CONFIG);
-        loadingContext.registerConfig(ModConfig.Type.COMMON, DTConfigs.COMMON_CONFIG);
-        loadingContext.registerConfig(ModConfig.Type.CLIENT, DTConfigs.CLIENT_CONFIG);
+		loadingContext.registerConfig(ModConfig.Type.SERVER, DTConfigs.SERVER_CONFIG);
+		loadingContext.registerConfig(ModConfig.Type.COMMON, DTConfigs.COMMON_CONFIG);
+		loadingContext.registerConfig(ModConfig.Type.CLIENT, DTConfigs.CLIENT_CONFIG);
 
 //        DistExecutor.safeRunWhenOn(Dist.CLIENT, () -> DTClient::clientStart);
 
-        TreeGenerator.setup();
+		TreeGenerator.setup();
 
-        RegistryHandler.setup(MOD_ID);
+		RegistryHandler.setup(MOD_ID);
 
-        DTRegistries.setup();
+		DTRegistries.setup();
 
-        modEventBus.addListener(this::clientSetup);
-        modEventBus.addListener(this::onCommonSetup);
-        modEventBus.addListener(this::gatherData);
-        modEventBus.addListener(CommonSetup::onCommonSetup);
+		modEventBus.addListener(this::clientSetup);
+		modEventBus.addListener(this::onCommonSetup);
+		modEventBus.addListener(this::gatherData);
+		modEventBus.addListener(CommonSetup::onCommonSetup);
 
-        EventHandlers.registerCommon();
-        CompatHandler.registerBuiltInSeasonManagers();
-        DTArgumentTypes.ARGUMENT_TYPES.register(modEventBus);
-    }
+		EventHandlers.registerCommon();
+		CompatHandler.registerBuiltInSeasonManagers();
+		DTArgumentTypes.ARGUMENT_TYPES.register(modEventBus);
+	}
 
-    private void clientSetup(final FMLClientSetupEvent event) {
-        DTClient.setup();
-    }
+	public static Identifier resLoc(final String path) {
+		return new Identifier(MOD_ID, path);
+	}
 
-    private void onCommonSetup(final FMLCommonSetupEvent event) {
-        // Clears and locks registry handlers to free them from memory.
-        RegistryHandler.REGISTRY.clear();
+	private void clientSetup(final FMLClientSetupEvent event) {
+		DTClient.setup();
+	}
 
-        DTRegistries.DENDRO_POTION.get().registerRecipes();
+	private void onCommonSetup(final FMLCommonSetupEvent event) {
+		// Clears and locks registry handlers to free them from memory.
+		RegistryHandler.REGISTRY.clear();
 
-        Resources.MANAGER.setup();
+		DTRegistries.DENDRO_POTION.get().registerRecipes();
 
-        if (DTConfigs.REPLACE_NYLIUM_FUNGI.get()) {
-            DTTrees.replaceNyliumFungiFeatures();
-        }
-    }
+		Resources.MANAGER.setup();
 
-    private void gatherData(final GatherDataEvent event) {
-        Resources.MANAGER.gatherData();
-        GatherDataHelper.gatherAllData(
-                MOD_ID,
-                event,
-                SoilProperties.REGISTRY,
-                Family.REGISTRY,
-                Species.REGISTRY,
-                LeavesProperties.REGISTRY
-        );
-    }
+		if (DTConfigs.REPLACE_NYLIUM_FUNGI.get()) {
+			DTTrees.replaceNyliumFungiFeatures();
+		}
+	}
 
-    public static Identifier resLoc(final String path) {
-        return new Identifier(MOD_ID, path);
-    }
+	private void gatherData(final GatherDataEvent event) {
+		Resources.MANAGER.gatherData();
+		GatherDataHelper.gatherAllData(
+				MOD_ID,
+				event,
+				SoilProperties.REGISTRY,
+				Family.REGISTRY,
+				Species.REGISTRY,
+				LeavesProperties.REGISTRY
+		);
+	}
+
+	public enum AxeDamage {
+		VANILLA,
+		THICKNESS,
+		VOLUME
+	}
+
+	public enum DestroyMode {
+		IGNORE,
+		SLOPPY,
+		SET_RADIUS,
+		HARVEST,
+		ROT,
+		OVERFLOW
+	}
+
+	public enum SwampOakWaterState {
+		ROOTED,
+		SUNK,
+		DISABLED
+	}
 
 }

@@ -45,98 +45,98 @@ import java.util.List;
  */
 public class PoissonDiscChunkSet {
 
-    private byte[] discData;
-    public boolean generated = false;
+	public boolean generated = false;
+	private byte[] discData;
 
-    public PoissonDiscChunkSet() {
-        discData = new byte[16];
-    }
+	public PoissonDiscChunkSet() {
+		discData = new byte[16];
+	}
 
-    public PoissonDiscChunkSet(byte[] data) {
-        generated = true;
-        discData = data != null && data.length == 16 ? Arrays.copyOf(data, 16) : new byte[16];
-    }
+	public PoissonDiscChunkSet(byte[] data) {
+		generated = true;
+		discData = data != null && data.length == 16 ? Arrays.copyOf(data, 16) : new byte[16];
+	}
 
-    public List<PoissonDisc> getDiscs(List<PoissonDisc> discs, int chunkX, int chunkZ) {
-        for (int tile = 0; tile < 16; tile++) {
-            byte cd = discData[tile];
-            if (cd != 0) {//No data in the tile
-                if ((cd & 0x80) != 0) {//Extended Bit
-                    int flip = (cd | (cd << 1)) & 3;//0 or 3
-                    discs.add(unpackDiscData(tile, 0x10 ^ flip, chunkX, chunkZ));//r2 @ 0,0 or 0,3
-                    discs.add(unpackDiscData(tile, 0x1f ^ flip, chunkX, chunkZ));//r2 @ 3,3 or 3,0
-                } else if ((cd & 0x70) != 0) {//has a radius
-                    discs.add(unpackDiscData(tile, cd, chunkX, chunkZ));
-                }
-            }
-        }
-        return discs;
-    }
+	private static PoissonDisc unpackDiscData(int tile, int diskData, int chunkX, int chunkZ) {
+		int radius = getRadiusFromDiscData(diskData);
+		int x = ((tile << 2) & 12);
+		int z = (tile & 12);
+		return new PoissonDisc((chunkX << 4) | x | ((diskData >> 2) & 3), (chunkZ << 4) | z | (diskData & 3), radius, true);
+	}
 
-    public void clearDiscs() {
-        Arrays.fill(discData, (byte) 0);
-    }
+	private static int getRadiusFromDiscData(int discData) {
+		return ((discData >> 4) & 7) + 1;
+	}
 
-    public List<PoissonDisc> addDiscs(List<PoissonDisc> discs) {
-        clearDiscs();
-        for (PoissonDisc d : discs) {
-            addDisc(d);
-        }
-        return discs;
-    }
+	private static byte buildDiscData(PoissonDisc c) {
+		return (byte) ((((c.radius - 1) & 7) << 4) | (c.x & 3) << 2 | c.z & 3);
+	}
 
-    private static PoissonDisc unpackDiscData(int tile, int diskData, int chunkX, int chunkZ) {
-        int radius = getRadiusFromDiscData(diskData);
-        int x = ((tile << 2) & 12);
-        int z = (tile & 12);
-        return new PoissonDisc((chunkX << 4) | x | ((diskData >> 2) & 3), (chunkZ << 4) | z | (diskData & 3), radius, true);
-    }
+	private static int calcTileNum(PoissonDisc c) {
+		return c.z & 12 | ((c.x & 12) >> 2);//Calculate which of the 16 tiles we are working in
+	}
 
-    private static int getRadiusFromDiscData(int discData) {
-        return ((discData >> 4) & 7) + 1;
-    }
+	public List<PoissonDisc> getDiscs(List<PoissonDisc> discs, int chunkX, int chunkZ) {
+		for (int tile = 0; tile < 16; tile++) {
+			byte cd = discData[tile];
+			if (cd != 0) {//No data in the tile
+				if ((cd & 0x80) != 0) {//Extended Bit
+					int flip = (cd | (cd << 1)) & 3;//0 or 3
+					discs.add(unpackDiscData(tile, 0x10 ^ flip, chunkX, chunkZ));//r2 @ 0,0 or 0,3
+					discs.add(unpackDiscData(tile, 0x1f ^ flip, chunkX, chunkZ));//r2 @ 3,3 or 3,0
+				} else if ((cd & 0x70) != 0) {//has a radius
+					discs.add(unpackDiscData(tile, cd, chunkX, chunkZ));
+				}
+			}
+		}
+		return discs;
+	}
 
-    private static byte buildDiscData(PoissonDisc c) {
-        return (byte) ((((c.radius - 1) & 7) << 4) | (c.x & 3) << 2 | c.z & 3);
-    }
+	public void clearDiscs() {
+		Arrays.fill(discData, (byte) 0);
+	}
 
-    private static int calcTileNum(PoissonDisc c) {
-        return c.z & 12 | ((c.x & 12) >> 2);//Calculate which of the 16 tiles we are working in
-    }
+	public List<PoissonDisc> addDiscs(List<PoissonDisc> discs) {
+		clearDiscs();
+		for (PoissonDisc d : discs) {
+			addDisc(d);
+		}
+		return discs;
+	}
 
-    public boolean addDisc(PoissonDisc d) {
-        if (d.radius >= 2 && d.radius <= 8) {
-            int tile = calcTileNum(d); //Calculate which of the 16 tiles we are working in
-            int cd = discData[tile];
-            if (cd != 0) { //There's already a disc in this tile
-                if ((d.radius == 2) && (getRadiusFromDiscData(cd) == 2)) { //but we are adding a radius 2 disc to a tile with an exiting radius 2 disc.. it might still be possible to slip it in.
-                    int oldDiscPos = cd & 15; //Get subtile position of old disc(lowest 4 bits)
-                    int newDiscPos = ((d.x & 3) << 2) | (d.z & 3);//Get subtile position of new disc
-                    switch (oldDiscPos << 4 | newDiscPos) {//Combine both subtile positions into a single value to expedite comparison
-                        case 0x0F://0,0 and 3,3
-                        case 0xF0://3,3 and 0,0
-                            discData[tile] = (byte) 0x80;//Extended bit
-                            return true;
-                        case 0xC3://3,0 and 0,3
-                        case 0x3C://0,3 and 3,0
-                            discData[tile] = (byte) 0x81;//Extended bit and rotate tile 90
-                            return true;
-                    }
-                }
-            } else { //Add a single simple disc
-                discData[tile] = buildDiscData(d);
-                return true;
-            }
-        }
-        return false;
-    }
+	public boolean addDisc(PoissonDisc d) {
+		if (d.radius >= 2 && d.radius <= 8) {
+			int tile = calcTileNum(d); //Calculate which of the 16 tiles we are working in
+			int cd = discData[tile];
+			if (cd != 0) { //There's already a disc in this tile
+				if ((d.radius == 2) && (getRadiusFromDiscData(cd) == 2)) { //but we are adding a radius 2 disc to a tile with an exiting radius 2 disc.. it might still be possible to slip it in.
+					int oldDiscPos = cd & 15; //Get subtile position of old disc(lowest 4 bits)
+					int newDiscPos = ((d.x & 3) << 2) | (d.z & 3);//Get subtile position of new disc
+					switch (oldDiscPos << 4 | newDiscPos) {//Combine both subtile positions into a single value to expedite comparison
+						case 0x0F://0,0 and 3,3
+						case 0xF0://3,3 and 0,0
+							discData[tile] = (byte) 0x80;//Extended bit
+							return true;
+						case 0xC3://3,0 and 0,3
+						case 0x3C://0,3 and 3,0
+							discData[tile] = (byte) 0x81;//Extended bit and rotate tile 90
+							return true;
+					}
+				}
+			} else { //Add a single simple disc
+				discData[tile] = buildDiscData(d);
+				return true;
+			}
+		}
+		return false;
+	}
 
-    public byte[] getDiscData() {
-        return discData;
-    }
+	public byte[] getDiscData() {
+		return discData;
+	}
 
-    public void setDiscData(byte[] discData) {
-        this.discData = Arrays.copyOf(discData, 16);
-    }
+	public void setDiscData(byte[] discData) {
+		this.discData = Arrays.copyOf(discData, 16);
+	}
 
 }

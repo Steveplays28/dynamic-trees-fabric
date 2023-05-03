@@ -1,10 +1,12 @@
 package io.github.steveplays28.dynamictreesfabric.tileentity;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import io.github.steveplays28.dynamictreesfabric.api.TreeRegistry;
 import io.github.steveplays28.dynamictreesfabric.init.DTRegistries;
 import io.github.steveplays28.dynamictreesfabric.trees.Species;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.NbtCompound;
@@ -20,51 +22,51 @@ import net.minecraft.util.math.BlockPos;
  */
 public class SpeciesTileEntity extends BlockEntity {
 
-    private Species species = Species.NULL_SPECIES;
+	private Species species = Species.NULL_SPECIES;
 
-    public SpeciesTileEntity(BlockPos pos, BlockState state) {
-        super(DTRegistries.speciesTE, pos, state);
-    }
+	public SpeciesTileEntity(BlockPos pos, BlockState state) {
+		super(DTRegistries.speciesTE, pos, state);
+	}
 
-    public Species getSpecies() {
-        return species;
-    }
+	public Species getSpecies() {
+		return species;
+	}
 
-    public void setSpecies(Species species) {
-        this.species = species;
-        this.markDirty();
-    }
+	public void setSpecies(Species species) {
+		this.species = species;
+		this.markDirty();
+	}
 
-    @Override
-    public void readNbt(NbtCompound tag) {
-        if (tag.contains("species")) {
-            Identifier speciesName = new Identifier(tag.getString("species"));
-            species = TreeRegistry.findSpecies(speciesName);
-        }
-        super.readNbt( tag);
-    }
+	@Override
+	public void readNbt(NbtCompound tag) {
+		if (tag.contains("species")) {
+			Identifier speciesName = new Identifier(tag.getString("species"));
+			species = TreeRegistry.findSpecies(speciesName);
+		}
+		super.readNbt(tag);
+	}
 
-    @Nonnull
-    @Override
-    public void writeNbt(NbtCompound tag) {
-        tag.putString("species", species.getRegistryName().toString());
-    }
+	@Nonnull
+	@Override
+	public void writeNbt(NbtCompound tag) {
+		tag.putString("species", species.getRegistryName().toString());
+	}
 
-    @Nullable
-    public BlockEntityUpdateS2CPacket toUpdatePacket() {
-        return BlockEntityUpdateS2CPacket.create(this);
-    }
+	@Nullable
+	public BlockEntityUpdateS2CPacket toUpdatePacket() {
+		return BlockEntityUpdateS2CPacket.create(this);
+	}
 
-    @Override
-    public void onDataPacket(ClientConnection net, BlockEntityUpdateS2CPacket pkt) {
-        readNbt(pkt.getNbt());
-    }
+	@Override
+	public void onDataPacket(ClientConnection net, BlockEntityUpdateS2CPacket pkt) {
+		readNbt(pkt.getNbt());
+	}
 
-    @Override
-    public NbtCompound toInitialChunkDataNbt() {
-        NbtCompound tag = super.toInitialChunkDataNbt();
-        this.writeNbt(tag);
-        return tag;
-    }
+	@Override
+	public NbtCompound toInitialChunkDataNbt() {
+		NbtCompound tag = super.toInitialChunkDataNbt();
+		this.writeNbt(tag);
+		return tag;
+	}
 
 }

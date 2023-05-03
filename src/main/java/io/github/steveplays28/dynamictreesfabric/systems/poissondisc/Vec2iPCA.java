@@ -7,22 +7,22 @@ package io.github.steveplays28.dynamictreesfabric.systems.poissondisc;
  */
 public class Vec2iPCA extends Vec2i {
 
-    double radians;
+	double radians;
 
-    public Vec2iPCA(int x, int z, boolean tight) {
-        super(x, z, tight);
-    }
+	public Vec2iPCA(int x, int z, boolean tight) {
+		super(x, z, tight);
+	}
 
-    @Override
-    public Vec2i set(int x, int z) {
-        super.set(x, z);
-        radians = super.angle();
-        return this;
-    }
+	@Override
+	public Vec2i set(int x, int z) {
+		super.set(x, z);
+		radians = super.angle();
+		return this;
+	}
 
-    @Override
-    public double angle() {
-        return radians;
-    }
+	@Override
+	public double angle() {
+		return radians;
+	}
 
 }

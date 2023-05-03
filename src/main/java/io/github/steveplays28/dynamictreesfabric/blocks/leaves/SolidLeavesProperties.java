@@ -1,6 +1,7 @@
 package io.github.steveplays28.dynamictreesfabric.blocks.leaves;
 
 import io.github.steveplays28.dynamictreesfabric.api.registry.TypedRegistry;
+
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.util.Identifier;
 
@@ -12,16 +13,16 @@ import net.minecraft.util.Identifier;
  */
 public class SolidLeavesProperties extends LeavesProperties {
 
-    public static final TypedRegistry.EntryType<LeavesProperties> TYPE = TypedRegistry.newType(SolidLeavesProperties::new);
+	public static final TypedRegistry.EntryType<LeavesProperties> TYPE = TypedRegistry.newType(SolidLeavesProperties::new);
 
-    public SolidLeavesProperties(Identifier registryName) {
-        super(registryName);
-        this.requiresShears = false;
-    }
+	public SolidLeavesProperties(Identifier registryName) {
+		super(registryName);
+		this.requiresShears = false;
+	}
 
-    @Override
-    protected DynamicLeavesBlock createDynamicLeaves(AbstractBlock.Settings properties) {
-        return new SolidDynamicLeavesBlock(this, properties);
-    }
+	@Override
+	protected DynamicLeavesBlock createDynamicLeaves(AbstractBlock.Settings properties) {
+		return new SolidDynamicLeavesBlock(this, properties);
+	}
 
 }

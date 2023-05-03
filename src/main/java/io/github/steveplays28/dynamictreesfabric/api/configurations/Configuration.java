@@ -1,9 +1,12 @@
 package io.github.steveplays28.dynamictreesfabric.api.configurations;
 
 import io.github.steveplays28.dynamictreesfabric.api.registry.RegistryEntry;
-import javax.annotation.Nonnull;
+
 import net.minecraft.util.crash.CrashException;
 import net.minecraft.util.crash.CrashReport;
+
+import javax.annotation.Nonnull;
+
 import java.util.Optional;
 import java.util.function.Predicate;
 
@@ -14,130 +17,129 @@ import java.util.function.Predicate;
  * @author Harley O'Connor
  */
 public abstract class Configuration<T extends Configuration<T, C>, C extends Configurable>
-        extends RegistryEntry<T> {
+		extends RegistryEntry<T> {
 
-    protected final C configurable;
-    protected final Properties properties = new Properties();
+	protected final C configurable;
+	protected final Properties properties = new Properties();
 
-    public Configuration(C configurable) {
-        this.configurable = configurable;
-    }
+	public Configuration(C configurable) {
+		this.configurable = configurable;
+	}
 
-    /**
-     * Adds the given {@link ConfigurationProperty} to this {@link Configuration} object's properties.
-     *
-     * @param property The {@link ConfigurationProperty} to set.
-     * @param value    The value to register.
-     * @param <V>      The type of value to register.
-     * @return This {@link Configuration} after adding the property.
-     * @throws CrashException If the property given is not registered to the {@link Configurable}.
-     */
-    @SuppressWarnings("unchecked")
-    public <V> T with(ConfigurationProperty<V> property, V value) {
-        if (!this.configurable.isPropertyRegistered(property)) {
-            final CrashReport crashReport = CrashReport.create(new IllegalArgumentException(), "Tried to add " +
-                    "unregistered property with identifier '" + property.getKey() + "' and type '" +
-                    property.getType() + "' configurable '" + this.configurable + "'.");
-            crashReport.addElement("Adding property to a gen feature.");
-            throw new CrashException(crashReport);
-        }
+	/**
+	 * Adds the given {@link ConfigurationProperty} to this {@link Configuration} object's properties.
+	 *
+	 * @param property The {@link ConfigurationProperty} to set.
+	 * @param value    The value to register.
+	 * @param <V>      The type of value to register.
+	 * @return This {@link Configuration} after adding the property.
+	 * @throws CrashException If the property given is not registered to the {@link Configurable}.
+	 */
+	@SuppressWarnings("unchecked")
+	public <V> T with(ConfigurationProperty<V> property, V value) {
+		if (!this.configurable.isPropertyRegistered(property)) {
+			final CrashReport crashReport = CrashReport.create(new IllegalArgumentException(), "Tried to add " +
+					"unregistered property with identifier '" + property.getKey() + "' and type '" +
+					property.getType() + "' configurable '" + this.configurable + "'.");
+			crashReport.addElement("Adding property to a gen feature.");
+			throw new CrashException(crashReport);
+		}
 
-        this.properties.put(property, value);
-        return (T) this;
-    }
+		this.properties.put(property, value);
+		return (T) this;
+	}
 
-    @SuppressWarnings("unchecked")
-    public T withAll(PropertiesAccessor properties) {
-        properties.forEach(this::with);
-        return (T) this;
-    }
+	@SuppressWarnings("unchecked")
+	public T withAll(PropertiesAccessor properties) {
+		properties.forEach(this::with);
+		return (T) this;
+	}
 
-    /**
-     * Checks if the properties contains the given {@link ConfigurationProperty}.
-     *
-     * @param property The {@link ConfigurationProperty} to check for.
-     * @return {@code true} if it does, {@code false} if not.
-     */
-    public boolean has(ConfigurationProperty<?> property) {
-        return this.properties.has(property);
-    }
+	/**
+	 * Checks if the properties contains the given {@link ConfigurationProperty}.
+	 *
+	 * @param property The {@link ConfigurationProperty} to check for.
+	 * @return {@code true} if it does, {@code false} if not.
+	 */
+	public boolean has(ConfigurationProperty<?> property) {
+		return this.properties.has(property);
+	}
 
-    /**
-     * Gets the value for the given {@link ConfigurationProperty}. This
-     * method expects that the feature will be set, so call {@link #getAsOptional(ConfigurationProperty)} instead if it is
-     * optional.
-     *
-     * @param property The {@link ConfigurationProperty} to get.
-     * @param <V>      The type of the property's value.
-     * @return The property's value.
-     * @throws CrashException If the property is null. If a property is optional. {@link
-     *                           #getAsOptional(ConfigurationProperty)} should be called instead.
-     */
-    @Nonnull
-    public <V> V get(ConfigurationProperty<V> property) {
-        Optional<V> optionalProperty = getAsOptional(property);
+	/**
+	 * Gets the value for the given {@link ConfigurationProperty}. This
+	 * method expects that the feature will be set, so call {@link #getAsOptional(ConfigurationProperty)} instead if it is
+	 * optional.
+	 *
+	 * @param property The {@link ConfigurationProperty} to get.
+	 * @param <V>      The type of the property's value.
+	 * @return The property's value.
+	 * @throws CrashException If the property is null. If a property is optional. {@link
+	 *                        #getAsOptional(ConfigurationProperty)} should be called instead.
+	 */
+	@Nonnull
+	public <V> V get(ConfigurationProperty<V> property) {
+		Optional<V> optionalProperty = getAsOptional(property);
 
-        if (optionalProperty.isPresent())
-            return optionalProperty.get();
-         else {
-            final CrashReport crashReport = CrashReport.create(new IllegalStateException(),
-                    "Property '" + property.getKey() + "' from '" + this.configurable + "' is Null.");
-            crashReport.addElement("Getting property from a configuration");
-            throw new CrashException(crashReport);
-        }
+		if (optionalProperty.isPresent())
+			return optionalProperty.get();
+		else {
+			final CrashReport crashReport = CrashReport.create(new IllegalStateException(),
+					"Property '" + property.getKey() + "' from '" + this.configurable + "' is Null.");
+			crashReport.addElement("Getting property from a configuration");
+			throw new CrashException(crashReport);
+		}
 
-    }
+	}
 
-    /**
-     *
-     * @param property The {@link ConfigurationProperty} to get.
-     * @param <V>      The type of the property's value.
-     * @return An Optional with the property's value.
-     * @throws CrashException If the property did not exist.
-     */
-    public <V> Optional<V> getAsOptional(ConfigurationProperty<V> property) {
-        if (!this.has(property)) {
-            final CrashReport crashReport = CrashReport.create(new IllegalStateException(), "Tried to obtain " +
-                    "property '" + property.getKey() + "' from '" + this.configurable + "' that did not exist.");
-            crashReport.addElement("Getting property from a configuration");
-            throw new CrashException(crashReport);
-        }
+	/**
+	 * @param property The {@link ConfigurationProperty} to get.
+	 * @param <V>      The type of the property's value.
+	 * @return An Optional with the property's value.
+	 * @throws CrashException If the property did not exist.
+	 */
+	public <V> Optional<V> getAsOptional(ConfigurationProperty<V> property) {
+		if (!this.has(property)) {
+			final CrashReport crashReport = CrashReport.create(new IllegalStateException(), "Tried to obtain " +
+					"property '" + property.getKey() + "' from '" + this.configurable + "' that did not exist.");
+			crashReport.addElement("Getting property from a configuration");
+			throw new CrashException(crashReport);
+		}
 
-        return Optional.ofNullable(this.properties.get(property));
-    }
+		return Optional.ofNullable(this.properties.get(property));
+	}
 
-    /**
-     * If property is null, invalidResult will be returned instead
-     *
-     * @param property The {@link ConfigurationProperty} to get.
-     * @param validator A predicate that can be used to validate the value of the Property. If the
-     *                  predicate fails, the invalidDefault will be returned instead
-     * @param invalidDefault The value that will be returned if the validator fails
-     * @param <V>      The type of the property's value.
-     * @return  The property's value or the invalidDefault if the validator failed.
-     */
-    public <V> V getOrInvalidDefault(ConfigurationProperty<V> property, Predicate<V> validator, V invalidDefault) {
-        return this.getAsOptional(property).filter(validator).orElse(invalidDefault);
-    }
+	/**
+	 * If property is null, invalidResult will be returned instead
+	 *
+	 * @param property       The {@link ConfigurationProperty} to get.
+	 * @param validator      A predicate that can be used to validate the value of the Property. If the
+	 *                       predicate fails, the invalidDefault will be returned instead
+	 * @param invalidDefault The value that will be returned if the validator fails
+	 * @param <V>            The type of the property's value.
+	 * @return The property's value or the invalidDefault if the validator failed.
+	 */
+	public <V> V getOrInvalidDefault(ConfigurationProperty<V> property, Predicate<V> validator, V invalidDefault) {
+		return this.getAsOptional(property).filter(validator).orElse(invalidDefault);
+	}
 
-    /**
-     * Makes a copy of this {@link Configurable}, copying the {@link #configurable} reference and all {@link
-     * #properties} from this {@link Configurable}.
-     *
-     * @return The copy of this {@link Configurable}.
-     */
-    public abstract T copy();
+	/**
+	 * Makes a copy of this {@link Configurable}, copying the {@link #configurable} reference and all {@link
+	 * #properties} from this {@link Configurable}.
+	 *
+	 * @return The copy of this {@link Configurable}.
+	 */
+	public abstract T copy();
 
-    public C getConfigurable() {
-        return this.configurable;
-    }
+	public C getConfigurable() {
+		return this.configurable;
+	}
 
-    @Override
-    public String toString() {
-        return this.getClass().getSimpleName() + "{" +
-                "configurable=" + configurable +
-                ", properties=" + properties +
-                '}';
-    }
+	@Override
+	public String toString() {
+		return this.getClass().getSimpleName() + "{" +
+				"configurable=" + configurable +
+				", properties=" + properties +
+				'}';
+	}
 
 }

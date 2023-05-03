@@ -6,5 +6,5 @@ import net.minecraft.world.BlockView;
 
 @FunctionalInterface
 public interface Musable {
-    boolean isMusable(BlockView world, BlockState state, BlockPos pos);
+	boolean isMusable(BlockView world, BlockState state, BlockPos pos);
 }

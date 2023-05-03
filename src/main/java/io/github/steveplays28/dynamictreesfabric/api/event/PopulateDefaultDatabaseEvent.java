@@ -16,14 +16,14 @@ import net.minecraftforge.eventbus.api.Event;
 @Deprecated
 public final class PopulateDefaultDatabaseEvent extends Event {
 
-    private final BiomeDatabase defaultDatabase;
+	private final BiomeDatabase defaultDatabase;
 
-    public PopulateDefaultDatabaseEvent(final BiomeDatabase defaultDatabase) {
-        this.defaultDatabase = defaultDatabase;
-    }
+	public PopulateDefaultDatabaseEvent(final BiomeDatabase defaultDatabase) {
+		this.defaultDatabase = defaultDatabase;
+	}
 
-    public BiomeDatabase getDefaultDatabase() {
-        return defaultDatabase;
-    }
+	public BiomeDatabase getDefaultDatabase() {
+		return defaultDatabase;
+	}
 
 }

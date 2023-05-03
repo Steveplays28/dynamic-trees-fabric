@@ -1,21 +1,22 @@
 package io.github.steveplays28.dynamictreesfabric.util;
 
-import javax.annotation.Nonnull;
 import java.util.function.Supplier;
+
+import javax.annotation.Nonnull;
 
 /**
  * @author Harley O'Connor
  */
 public interface MutableLazyValue<T> {
 
-    T get();
+	static <T> MutableLazyValue<T> supplied(Supplier<T> supplier) {
+		return new MutableSuppliedLazyValue<>(supplier);
+	}
 
-    void reset(Supplier<T> supplier);
+	T get();
 
-    void set(@Nonnull T value);
+	void reset(Supplier<T> supplier);
 
-    static <T> MutableLazyValue<T> supplied(Supplier<T> supplier) {
-        return new MutableSuppliedLazyValue<>(supplier);
-    }
+	void set(@Nonnull T value);
 
 }

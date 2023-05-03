@@ -1,8 +1,9 @@
 package io.github.steveplays28.dynamictreesfabric.util;
 
+import net.minecraftforge.client.model.data.ModelProperty;
+
 import net.minecraft.util.StringIdentifiable;
 import net.minecraft.util.math.Direction;
-import net.minecraftforge.client.model.data.ModelProperty;
 
 /**
  * Extension of regular {@link Connections} data, modified for surface roots. This is needed because roots only have
@@ -12,82 +13,82 @@ import net.minecraftforge.client.model.data.ModelProperty;
  */
 public class RootConnections extends Connections {
 
-    public static final ModelProperty<RootConnections> ROOT_CONNECTIONS_PROPERTY = new ModelProperty<>();
-    public static final ConnectionLevel[] PLACEHOLDER_CONNECTION_LEVELS = new ConnectionLevel[]{ConnectionLevel.MID, ConnectionLevel.MID, ConnectionLevel.MID, ConnectionLevel.MID};
+	public static final ModelProperty<RootConnections> ROOT_CONNECTIONS_PROPERTY = new ModelProperty<>();
+	public static final ConnectionLevel[] PLACEHOLDER_CONNECTION_LEVELS = new ConnectionLevel[]{ConnectionLevel.MID, ConnectionLevel.MID, ConnectionLevel.MID, ConnectionLevel.MID};
 
-    /**
-     * An array of connection levels, with the index being equivalent to their horizontal index of the connection
-     * level's {@link Direction}. For example, if the connection level to <tt>EAST</tt> of the root is <tt>HIGH</tt>,
-     * <tt>connectionsLevels[3]</tt> will equal <tt>ConnectionLevel.HIGH</tt>.
-     */
-    protected ConnectionLevel[] connectionLevels;
+	/**
+	 * An array of connection levels, with the index being equivalent to their horizontal index of the connection
+	 * level's {@link Direction}. For example, if the connection level to <tt>EAST</tt> of the root is <tt>HIGH</tt>,
+	 * <tt>connectionsLevels[3]</tt> will equal <tt>ConnectionLevel.HIGH</tt>.
+	 */
+	protected ConnectionLevel[] connectionLevels;
 
-    public RootConnections() {
-        // Surface roots only need horizontal connections, so the radii has 4 items with equivalent index to the horizontal index of the respective Direction.
-        this.radii = new int[]{0, 0, 0, 0};
-        this.connectionLevels = PLACEHOLDER_CONNECTION_LEVELS.clone();
-    }
+	public RootConnections() {
+		// Surface roots only need horizontal connections, so the radii has 4 items with equivalent index to the horizontal index of the respective Direction.
+		this.radii = new int[]{0, 0, 0, 0};
+		this.connectionLevels = PLACEHOLDER_CONNECTION_LEVELS.clone();
+	}
 
-    public RootConnections(RootConnections connections) {
-        this.setAllRadii(connections.getAllRadii());
-        this.setConnectionLevels(connections.getConnectionLevels());
-    }
+	public RootConnections(RootConnections connections) {
+		this.setAllRadii(connections.getAllRadii());
+		this.setConnectionLevels(connections.getConnectionLevels());
+	}
 
-    public ConnectionLevel[] getConnectionLevels() {
-        return connectionLevels;
-    }
+	public ConnectionLevel[] getConnectionLevels() {
+		return connectionLevels;
+	}
 
-    /**
-     * Sets the radius of the connection in a horizontal direction.
-     *
-     * @param dir    The horizontal direction.
-     * @param radius The connection radius for that direction.
-     */
-    @Override
-    public void setRadius(Direction dir, int radius) {
-        // Surface radii uses horizontal index, so use that instead.
-        this.radii[dir.getHorizontal()] = radius;
-    }
+	public void setConnectionLevels(ConnectionLevel[] connectionLevels) {
+		this.connectionLevels = connectionLevels;
+	}
 
-    public void setConnectionLevel(Direction dir, ConnectionLevel connectionLevel) {
-        this.connectionLevels[dir.getHorizontal()] = connectionLevel;
-    }
+	/**
+	 * Sets the radius of the connection in a horizontal direction.
+	 *
+	 * @param dir    The horizontal direction.
+	 * @param radius The connection radius for that direction.
+	 */
+	@Override
+	public void setRadius(Direction dir, int radius) {
+		// Surface radii uses horizontal index, so use that instead.
+		this.radii[dir.getHorizontal()] = radius;
+	}
 
-    public void setConnectionLevels(ConnectionLevel[] connectionLevels) {
-        this.connectionLevels = connectionLevels;
-    }
+	public void setConnectionLevel(Direction dir, ConnectionLevel connectionLevel) {
+		this.connectionLevels[dir.getHorizontal()] = connectionLevel;
+	}
 
-    /**
-     * This holds the type of connection a surface root has with the block in the given {@link Direction} as described
-     * by its index (see {@link RootConnections#connectionLevels}).
-     * <ul>
-     *     <li>A <tt>MID</tt> connection level is a normal connection with another root at the same y-level in the given {@link Direction}.</li>
-     *     <li>A <tt>LOW</tt> connection level describes one where there is a surface root down one block in the y-direction and offset by one block in the given {@link Direction}.</li>
-     *     <li>A <tt>HIGH</tt> connection describes one where there is a surface root up one block in the y-direction and offset by one block in the given {@link Direction}.</li>
-     * </ul>
-     */
-    public enum ConnectionLevel implements StringIdentifiable {
-        MID(0),
-        LOW(-1),
-        HIGH(1);
+	/**
+	 * This holds the type of connection a surface root has with the block in the given {@link Direction} as described
+	 * by its index (see {@link RootConnections#connectionLevels}).
+	 * <ul>
+	 *     <li>A <tt>MID</tt> connection level is a normal connection with another root at the same y-level in the given {@link Direction}.</li>
+	 *     <li>A <tt>LOW</tt> connection level describes one where there is a surface root down one block in the y-direction and offset by one block in the given {@link Direction}.</li>
+	 *     <li>A <tt>HIGH</tt> connection describes one where there is a surface root up one block in the y-direction and offset by one block in the given {@link Direction}.</li>
+	 * </ul>
+	 */
+	public enum ConnectionLevel implements StringIdentifiable {
+		MID(0),
+		LOW(-1),
+		HIGH(1);
 
-        /**
-         * This holds the offset in the y-level of the connecting surface root.
-         */
-        private final int yOffset;
+		/**
+		 * This holds the offset in the y-level of the connecting surface root.
+		 */
+		private final int yOffset;
 
-        ConnectionLevel(int y) {
-            this.yOffset = y;
-        }
+		ConnectionLevel(int y) {
+			this.yOffset = y;
+		}
 
-        @Override
-        public String asString() {
-            return toString().toLowerCase();
-        }
+		@Override
+		public String asString() {
+			return toString().toLowerCase();
+		}
 
-        public int getYOffset() {
-            return yOffset;
-        }
-    }
+		public int getYOffset() {
+			return yOffset;
+		}
+	}
 
 }

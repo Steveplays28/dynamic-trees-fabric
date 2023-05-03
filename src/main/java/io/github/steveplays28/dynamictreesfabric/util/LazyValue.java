@@ -8,14 +8,14 @@ import java.util.function.Supplier;
 @FunctionalInterface
 public interface LazyValue<T> {
 
-    T get();
+	static <T> LazyValue<T> of(T value) {
+		return () -> value;
+	}
 
-    static <T> LazyValue<T> of(T value) {
-        return () -> value;
-    }
+	static <T> LazyValue<T> supplied(Supplier<T> supplier) {
+		return new SuppliedLazyValue<>(supplier);
+	}
 
-    static <T> LazyValue<T> supplied(Supplier<T> supplier) {
-        return new SuppliedLazyValue<>(supplier);
-    }
+	T get();
 
 }

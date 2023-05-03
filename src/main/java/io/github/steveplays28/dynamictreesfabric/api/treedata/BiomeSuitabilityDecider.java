@@ -2,6 +2,7 @@ package io.github.steveplays28.dynamictreesfabric.api.treedata;
 
 import io.github.steveplays28.dynamictreesfabric.api.TreeRegistry;
 import io.github.steveplays28.dynamictreesfabric.trees.Species;
+
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
@@ -16,40 +17,40 @@ import net.minecraft.world.biome.Biome;
 @FunctionalInterface
 public interface BiomeSuitabilityDecider {
 
-    Decision getSuitability(World world, Biome biome, Species tree, BlockPos pos);
+	Decision getSuitability(World world, Biome biome, Species tree, BlockPos pos);
 
-    /**
-     * Decision interface for handling the event
-     */
-    class Decision {
-        private final boolean handled; // The handling indicator
-        private float suitability; // The payload
+	/**
+	 * Decision interface for handling the event
+	 */
+	class Decision {
+		private final boolean handled; // The handling indicator
+		private float suitability; // The payload
 
-        /**
-         * Create via this constructor to leave the event unhandled so another decider can potentially handle it.
-         */
-        public Decision() {
-            handled = false;
-        }
+		/**
+		 * Create via this constructor to leave the event unhandled so another decider can potentially handle it.
+		 */
+		public Decision() {
+			handled = false;
+		}
 
-        /**
-         * Create via this constructor to decide what the suitability should be.
-         *
-         * @param suitability Suitability factor from 0.0 - 1.0 range.  (0.0f for completely unsuited.. 1.0f for
-         *                    perfectly suited)
-         */
-        public Decision(float suitability) {
-            this.suitability = MathHelper.clamp(suitability, 0f, 1f);
-            handled = true;
-        }
+		/**
+		 * Create via this constructor to decide what the suitability should be.
+		 *
+		 * @param suitability Suitability factor from 0.0 - 1.0 range.  (0.0f for completely unsuited.. 1.0f for
+		 *                    perfectly suited)
+		 */
+		public Decision(float suitability) {
+			this.suitability = MathHelper.clamp(suitability, 0f, 1f);
+			handled = true;
+		}
 
-        public boolean isHandled() {
-            return handled;
-        }
+		public boolean isHandled() {
+			return handled;
+		}
 
-        public float getSuitability() {
-            return suitability;
-        }
-    }
+		public float getSuitability() {
+			return suitability;
+		}
+	}
 
 }

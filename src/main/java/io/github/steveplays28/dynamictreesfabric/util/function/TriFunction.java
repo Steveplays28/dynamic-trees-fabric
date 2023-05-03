@@ -8,13 +8,13 @@ package io.github.steveplays28.dynamictreesfabric.util.function;
 @FunctionalInterface
 public interface TriFunction<T, U, R, S> {
 
-    /**
-     * Applies this function to the given arguments.
-     *
-     * @param t the first function argument
-     * @param u the second function argument
-     * @return the function result
-     */
-    S apply(T t, U u, R r);
+	/**
+	 * Applies this function to the given arguments.
+	 *
+	 * @param t the first function argument
+	 * @param u the second function argument
+	 * @return the function result
+	 */
+	S apply(T t, U u, R r);
 
 }

@@ -10,6 +10,6 @@ import java.util.function.Function;
 @FunctionalInterface
 public interface ThrowableFunction<I, R, T extends Throwable> {
 
-    R apply(I i) throws T;
+	R apply(I i) throws T;
 
 }

@@ -5,8 +5,8 @@ package io.github.steveplays28.dynamictreesfabric.api.configurations;
  */
 public final class CustomConfigurationProperty<V> extends ConfigurationProperty<V> {
 
-    CustomConfigurationProperty(String key, Class<V> type) {
-        super(key, type);
-    }
+	CustomConfigurationProperty(String key, Class<V> type) {
+		super(key, type);
+	}
 
 }

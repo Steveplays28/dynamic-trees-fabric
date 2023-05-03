@@ -10,12 +10,12 @@ package io.github.steveplays28.dynamictreesfabric.deserialisation;
  */
 public class DeserialisationException extends Exception {
 
-    public DeserialisationException(String message) {
-        super(message);
-    }
+	public DeserialisationException(String message) {
+		super(message);
+	}
 
-    public static DeserialisationException error(String message) {
-        return new DeserialisationException(message);
-    }
+	public static DeserialisationException error(String message) {
+		return new DeserialisationException(message);
+	}
 
 }

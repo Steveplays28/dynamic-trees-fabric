@@ -2,6 +2,7 @@ package io.github.steveplays28.dynamictreesfabric.systems.genfeatures.context;
 
 import io.github.steveplays28.dynamictreesfabric.blocks.rootyblocks.RootyBlock;
 import io.github.steveplays28.dynamictreesfabric.trees.Species;
+
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
@@ -10,40 +11,40 @@ import net.minecraft.world.World;
  */
 public class PostGrowContext extends GenerationContext<World> {
 
-    private final BlockPos treePos;
-    private final int fertility;
-    private final boolean natural;
+	private final BlockPos treePos;
+	private final int fertility;
+	private final boolean natural;
 
-    /**
-     * Instantiates a new {@link PostGrowContext} object.
-     *
-     * @param world     The {@link World} object.
-     * @param rootPos   The {@link BlockPos} of the {@link RootyBlock} the generated tree is planted on.
-     * @param treePos   The {@link BlockPos} of the base trunk block of the tree (usually directly above the rooty dirt
-     *                  block).
-     * @param species   The {@link Species} being grown.
-     * @param fertility The fertility of the {@link RootyBlock} the tree is planted in.
-     * @param natural   If {@code true}, this member is being used to grow the tree naturally (create drops or fruit),
-     *                  otherwise this member is being used to grow a tree with a growth accelerant like bonemeal or the
-     *                  potion of burgeoning.
-     */
-    public PostGrowContext(World world, BlockPos rootPos, Species species, BlockPos treePos, int fertility, boolean natural) {
-        super(world, rootPos, species);
-        this.treePos = treePos;
-        this.fertility = fertility;
-        this.natural = natural;
-    }
+	/**
+	 * Instantiates a new {@link PostGrowContext} object.
+	 *
+	 * @param world     The {@link World} object.
+	 * @param rootPos   The {@link BlockPos} of the {@link RootyBlock} the generated tree is planted on.
+	 * @param treePos   The {@link BlockPos} of the base trunk block of the tree (usually directly above the rooty dirt
+	 *                  block).
+	 * @param species   The {@link Species} being grown.
+	 * @param fertility The fertility of the {@link RootyBlock} the tree is planted in.
+	 * @param natural   If {@code true}, this member is being used to grow the tree naturally (create drops or fruit),
+	 *                  otherwise this member is being used to grow a tree with a growth accelerant like bonemeal or the
+	 *                  potion of burgeoning.
+	 */
+	public PostGrowContext(World world, BlockPos rootPos, Species species, BlockPos treePos, int fertility, boolean natural) {
+		super(world, rootPos, species);
+		this.treePos = treePos;
+		this.fertility = fertility;
+		this.natural = natural;
+	}
 
-    public BlockPos treePos() {
-        return treePos;
-    }
+	public BlockPos treePos() {
+		return treePos;
+	}
 
-    public int fertility() {
-        return fertility;
-    }
+	public int fertility() {
+		return fertility;
+	}
 
-    public boolean natural() {
-        return natural;
-    }
+	public boolean natural() {
+		return natural;
+	}
 
 }

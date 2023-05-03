@@ -1,5 +1,7 @@
 {
-    "variants": {
-        "": { "model": "dynamictrees:block/potted_sapling" }
+  "variants": {
+    "": {
+      "model": "dynamictrees:block/potted_sapling"
     }
+  }
 }

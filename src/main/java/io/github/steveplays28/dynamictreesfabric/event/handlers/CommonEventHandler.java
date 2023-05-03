@@ -14,28 +14,28 @@ import net.minecraftforge.fml.LogicalSide;
 
 public class CommonEventHandler {
 
-    @SubscribeEvent
-    public void onWorldTick(TickEvent.LevelTickEvent event) {
-        if (event.side == LogicalSide.SERVER) {
-            FutureBreak.process(event.level);
-        }
+	@SubscribeEvent
+	public void onWorldTick(TickEvent.LevelTickEvent event) {
+		if (event.side == LogicalSide.SERVER) {
+			FutureBreak.process(event.level);
+		}
 
-        if (event.type == TickEvent.Type.LEVEL && event.phase == TickEvent.Phase.START) {
-            SeasonHelper.updateTick(event.level, event.level.getDayTime());
-        }
-    }
+		if (event.type == TickEvent.Type.LEVEL && event.phase == TickEvent.Phase.START) {
+			SeasonHelper.updateTick(event.level, event.level.getDayTime());
+		}
+	}
 
-    @SubscribeEvent
-    public void onWorldLoad(LevelEvent.Load event) {
-        if (event.getLevel().isClientSide()) {
-            DTClient.discoverWoodColors();
-        }
-    }
+	@SubscribeEvent
+	public void onWorldLoad(LevelEvent.Load event) {
+		if (event.getLevel().isClientSide()) {
+			DTClient.discoverWoodColors();
+		}
+	}
 
-    @SubscribeEvent
-    @OnlyIn(Dist.CLIENT)
-    public void onItemTooltipAdded(ItemTooltipEvent event) {
-        TooltipHandler.setupTooltips(event);
-    }
+	@SubscribeEvent
+	@OnlyIn(Dist.CLIENT)
+	public void onItemTooltipAdded(ItemTooltipEvent event) {
+		TooltipHandler.setupTooltips(event);
+	}
 
 }

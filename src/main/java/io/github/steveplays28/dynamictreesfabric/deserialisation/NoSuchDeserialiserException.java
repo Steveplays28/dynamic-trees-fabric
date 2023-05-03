@@ -7,13 +7,13 @@ package io.github.steveplays28.dynamictreesfabric.deserialisation;
  */
 public final class NoSuchDeserialiserException extends RuntimeException {
 
-    /**
-     * Constructs a {@code NoSuchDeserialiserException} with the specified detail {@code message}.
-     *
-     * @param message the detail message
-     */
-    public NoSuchDeserialiserException(String message) {
-        super(message);
-    }
+	/**
+	 * Constructs a {@code NoSuchDeserialiserException} with the specified detail {@code message}.
+	 *
+	 * @param message the detail message
+	 */
+	public NoSuchDeserialiserException(String message) {
+		super(message);
+	}
 
 }

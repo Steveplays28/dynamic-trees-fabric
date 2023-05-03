@@ -1,9 +1,12 @@
 package io.github.steveplays28.dynamictreesfabric.api.registry;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.function.Supplier;
+
+import javax.annotation.Nullable;
+
 import io.github.steveplays28.dynamictreesfabric.util.ResourceLocationUtils;
-import net.minecraft.block.Block;
-import net.minecraft.item.Item;
-import net.minecraft.util.Identifier;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -14,10 +17,9 @@ import net.minecraftforge.registries.RegisterEvent;
 import net.minecraftforge.registries.RegistryObject;
 import org.apache.logging.log4j.LogManager;
 
-import javax.annotation.Nullable;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.function.Supplier;
+import net.minecraft.block.Block;
+import net.minecraft.item.Item;
+import net.minecraft.util.Identifier;
 
 /**
  * Handles registries for the given mod ID in the constructor. Add-ons should instantiate one of these in their
@@ -31,174 +33,174 @@ import java.util.function.Supplier;
  */
 public class RegistryHandler extends RegistryEntry<RegistryHandler> {
 
-    /**
-     * The central registry for {@link RegistryHandler}s. Stored in a {@link ConcurrentRegistry} as these are created
-     * from the mod constructor which are called from a Stream.
-     */
-    public static final ConcurrentRegistry<RegistryHandler> REGISTRY = new ConcurrentRegistry<>(RegistryHandler.class, new RegistryHandler("null"), true);
-    private static final Method ADD_ENTRIES_METHOD;
+	/**
+	 * The central registry for {@link RegistryHandler}s. Stored in a {@link ConcurrentRegistry} as these are created
+	 * from the mod constructor which are called from a Stream.
+	 */
+	public static final ConcurrentRegistry<RegistryHandler> REGISTRY = new ConcurrentRegistry<>(RegistryHandler.class, new RegistryHandler("null"), true);
+	private static final Method ADD_ENTRIES_METHOD;
 
-    static {
-        try {
-            ADD_ENTRIES_METHOD = DeferredRegister.class.getDeclaredMethod("addEntries", RegisterEvent.class);
-            ADD_ENTRIES_METHOD.setAccessible(true);
-        } catch (NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
-    }
+	static {
+		try {
+			ADD_ENTRIES_METHOD = DeferredRegister.class.getDeclaredMethod("addEntries", RegisterEvent.class);
+			ADD_ENTRIES_METHOD.setAccessible(true);
+		} catch (NoSuchMethodException e) {
+			throw new RuntimeException(e);
+		}
+	}
 
-    /**
-     * Sets up a {@link RegistryHandler} for the given {@code modId}. This includes instantiating, registering, and
-     * subscribing it to the {@code mod event bus}. This should be {@code only} be called from the relevant mod
-     * constructor!
-     *
-     * @param modId The {@code mod ID} to setup for.
-     */
-    public static void setup(final String modId) {
-        final RegistryHandler registryHandler = new RegistryHandler(modId);
-        RegistryHandler.REGISTRY.register(registryHandler);
-        IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
-        modEventBus.register(new RegisterEventHandler<>(registryHandler.blocksDeferredRegister));
-        modEventBus.register(new RegisterEventHandler<>(registryHandler.itemsDeferredRegister));
-    }
+	protected final DeferredRegister<Block> blocksDeferredRegister = DeferredRegister.create(ForgeRegistries.BLOCKS, this.getRegistryName().getNamespace());
+	protected final DeferredRegister<Item> itemsDeferredRegister = DeferredRegister.create(ForgeRegistries.ITEMS, this.getRegistryName().getNamespace());
 
-    /**
-     * Gets the {@link RegistryHandler} for the given mod ID, or the null registry handler if it doesn't exist.
-     *
-     * @param modId The mod ID of the mod to get the {@link RegistryHandler} for.
-     * @return The {@link RegistryHandler} object.
-     */
-    public static RegistryHandler get(final String modId) {
-        return REGISTRY.get(new Identifier(modId, modId));
-    }
+	/**
+	 * Instantiates a new {@link RegistryHandler} object for the given mod ID. This should be registered using {@link
+	 * SimpleRegistry#register(RegistryEntry)} on {@link #REGISTRY}. It will also need to be registered to the mod event bus,
+	 * which can be grabbed from {@link FMLJavaModLoadingContext#getModEventBus()}, so the registry events are fired.
+	 *
+	 * @param modId The mod ID for the relevant mod.
+	 */
+	public RegistryHandler(final String modId) {
+		super(new Identifier(modId, modId));
+	}
 
-    /**
-     * Gets the {@link RegistryHandler} for the given mod ID, or defaults to the Dynamic Trees one if it doesn't exist.
-     *
-     * @param modId The mod ID of the mod to get the {@link RegistryHandler} for.
-     * @return The {@link RegistryHandler} object.
-     */
-    public static RegistryHandler getOrCorrected(final String modId) {
-        final RegistryHandler handler = get(modId);
-        return handler.isValid() ? handler : get(io.github.steveplays28.dynamictreesfabric.DynamicTreesFabric.MOD_ID);
-    }
+	/**
+	 * Sets up a {@link RegistryHandler} for the given {@code modId}. This includes instantiating, registering, and
+	 * subscribing it to the {@code mod event bus}. This should be {@code only} be called from the relevant mod
+	 * constructor!
+	 *
+	 * @param modId The {@code mod ID} to setup for.
+	 */
+	public static void setup(final String modId) {
+		final RegistryHandler registryHandler = new RegistryHandler(modId);
+		RegistryHandler.REGISTRY.register(registryHandler);
+		IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
+		modEventBus.register(new RegisterEventHandler<>(registryHandler.blocksDeferredRegister));
+		modEventBus.register(new RegisterEventHandler<>(registryHandler.itemsDeferredRegister));
+	}
 
-    /**
-     * Ensures the given registry name is 'correct'. This will change the namespace to
-     * <tt>dynamictrees</tt> if the namespace for the given {@link Identifier}
-     * doesn't have a {@link RegistryHandler} registered, so that we don't register blocks or items to mod without a
-     * {@link RegistryHandler} (non-add-on mods).
-     *
-     * @param registryName The {@link Identifier} registry name.
-     * @return The correct {@link Identifier} registry name.
-     */
-    public static Identifier correctRegistryName(Identifier registryName) {
-        if (!get(registryName.getNamespace()).isValid()) {
-            registryName = ResourceLocationUtils.namespace(registryName, io.github.steveplays28.dynamictreesfabric.DynamicTreesFabric.MOD_ID);
-        }
-        return registryName;
-    }
+	/**
+	 * Gets the {@link RegistryHandler} for the given mod ID, or the null registry handler if it doesn't exist.
+	 *
+	 * @param modId The mod ID of the mod to get the {@link RegistryHandler} for.
+	 * @return The {@link RegistryHandler} object.
+	 */
+	public static RegistryHandler get(final String modId) {
+		return REGISTRY.get(new Identifier(modId, modId));
+	}
 
-    /**
-     * Adds a {@link Block} to be registered with the given registry name, for the namespace of that registry name.
-     *
-     * @param registryName The {@link Identifier} registry name to set for the block.
-     * @param blockSup The supplier of the {@link Block} object to register.
-     * @param <T> The {@link Class} of the {@link Block}.
-     * @return The supplier of the {@link Block}, allowing for this to be called in-line.
-     */
-    public static <T extends Block> RegistryObject<T> addBlock(Identifier registryName, Supplier<T> blockSup) {
-        registryName = correctRegistryName(registryName);
-        return get(registryName.getNamespace()).putBlock(registryName, blockSup);
-    }
+	/**
+	 * Gets the {@link RegistryHandler} for the given mod ID, or defaults to the Dynamic Trees one if it doesn't exist.
+	 *
+	 * @param modId The mod ID of the mod to get the {@link RegistryHandler} for.
+	 * @return The {@link RegistryHandler} object.
+	 */
+	public static RegistryHandler getOrCorrected(final String modId) {
+		final RegistryHandler handler = get(modId);
+		return handler.isValid() ? handler : get(io.github.steveplays28.dynamictreesfabric.DynamicTreesFabric.MOD_ID);
+	}
 
-    /**
-     * Adds an {@link Item} to be registered with the given registry name, for the namespace of that registry name.
-     *
-     * @param registryName The {@link Identifier} registry name to set for the block.
-     * @param itemSup The supplier of the {@link Item} object to register.
-     * @param <T> The {@link Class} of the {@link Item}.
-     * @return The supplier of the {@link Item}, allowing for this to be called in-line.
-     */
-    public static <T extends Item> RegistryObject<T> addItem(Identifier registryName, Supplier<T> itemSup) {
-        registryName = correctRegistryName(registryName);
-        return get(registryName.getNamespace()).putItem(registryName, itemSup);
-    }
+	/**
+	 * Ensures the given registry name is 'correct'. This will change the namespace to
+	 * <tt>dynamictrees</tt> if the namespace for the given {@link Identifier}
+	 * doesn't have a {@link RegistryHandler} registered, so that we don't register blocks or items to mod without a
+	 * {@link RegistryHandler} (non-add-on mods).
+	 *
+	 * @param registryName The {@link Identifier} registry name.
+	 * @return The correct {@link Identifier} registry name.
+	 */
+	public static Identifier correctRegistryName(Identifier registryName) {
+		if (!get(registryName.getNamespace()).isValid()) {
+			registryName = ResourceLocationUtils.namespace(registryName, io.github.steveplays28.dynamictreesfabric.DynamicTreesFabric.MOD_ID);
+		}
+		return registryName;
+	}
 
-    protected final DeferredRegister<Block> blocksDeferredRegister = DeferredRegister.create(ForgeRegistries.BLOCKS, this.getRegistryName().getNamespace());
-    protected final DeferredRegister<Item> itemsDeferredRegister = DeferredRegister.create(ForgeRegistries.ITEMS, this.getRegistryName().getNamespace());
+	/**
+	 * Adds a {@link Block} to be registered with the given registry name, for the namespace of that registry name.
+	 *
+	 * @param registryName The {@link Identifier} registry name to set for the block.
+	 * @param blockSup     The supplier of the {@link Block} object to register.
+	 * @param <T>          The {@link Class} of the {@link Block}.
+	 * @return The supplier of the {@link Block}, allowing for this to be called in-line.
+	 */
+	public static <T extends Block> RegistryObject<T> addBlock(Identifier registryName, Supplier<T> blockSup) {
+		registryName = correctRegistryName(registryName);
+		return get(registryName.getNamespace()).putBlock(registryName, blockSup);
+	}
 
-    /**
-     * Instantiates a new {@link RegistryHandler} object for the given mod ID. This should be registered using {@link
-     * SimpleRegistry#register(RegistryEntry)} on {@link #REGISTRY}. It will also need to be registered to the mod event bus,
-     * which can be grabbed from {@link FMLJavaModLoadingContext#getModEventBus()}, so the registry events are fired.
-     *
-     * @param modId The mod ID for the relevant mod.
-     */
-    public RegistryHandler(final String modId) {
-        super(new Identifier(modId, modId));
-    }
+	/**
+	 * Adds an {@link Item} to be registered with the given registry name, for the namespace of that registry name.
+	 *
+	 * @param registryName The {@link Identifier} registry name to set for the block.
+	 * @param itemSup      The supplier of the {@link Item} object to register.
+	 * @param <T>          The {@link Class} of the {@link Item}.
+	 * @return The supplier of the {@link Item}, allowing for this to be called in-line.
+	 */
+	public static <T extends Item> RegistryObject<T> addItem(Identifier registryName, Supplier<T> itemSup) {
+		registryName = correctRegistryName(registryName);
+		return get(registryName.getNamespace()).putItem(registryName, itemSup);
+	}
 
-    @Nullable
-    public RegistryObject<Block> getBlock(final Identifier registryName) {
-        return RegistryObject.create(registryName, ForgeRegistries.BLOCKS);
-    }
+	@Nullable
+	public RegistryObject<Block> getBlock(final Identifier registryName) {
+		return RegistryObject.create(registryName, ForgeRegistries.BLOCKS);
+	}
 
-    @Nullable
-    public RegistryObject<Item> getItem(final Identifier registryName) {
-        return RegistryObject.create(registryName, ForgeRegistries.ITEMS);
-    }
+	@Nullable
+	public RegistryObject<Item> getItem(final Identifier registryName) {
+		return RegistryObject.create(registryName, ForgeRegistries.ITEMS);
+	}
 
-    @SuppressWarnings("unchecked")
-    public <T extends Block> RegistryObject<T> putBlock(final Identifier registryName, final Supplier<T> blockSup) {
-        if (this.warnIfInvalid("Block", registryName)) {
-            return (RegistryObject<T>) getBlock(registryName);
-        }
+	@SuppressWarnings("unchecked")
+	public <T extends Block> RegistryObject<T> putBlock(final Identifier registryName, final Supplier<T> blockSup) {
+		if (this.warnIfInvalid("Block", registryName)) {
+			return (RegistryObject<T>) getBlock(registryName);
+		}
 
-        return this.blocksDeferredRegister.register(registryName.getPath(), blockSup);
-    }
+		return this.blocksDeferredRegister.register(registryName.getPath(), blockSup);
+	}
 
-    @SuppressWarnings("unchecked")
-    public <T extends Item> RegistryObject<T> putItem(final Identifier registryName, final Supplier<T> itemSup) {
-        if (this.warnIfInvalid("Item", registryName)) {
-            return (RegistryObject<T>) getItem(registryName);
-        }
+	@SuppressWarnings("unchecked")
+	public <T extends Item> RegistryObject<T> putItem(final Identifier registryName, final Supplier<T> itemSup) {
+		if (this.warnIfInvalid("Item", registryName)) {
+			return (RegistryObject<T>) getItem(registryName);
+		}
 
-        return this.itemsDeferredRegister.register(registryName.getPath(), itemSup);
-    }
+		return this.itemsDeferredRegister.register(registryName.getPath(), itemSup);
+	}
 
-    /**
-     * Checks if this {@link RegistryHandler} is valid, and if not prints a warning to the console.
-     *
-     * @param type The type of registry being added.
-     * @param registryName The {@link Identifier} registry name.
-     * @return True if it was invalid.
-     */
-    private boolean warnIfInvalid(final String type, final Identifier registryName) {
-        if (!this.isValid()) {
-            LogManager.getLogger().warn("{} '{}' was added to null registry handler.", type, registryName);
-        }
-        return !this.isValid();
-    }
+	/**
+	 * Checks if this {@link RegistryHandler} is valid, and if not prints a warning to the console.
+	 *
+	 * @param type         The type of registry being added.
+	 * @param registryName The {@link Identifier} registry name.
+	 * @return True if it was invalid.
+	 */
+	private boolean warnIfInvalid(final String type, final Identifier registryName) {
+		if (!this.isValid()) {
+			LogManager.getLogger().warn("{} '{}' was added to null registry handler.", type, registryName);
+		}
+		return !this.isValid();
+	}
 
-    public static class RegisterEventHandler<T> {
-        private final DeferredRegister<T> deferredRegister;
+	public static class RegisterEventHandler<T> {
+		private final DeferredRegister<T> deferredRegister;
 
-        public RegisterEventHandler(DeferredRegister<T> deferredRegister) {
-            this.deferredRegister = deferredRegister;
-        }
+		public RegisterEventHandler(DeferredRegister<T> deferredRegister) {
+			this.deferredRegister = deferredRegister;
+		}
 
-        // LOWEST allows DT to accumulate blocks & items from inside other listeners to this register event if necessary
-        @SubscribeEvent(priority = EventPriority.LOWEST)
-        public void onRegister(RegisterEvent event) {
-            if (event.getRegistryKey() == this.deferredRegister.getRegistryKey()) {
-                try {
-                    ADD_ENTRIES_METHOD.invoke(this.deferredRegister, event);
-                } catch (IllegalAccessException | InvocationTargetException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        }
-    }
+		// LOWEST allows DT to accumulate blocks & items from inside other listeners to this register event if necessary
+		@SubscribeEvent(priority = EventPriority.LOWEST)
+		public void onRegister(RegisterEvent event) {
+			if (event.getRegistryKey() == this.deferredRegister.getRegistryKey()) {
+				try {
+					ADD_ENTRIES_METHOD.invoke(this.deferredRegister, event);
+				} catch (IllegalAccessException | InvocationTargetException e) {
+					throw new RuntimeException(e);
+				}
+			}
+		}
+	}
 
 }

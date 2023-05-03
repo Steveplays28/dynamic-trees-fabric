@@ -7,8 +7,8 @@ import net.minecraft.world.WorldAccess;
 
 public interface NodeInspector {
 
-    boolean run(BlockState blockState, WorldAccess world, BlockPos pos, Direction fromDir);
+	boolean run(BlockState blockState, WorldAccess world, BlockPos pos, Direction fromDir);
 
-    boolean returnRun(BlockState blockState, WorldAccess world, BlockPos pos, Direction fromDir);
+	boolean returnRun(BlockState blockState, WorldAccess world, BlockPos pos, Direction fromDir);
 
 }

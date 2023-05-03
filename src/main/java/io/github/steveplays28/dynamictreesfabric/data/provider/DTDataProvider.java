@@ -9,12 +9,12 @@ import net.minecraft.util.Identifier;
  */
 public interface DTDataProvider {
 
-    default Identifier block(Identifier blockLocation) {
-        return prefix(blockLocation, "block/");
-    }
+	default Identifier block(Identifier blockLocation) {
+		return prefix(blockLocation, "block/");
+	}
 
-    default Identifier item(Identifier resourceLocation) {
-        return prefix(resourceLocation, "item/");
-    }
+	default Identifier item(Identifier resourceLocation) {
+		return prefix(resourceLocation, "item/");
+	}
 
 }

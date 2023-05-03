@@ -1,5 +1,7 @@
 {
-    "variants": {
-        "": { "model": "dynamictrees:block/empty" }
+  "variants": {
+    "": {
+      "model": "dynamictrees:block/empty"
     }
+  }
 }

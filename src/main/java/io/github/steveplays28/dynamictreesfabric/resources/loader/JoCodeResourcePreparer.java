@@ -1,9 +1,9 @@
 package io.github.steveplays28.dynamictreesfabric.resources.loader;
 
+import java.util.List;
+
 import io.github.steveplays28.dynamictreesfabric.api.resource.loading.preparation.TextResourcePreparer;
 import io.github.steveplays28.dynamictreesfabric.worldgen.JoCode;
-
-import java.util.List;
 
 /**
  * Extension of {@link TextResourcePreparer} which reads the basic syntax used to store {@linkplain JoCode JoCodes} in a
@@ -14,33 +14,33 @@ import java.util.List;
  */
 public final class JoCodeResourcePreparer extends TextResourcePreparer {
 
-    public JoCodeResourcePreparer(String folder) {
-        super(folder);
-    }
+	public JoCodeResourcePreparer(String folder) {
+		super(folder);
+	}
 
-    @Override
-    protected void offerLine(List<String> lines, String line) {
-        if (this.shouldAddLine(line)) {
-            lines.add(this.processLine(line));
-        }
-    }
+	@Override
+	protected void offerLine(List<String> lines, String line) {
+		if (this.shouldAddLine(line)) {
+			lines.add(this.processLine(line));
+		}
+	}
 
-    private boolean shouldAddLine(String line) {
-        return (line.length() >= 3) && (line.charAt(0) != '#');
-    }
+	private boolean shouldAddLine(String line) {
+		return (line.length() >= 3) && (line.charAt(0) != '#');
+	}
 
-    private String processLine(String line) {
-        line = this.withoutWhitespace(line);
-        return this.withoutTrailingComments(line);
-    }
+	private String processLine(String line) {
+		line = this.withoutWhitespace(line);
+		return this.withoutTrailingComments(line);
+	}
 
-    private String withoutWhitespace(String line) {
-        return line.replace(" ", "");
-    }
+	private String withoutWhitespace(String line) {
+		return line.replace(" ", "");
+	}
 
-    private String withoutTrailingComments(String line) {
-        final int commentIndex = line.indexOf('#');
-        return line.substring(0, commentIndex < 0 ? line.length() : commentIndex);
-    }
+	private String withoutTrailingComments(String line) {
+		final int commentIndex = line.indexOf('#');
+		return line.substring(0, commentIndex < 0 ? line.length() : commentIndex);
+	}
 
 }

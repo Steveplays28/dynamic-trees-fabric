@@ -12,13 +12,13 @@ package io.github.steveplays28.dynamictreesfabric.api.treepacks;
 @FunctionalInterface
 public interface IfTrueApplier<O> {
 
-    /**
-     * Applies a value to the specified {@code object}.
-     * <p>
-     * Should only be invoked when the corresponding condition is met.
-     *
-     * @param object the object to apply to
-     */
-    void apply(final O object);
+	/**
+	 * Applies a value to the specified {@code object}.
+	 * <p>
+	 * Should only be invoked when the corresponding condition is met.
+	 *
+	 * @param object the object to apply to
+	 */
+	void apply(final O object);
 
 }

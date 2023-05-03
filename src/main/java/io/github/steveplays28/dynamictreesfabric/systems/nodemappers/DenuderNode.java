@@ -7,6 +7,7 @@ import io.github.steveplays28.dynamictreesfabric.trees.Family;
 import io.github.steveplays28.dynamictreesfabric.trees.Species;
 import io.github.steveplays28.dynamictreesfabric.util.BlockStates;
 import io.github.steveplays28.dynamictreesfabric.util.SimpleVoxmap;
+
 import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -17,59 +18,59 @@ import net.minecraft.world.WorldAccess;
  */
 public class DenuderNode implements NodeInspector {
 
-    private final Species species;
-    private final Family family;
+	private final Species species;
+	private final Family family;
 
-    public DenuderNode(final Species species, final Family family) {
-        this.species = species;
-        this.family = family;
-    }
+	public DenuderNode(final Species species, final Family family) {
+		this.species = species;
+		this.family = family;
+	}
 
-    @Override
-    public boolean run(BlockState state, WorldAccess world, BlockPos pos, Direction fromDir) {
-        final BranchBlock branch = TreeHelper.getBranch(state);
+	@Override
+	public boolean run(BlockState state, WorldAccess world, BlockPos pos, Direction fromDir) {
+		final BranchBlock branch = TreeHelper.getBranch(state);
 
-        if (branch == null || this.family.getBranch().map(other -> branch != other).orElse(false)) {
-            return false;
-        }
+		if (branch == null || this.family.getBranch().map(other -> branch != other).orElse(false)) {
+			return false;
+		}
 
-        final int radius = branch.getRadius(state);
+		final int radius = branch.getRadius(state);
 
-        branch.stripBranch(state, world, pos, radius);
+		branch.stripBranch(state, world, pos, radius);
 
-        if (radius <= this.family.getPrimaryThickness()) {
-            this.removeSurroundingLeaves(world, pos);
-        }
+		if (radius <= this.family.getPrimaryThickness()) {
+			this.removeSurroundingLeaves(world, pos);
+		}
 
-        return true;
-    }
+		return true;
+	}
 
-    @Override
-    public boolean returnRun(BlockState blockState, WorldAccess world, BlockPos pos, Direction fromDir) {
-        return false;
-    }
+	@Override
+	public boolean returnRun(BlockState blockState, WorldAccess world, BlockPos pos, Direction fromDir) {
+		return false;
+	}
 
-    public void removeSurroundingLeaves(WorldAccess world, BlockPos twigPos) {
-        if (world.isClient()) {
-            return;
-        }
+	public void removeSurroundingLeaves(WorldAccess world, BlockPos twigPos) {
+		if (world.isClient()) {
+			return;
+		}
 
-        final SimpleVoxmap leafCluster = this.species.getLeavesProperties().getCellKit().getLeafCluster();
-        final int xBound = leafCluster.getLenX();
-        final int yBound = leafCluster.getLenY();
-        final int zBound = leafCluster.getLenZ();
+		final SimpleVoxmap leafCluster = this.species.getLeavesProperties().getCellKit().getLeafCluster();
+		final int xBound = leafCluster.getLenX();
+		final int yBound = leafCluster.getLenY();
+		final int zBound = leafCluster.getLenZ();
 
-        BlockPos.stream(twigPos.add(-xBound, -yBound, -zBound), twigPos.add(xBound, yBound, zBound)).forEach(testPos -> {
-            // We're only interested in where leaves could possibly be.
-            if (leafCluster.getVoxel(twigPos, testPos) == 0) {
-                return;
-            }
+		BlockPos.stream(twigPos.add(-xBound, -yBound, -zBound), twigPos.add(xBound, yBound, zBound)).forEach(testPos -> {
+			// We're only interested in where leaves could possibly be.
+			if (leafCluster.getVoxel(twigPos, testPos) == 0) {
+				return;
+			}
 
-            final BlockState state = world.getBlockState(testPos);
-            if (this.family.isCompatibleGenericLeaves(this.species, state, world, testPos)) {
-                world.setBlockState(testPos, BlockStates.AIR, 3);
-            }
-        });
-    }
+			final BlockState state = world.getBlockState(testPos);
+			if (this.family.isCompatibleGenericLeaves(this.species, state, world, testPos)) {
+				world.setBlockState(testPos, BlockStates.AIR, 3);
+			}
+		});
+	}
 
 }

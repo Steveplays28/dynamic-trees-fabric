@@ -3,6 +3,7 @@ package io.github.steveplays28.dynamictreesfabric.util;
 import io.github.steveplays28.dynamictreesfabric.blocks.branches.BranchBlock;
 import io.github.steveplays28.dynamictreesfabric.models.bakedmodels.BasicBranchBlockBakedModel;
 import io.github.steveplays28.dynamictreesfabric.models.modeldata.ModelConnections;
+
 import net.minecraft.util.math.Direction;
 
 /**
@@ -14,38 +15,38 @@ import net.minecraft.util.math.Direction;
  */
 public class Connections {
 
-    /**
-     * An array of connection radii. These radii use the equivalent index of their {@link Direction}, and their value
-     * depends on the adjacent branch's radius in that direction - for example, if a branch in <tt>Direction.UP</tt> has
-     * radius <tt>5</tt> then <tt>radii[1]</tt> will equal <tt>5</tt>.
-     */
-    protected int[] radii;
+	/**
+	 * An array of connection radii. These radii use the equivalent index of their {@link Direction}, and their value
+	 * depends on the adjacent branch's radius in that direction - for example, if a branch in <tt>Direction.UP</tt> has
+	 * radius <tt>5</tt> then <tt>radii[1]</tt> will equal <tt>5</tt>.
+	 */
+	protected int[] radii;
 
-    public Connections() {
-        radii = new int[]{0, 0, 0, 0, 0, 0};
-    }
+	public Connections() {
+		radii = new int[]{0, 0, 0, 0, 0, 0};
+	}
 
-    public Connections(int[] radii) {
-        this.radii = radii;
-    }
+	public Connections(int[] radii) {
+		this.radii = radii;
+	}
 
-    /**
-     * Sets the radius in a given {@link Direction}.
-     *
-     * @param dir    The direction.
-     * @param radius The connection radius for that direction.
-     */
-    public void setRadius(Direction dir, int radius) {
-        radii[dir.getId()] = radius;
-    }
+	/**
+	 * Sets the radius in a given {@link Direction}.
+	 *
+	 * @param dir    The direction.
+	 * @param radius The connection radius for that direction.
+	 */
+	public void setRadius(Direction dir, int radius) {
+		radii[dir.getId()] = radius;
+	}
 
-    public int[] getAllRadii() {
-        return radii;
-    }
+	public int[] getAllRadii() {
+		return radii;
+	}
 
-    public Connections setAllRadii(int[] radii) {
-        this.radii = radii;
-        return this;
-    }
+	public Connections setAllRadii(int[] radii) {
+		this.radii = radii;
+		return this;
+	}
 
 }

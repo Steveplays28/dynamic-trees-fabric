@@ -10,11 +10,11 @@ import java.util.LinkedHashSet;
  */
 public final class AlternateLinkedHashSet<E> extends LinkedHashSet<E> {
 
-    @Override
-    public boolean add(final E e) {
-        final boolean previouslyPresent = this.remove(e);
-        super.add(e);
-        return !previouslyPresent;
-    }
+	@Override
+	public boolean add(final E e) {
+		final boolean previouslyPresent = this.remove(e);
+		super.add(e);
+		return !previouslyPresent;
+	}
 
 }

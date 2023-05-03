@@ -7,15 +7,15 @@ import io.github.steveplays28.dynamictreesfabric.deserialisation.JsonDeserialise
  */
 public interface JsonBiomeDatabaseDeserialiser<T> extends JsonDeserialiser<T> {
 
-    String DEFAULT = "...";
+	String DEFAULT = "...";
 
-    String STATIC = "static";
-    String RANDOM = "random";
-    String MATH = "math";
-    String SCALE = "scale";
+	String STATIC = "static";
+	String RANDOM = "random";
+	String MATH = "math";
+	String SCALE = "scale";
 
-    default boolean isDefault(String candidate) {
-        return DEFAULT.equals(candidate);
-    }
+	default boolean isDefault(String candidate) {
+		return DEFAULT.equals(candidate);
+	}
 
 }

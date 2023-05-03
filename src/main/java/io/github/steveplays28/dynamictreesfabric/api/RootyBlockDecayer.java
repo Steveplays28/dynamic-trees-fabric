@@ -2,6 +2,7 @@ package io.github.steveplays28.dynamictreesfabric.api;
 
 import io.github.steveplays28.dynamictreesfabric.blocks.rootyblocks.RootyBlock;
 import io.github.steveplays28.dynamictreesfabric.trees.Species;
+
 import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -18,15 +19,15 @@ import net.minecraft.world.World;
 @FunctionalInterface
 public interface RootyBlockDecayer {
 
-    /**
-     * Implementations perform their custom {@link RootyBlock} decay logic.
-     *
-     * @param world      The {@link World} instance.
-     * @param rootPos    The {@link BlockPos} of the {@link RootyBlock}.
-     * @param rootyState The {@link BlockState} of the {@link RootyBlock}.
-     * @param species    The {@link Species} of the tree that was removed.
-     * @return {@code true} if handled; otherwise {@code false} to run the default decay algorithm.
-     */
-    boolean decay(World world, BlockPos rootPos, BlockState rootyState, Species species);
+	/**
+	 * Implementations perform their custom {@link RootyBlock} decay logic.
+	 *
+	 * @param world      The {@link World} instance.
+	 * @param rootPos    The {@link BlockPos} of the {@link RootyBlock}.
+	 * @param rootyState The {@link BlockState} of the {@link RootyBlock}.
+	 * @param species    The {@link Species} of the tree that was removed.
+	 * @return {@code true} if handled; otherwise {@code false} to run the default decay algorithm.
+	 */
+	boolean decay(World world, BlockPos rootPos, BlockState rootyState, Species species);
 
 }

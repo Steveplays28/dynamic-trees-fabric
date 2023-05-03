@@ -1,6 +1,7 @@
 package io.github.steveplays28.dynamictreesfabric.cells;
 
 import io.github.steveplays28.dynamictreesfabric.api.cells.Cell;
+
 import net.minecraft.util.math.Direction;
 
 /**
@@ -10,20 +11,20 @@ import net.minecraft.util.math.Direction;
  */
 public class NormalCell implements Cell {
 
-    private final int value;
+	private final int value;
 
-    public NormalCell(int value) {
-        this.value = value;
-    }
+	public NormalCell(int value) {
+		this.value = value;
+	}
 
-    @Override
-    public int getValue() {
-        return value;
-    }
+	@Override
+	public int getValue() {
+		return value;
+	}
 
-    @Override
-    public int getValueFromSide(Direction side) {
-        return value;
-    }
+	@Override
+	public int getValueFromSide(Direction side) {
+		return value;
+	}
 
 }

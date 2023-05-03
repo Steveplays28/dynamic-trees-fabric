@@ -1,7 +1,9 @@
 package io.github.steveplays28.dynamictreesfabric.api.event;
 
 import io.github.steveplays28.dynamictreesfabric.worldgen.BiomeDatabase;
+
 import net.minecraft.util.Identifier;
+
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.Event;
 
@@ -19,16 +21,16 @@ import java.util.Map;
 @Deprecated
 public final class PopulateDimensionalDatabaseEvent extends Event {
 
-    private final Map<Identifier, BiomeDatabase> dimensionalMap;
-    private final BiomeDatabase defaultDatabase;
+	private final Map<Identifier, BiomeDatabase> dimensionalMap;
+	private final BiomeDatabase defaultDatabase;
 
-    public PopulateDimensionalDatabaseEvent(final Map<Identifier, BiomeDatabase> dimensionalMap, final BiomeDatabase defaultDatabase) {
-        this.dimensionalMap = dimensionalMap;
-        this.defaultDatabase = defaultDatabase;
-    }
+	public PopulateDimensionalDatabaseEvent(final Map<Identifier, BiomeDatabase> dimensionalMap, final BiomeDatabase defaultDatabase) {
+		this.dimensionalMap = dimensionalMap;
+		this.defaultDatabase = defaultDatabase;
+	}
 
-    public BiomeDatabase getDimensionDatabase(final Identifier dimensionRegistryName) {
-        return dimensionalMap.computeIfAbsent(dimensionRegistryName, k -> BiomeDatabase.copyOf(this.defaultDatabase));
-    }
+	public BiomeDatabase getDimensionDatabase(final Identifier dimensionRegistryName) {
+		return dimensionalMap.computeIfAbsent(dimensionRegistryName, k -> BiomeDatabase.copyOf(this.defaultDatabase));
+	}
 
 }

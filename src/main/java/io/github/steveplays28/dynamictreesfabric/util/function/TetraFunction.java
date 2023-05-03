@@ -5,5 +5,5 @@ package io.github.steveplays28.dynamictreesfabric.util.function;
  */
 @FunctionalInterface
 public interface TetraFunction<T, U, V, S, R> {
-    R apply(T t, U u, V v, S r);
+	R apply(T t, U u, V v, S r);
 }

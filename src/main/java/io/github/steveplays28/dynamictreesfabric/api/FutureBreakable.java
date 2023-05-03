@@ -8,6 +8,6 @@ import net.minecraft.world.World;
 @FunctionalInterface
 public interface FutureBreakable {
 
-    void futureBreak(BlockState state, World world, BlockPos pos, LivingEntity player);
+	void futureBreak(BlockState state, World world, BlockPos pos, LivingEntity player);
 
 }

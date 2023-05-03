@@ -9,14 +9,14 @@ import net.minecraftforge.fml.event.IModBusEvent;
  */
 public final class AddResourceLoadersEvent extends Event implements IModBusEvent {
 
-    private final TreeResourceManager resourceManager;
+	private final TreeResourceManager resourceManager;
 
-    public AddResourceLoadersEvent(TreeResourceManager resourceManager) {
-        this.resourceManager = resourceManager;
-    }
+	public AddResourceLoadersEvent(TreeResourceManager resourceManager) {
+		this.resourceManager = resourceManager;
+	}
 
-    public TreeResourceManager getResourceManager() {
-        return resourceManager;
-    }
+	public TreeResourceManager getResourceManager() {
+		return resourceManager;
+	}
 
 }

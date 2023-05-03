@@ -1,68 +1,69 @@
 package io.github.steveplays28.dynamictreesfabric.api.treepacks;
 
-import io.github.steveplays28.dynamictreesfabric.deserialisation.JsonDeserialisers;
-import io.github.steveplays28.dynamictreesfabric.deserialisation.result.Result;
-import io.github.steveplays28.dynamictreesfabric.util.Null;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Function;
+
+import javax.annotation.Nullable;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import io.github.steveplays28.dynamictreesfabric.deserialisation.JsonDeserialisers;
+import io.github.steveplays28.dynamictreesfabric.deserialisation.result.Result;
+import io.github.steveplays28.dynamictreesfabric.util.Null;
 
 /**
  * @author Harley O'Connor
  */
 public class ArrayPropertyApplier<T, V, I> extends PropertyApplier<T, V, I> {
 
-    private final PropertyApplier<T, V, I> applier;
-    private final Function<I, Result<Iterator<I>, I>> iteratorDeserialiser;
+	private final PropertyApplier<T, V, I> applier;
+	private final Function<I, Result<Iterator<I>, I>> iteratorDeserialiser;
 
-    public ArrayPropertyApplier(String key, Class<T> objectClass, Class<V> valueClass, PropertyApplier<T, V, I> applier, Function<I, Result<Iterator<I>, I>> iteratorDeserialiser) {
-        super(key, objectClass, valueClass, applier.applier);
-        this.applier = applier;
-        this.iteratorDeserialiser = iteratorDeserialiser;
-    }
+	public ArrayPropertyApplier(String key, Class<T> objectClass, Class<V> valueClass, PropertyApplier<T, V, I> applier, Function<I, Result<Iterator<I>, I>> iteratorDeserialiser) {
+		super(key, objectClass, valueClass, applier.applier);
+		this.applier = applier;
+		this.iteratorDeserialiser = iteratorDeserialiser;
+	}
 
-    @Nullable
-    @Override
-    public PropertyApplierResult applyIfShould(String key, Object object, I input) {
-        final Result<Iterator<I>, I> iteratorResult = this.iteratorDeserialiser.apply(input);
+	public static <T, V> ArrayPropertyApplier<T, V, JsonElement> json(String key, Class<T> objectClass, Class<V> valueClass, PropertyApplier<T, V, JsonElement> applier) {
+		return new ArrayPropertyApplier<>(key, objectClass, valueClass, applier,
+				element -> JsonDeserialisers.JSON_ARRAY.deserialise(element).map(JsonArray::iterator));
+	}
 
-        if (!this.key.equalsIgnoreCase(key) || !this.objectClass.isInstance(object) || !iteratorResult.success()) {
-            return null;
-        }
+	@Nullable
+	@Override
+	public PropertyApplierResult applyIfShould(String key, Object object, I input) {
+		final Result<Iterator<I>, I> iteratorResult = this.iteratorDeserialiser.apply(input);
 
-        final List<String> warnings = new ArrayList<>();
+		if (!this.key.equalsIgnoreCase(key) || !this.objectClass.isInstance(object) || !iteratorResult.success()) {
+			return null;
+		}
 
-        for (Iterator<I> it = iteratorResult.get(); it.hasNext(); ) {
-            Null.consumeIfNonnull(
-                    this.applier.applyIfShould(object, it.next(), this.valueClass, this.applier.applier),
-                    result -> {
-                        result.getError().ifPresent(warnings::add);
-                        warnings.addAll(result.getWarnings());
-                    }
-            );
-        }
+		final List<String> warnings = new ArrayList<>();
 
-        return PropertyApplierResult.success(warnings);
-    }
+		for (Iterator<I> it = iteratorResult.get(); it.hasNext(); ) {
+			Null.consumeIfNonnull(
+					this.applier.applyIfShould(object, it.next(), this.valueClass, this.applier.applier),
+					result -> {
+						result.getError().ifPresent(warnings::add);
+						warnings.addAll(result.getWarnings());
+					}
+			);
+		}
 
-    /**
-     * @deprecated not used
-     */
-    @Deprecated
-    @Nullable
-    @Override
-    protected <S, R> PropertyApplierResult applyIfShould(Object object, I input, Class<R> valueClass, Applier<S, R> applier) {
-        return PropertyApplierResult.success();
-    }
+		return PropertyApplierResult.success(warnings);
+	}
 
-    public static <T, V> ArrayPropertyApplier<T, V, JsonElement> json(String key, Class<T> objectClass, Class<V> valueClass, PropertyApplier<T, V, JsonElement> applier) {
-        return new ArrayPropertyApplier<>(key, objectClass, valueClass, applier,
-                element -> JsonDeserialisers.JSON_ARRAY.deserialise(element).map(JsonArray::iterator));
-    }
+	/**
+	 * @deprecated not used
+	 */
+	@Deprecated
+	@Nullable
+	@Override
+	protected <S, R> PropertyApplierResult applyIfShould(Object object, I input, Class<R> valueClass, Applier<S, R> applier) {
+		return PropertyApplierResult.success();
+	}
 
 }

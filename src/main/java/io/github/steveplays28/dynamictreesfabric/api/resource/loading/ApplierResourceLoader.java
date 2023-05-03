@@ -8,10 +8,10 @@ import net.minecraftforge.fml.ModLoader;
  */
 public interface ApplierResourceLoader<P> extends ResourceLoader<P> {
 
-    void registerAppliers();
+	static void postApplierEvent(ApplierRegistryEvent<?, ?> event) {
+		ModLoader.get().postEvent(event);
+	}
 
-    static void postApplierEvent(ApplierRegistryEvent<?, ?> event) {
-        ModLoader.get().postEvent(event);
-    }
+	void registerAppliers();
 
 }

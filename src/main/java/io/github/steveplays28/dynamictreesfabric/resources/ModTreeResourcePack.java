@@ -1,11 +1,11 @@
 package io.github.steveplays28.dynamictreesfabric.resources;
 
-import net.minecraftforge.forgespi.locating.IModFile;
-
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import net.minecraftforge.forgespi.locating.IModFile;
 
 /**
  * A {@link FlatTreeResourcePack} for loading resources packaged with mods. This
@@ -15,19 +15,19 @@ import java.util.List;
  */
 public final class ModTreeResourcePack extends FlatTreeResourcePack {
 
-    private final IModFile modFile;
+	private final IModFile modFile;
 
-    public ModTreeResourcePack(final Path path, final IModFile modFile) {
-        super(path);
-        this.modFile = modFile;
-    }
+	public ModTreeResourcePack(final Path path, final IModFile modFile) {
+		super(path);
+		this.modFile = modFile;
+	}
 
-    @Override
-    protected Path getPath(String... paths) {
-        final List<String> pathsList = new ArrayList<>(Arrays.asList(paths));
-        pathsList.add(0, Resources.TREES);
-        return this.modFile.findResource(pathsList.toArray(new String[0]))
-                .toAbsolutePath();
-    }
+	@Override
+	protected Path getPath(String... paths) {
+		final List<String> pathsList = new ArrayList<>(Arrays.asList(paths));
+		pathsList.add(0, Resources.TREES);
+		return this.modFile.findResource(pathsList.toArray(new String[0]))
+				.toAbsolutePath();
+	}
 
 }

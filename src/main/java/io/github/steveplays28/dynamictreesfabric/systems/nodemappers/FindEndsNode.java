@@ -1,8 +1,10 @@
 package io.github.steveplays28.dynamictreesfabric.systems.nodemappers;
 
-import io.github.steveplays28.dynamictreesfabric.api.network.NodeInspector;
 import java.util.ArrayList;
 import java.util.List;
+
+import io.github.steveplays28.dynamictreesfabric.api.network.NodeInspector;
+
 import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -15,42 +17,42 @@ import net.minecraft.world.WorldAccess;
  */
 public class FindEndsNode implements NodeInspector {
 
-    private final List<BlockPos> endPoints;
-    private BlockPos last;
+	private final List<BlockPos> endPoints;
+	private BlockPos last;
 
-    public FindEndsNode() { //Array is provided for you
-        this(new ArrayList<>(32));
-    }
+	public FindEndsNode() { //Array is provided for you
+		this(new ArrayList<>(32));
+	}
 
-    public FindEndsNode(List<BlockPos> ends) { //Or use your own
-        this.endPoints = ends;
-        last = BlockPos.ORIGIN;
-    }
+	public FindEndsNode(List<BlockPos> ends) { //Or use your own
+		this.endPoints = ends;
+		last = BlockPos.ORIGIN;
+	}
 
-    @Override
-    public boolean run(BlockState blockState, WorldAccess world, BlockPos pos, Direction fromDir) {
-        return true;
-    }
+	@Override
+	public boolean run(BlockState blockState, WorldAccess world, BlockPos pos, Direction fromDir) {
+		return true;
+	}
 
-    @Override
-    public boolean returnRun(BlockState blockState, WorldAccess world, BlockPos pos, Direction fromDir) {
+	@Override
+	public boolean returnRun(BlockState blockState, WorldAccess world, BlockPos pos, Direction fromDir) {
 
-        //Okay.. so.. a little explanation. If we are only one block away from the last block we returned from then we can't be on an end
-        BlockPos dPos = pos.subtract(last);
-        if (dPos.getX() * dPos.getX() + dPos.getY() * dPos.getY() + dPos.getZ() * dPos.getZ() != 1) {//This is actually the equation for distance squared. 1 squared is 1. Yay math.
-            endPoints.add(pos);
-        }
+		//Okay.. so.. a little explanation. If we are only one block away from the last block we returned from then we can't be on an end
+		BlockPos dPos = pos.subtract(last);
+		if (dPos.getX() * dPos.getX() + dPos.getY() * dPos.getY() + dPos.getZ() * dPos.getZ() != 1) {//This is actually the equation for distance squared. 1 squared is 1. Yay math.
+			endPoints.add(pos);
+		}
 
-        last = pos;//We can only be in a branch on the return run
+		last = pos;//We can only be in a branch on the return run
 
-        return false;
-    }
+		return false;
+	}
 
-    public List<BlockPos> getEnds() {
-        if (endPoints.isEmpty()) {//It's impossible for nothing to have been found.
-            endPoints.add(last);//So just add the last node that was found.
-        }
-        return endPoints;
-    }
+	public List<BlockPos> getEnds() {
+		if (endPoints.isEmpty()) {//It's impossible for nothing to have been found.
+			endPoints.add(last);//So just add the last node that was found.
+		}
+		return endPoints;
+	}
 
 }

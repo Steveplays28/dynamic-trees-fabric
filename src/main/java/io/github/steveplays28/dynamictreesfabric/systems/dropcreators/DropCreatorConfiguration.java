@@ -9,30 +9,30 @@ import io.github.steveplays28.dynamictreesfabric.systems.dropcreators.context.Dr
  */
 public final class DropCreatorConfiguration extends Configuration<DropCreatorConfiguration, DropCreator> {
 
-    public static final TemplateRegistry<DropCreatorConfiguration> TEMPLATES = new TemplateRegistry<>();
+	public static final TemplateRegistry<DropCreatorConfiguration> TEMPLATES = new TemplateRegistry<>();
 
-    public DropCreatorConfiguration(DropCreator dropCreator) {
-        super(dropCreator);
-    }
+	public DropCreatorConfiguration(DropCreator dropCreator) {
+		super(dropCreator);
+	}
 
-    /**
-     * {@inheritDoc}
-     *
-     * @return The copy of this {@link DropCreatorConfiguration}.
-     */
-    @Override
-    public DropCreatorConfiguration copy() {
-        final DropCreatorConfiguration duplicateGenFeature = new DropCreatorConfiguration(this.configurable);
-        duplicateGenFeature.properties.putAll(this.properties);
-        return duplicateGenFeature;
-    }
+	public static DropCreatorConfiguration getNull() {
+		return DropCreator.NULL.getDefaultConfiguration();
+	}
 
-    public <C extends DropContext> void appendDrops(DropCreator.Type<C> type, C context) {
-        this.configurable.appendDrops(this, type, context);
-    }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @return The copy of this {@link DropCreatorConfiguration}.
+	 */
+	@Override
+	public DropCreatorConfiguration copy() {
+		final DropCreatorConfiguration duplicateGenFeature = new DropCreatorConfiguration(this.configurable);
+		duplicateGenFeature.properties.putAll(this.properties);
+		return duplicateGenFeature;
+	}
 
-    public static DropCreatorConfiguration getNull() {
-        return DropCreator.NULL.getDefaultConfiguration();
-    }
+	public <C extends DropContext> void appendDrops(DropCreator.Type<C> type, C context) {
+		this.configurable.appendDrops(this, type, context);
+	}
 
 }

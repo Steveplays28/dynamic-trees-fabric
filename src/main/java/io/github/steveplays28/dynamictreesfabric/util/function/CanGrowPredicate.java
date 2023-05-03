@@ -1,7 +1,9 @@
 package io.github.steveplays28.dynamictreesfabric.util.function;
 
-import io.github.steveplays28.dynamictreesfabric.api.configurations.ConfigurationProperty;
 import java.util.function.BiPredicate;
+
+import io.github.steveplays28.dynamictreesfabric.api.configurations.ConfigurationProperty;
+
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldAccess;
 

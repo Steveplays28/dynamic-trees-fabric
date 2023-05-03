@@ -7,15 +7,15 @@ import javax.annotation.Nullable;
  */
 public interface PropertiesAccessor {
 
-    @Nullable
-    <V> V get(ConfigurationProperty<V> property);
+	@Nullable
+	<V> V get(ConfigurationProperty<V> property);
 
-    boolean has(ConfigurationProperty<?> property);
+	boolean has(ConfigurationProperty<?> property);
 
-    void forEach(IterationAction<?> action);
+	void forEach(IterationAction<?> action);
 
-    interface IterationAction<V> {
-        void apply(ConfigurationProperty<V> property, V value);
-    }
+	interface IterationAction<V> {
+		void apply(ConfigurationProperty<V> property, V value);
+	}
 
 }

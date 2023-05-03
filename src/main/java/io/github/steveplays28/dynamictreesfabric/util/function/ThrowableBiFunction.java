@@ -10,6 +10,6 @@ import java.util.function.BiFunction;
 @FunctionalInterface
 public interface ThrowableBiFunction<A, B, R, T extends Throwable> {
 
-    R apply(A a, B b) throws T;
+	R apply(A a, B b) throws T;
 
 }

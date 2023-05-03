@@ -11,11 +11,11 @@ import net.minecraft.item.ItemStack;
 @FunctionalInterface
 public interface Emptiable {
 
-    /**
-     * The container item this object returns when a substance is emptied.
-     *
-     * @return An {@link ItemStack} for the item.
-     */
-    ItemStack getEmptyContainer();
+	/**
+	 * The container item this object returns when a substance is emptied.
+	 *
+	 * @return An {@link ItemStack} for the item.
+	 */
+	ItemStack getEmptyContainer();
 
 }

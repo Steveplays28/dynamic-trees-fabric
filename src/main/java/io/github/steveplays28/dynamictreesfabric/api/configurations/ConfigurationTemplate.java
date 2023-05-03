@@ -7,8 +7,8 @@ import io.github.steveplays28.dynamictreesfabric.deserialisation.result.Result;
  */
 public interface ConfigurationTemplate<C extends Configuration<C, ?>> {
 
-    Result<C, ?> apply(PropertiesAccessor properties);
+	Result<C, ?> apply(PropertiesAccessor properties);
 
-    Iterable<ConfigurationProperty<?>> getRegisteredProperties();
+	Iterable<ConfigurationProperty<?>> getRegisteredProperties();
 
 }

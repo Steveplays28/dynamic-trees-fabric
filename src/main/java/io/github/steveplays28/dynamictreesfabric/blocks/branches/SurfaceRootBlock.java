@@ -1,11 +1,13 @@
 package io.github.steveplays28.dynamictreesfabric.blocks.branches;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import io.github.steveplays28.dynamictreesfabric.api.TreeHelper;
 import io.github.steveplays28.dynamictreesfabric.trees.Family;
 import io.github.steveplays28.dynamictreesfabric.util.CoordUtils;
 import io.github.steveplays28.dynamictreesfabric.util.RootConnections;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -38,254 +40,252 @@ import net.minecraft.world.tick.OrderedTick;
 @SuppressWarnings("deprecation")
 public class SurfaceRootBlock extends Block implements Waterloggable {
 
-    public static final int MAX_RADIUS = 8;
+	public static final int MAX_RADIUS = 8;
+	public static final BooleanProperty GROUNDED = BooleanProperty.of("grounded");
+	public static final BooleanProperty WATERLOGGED = Properties.WATERLOGGED;
+	protected static final IntProperty RADIUS = IntProperty.of("radius", 1, MAX_RADIUS);
+	private final Family family;
 
-    protected static final IntProperty RADIUS = IntProperty.of("radius", 1, MAX_RADIUS);
-    public static final BooleanProperty GROUNDED = BooleanProperty.of("grounded");
-    public static final BooleanProperty WATERLOGGED = Properties.WATERLOGGED;
+	public SurfaceRootBlock(Family family) {
+		this(Material.WOOD, family);
+		setDefaultState(getDefaultState().with(WATERLOGGED, false));
+	}
 
-    private final Family family;
-
-    public SurfaceRootBlock(Family family) {
-        this(Material.WOOD, family);
-        setDefaultState(getDefaultState().with(WATERLOGGED, false));
-    }
-
-    public SurfaceRootBlock(Material material, Family family) {
-        super(Block.Properties.of(material)
+	public SurfaceRootBlock(Material material, Family family) {
+		super(Block.Properties.of(material)
 //                .harvestTool(ToolType.AXE)
 //                .harvestLevel(0)
-                .strength(2.5f, 1.0F)
-                .sounds(BlockSoundGroup.WOOD));
+				.strength(2.5f, 1.0F)
+				.sounds(BlockSoundGroup.WOOD));
 
-        this.family = family;
-    }
+		this.family = family;
+	}
 
-    public Family getFamily() {
-        return family;
-    }
+	public Family getFamily() {
+		return family;
+	}
 
-    public static class RootConnection {
-        public RootConnections.ConnectionLevel level;
-        public int radius;
+	@Override
+	public ItemStack getCloneItemStack(BlockState state, HitResult target, BlockView world, BlockPos pos, PlayerEntity player) {
+		return this.family.getBranchItem().map(ItemStack::new).orElse(ItemStack.EMPTY);
+	}
 
-        public RootConnection(RootConnections.ConnectionLevel level, int radius) {
-            this.level = level;
-            this.radius = radius;
-        }
+	@Override
+	protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
+		builder.add(RADIUS, GROUNDED, WATERLOGGED);
+	}
 
-        @Override
-        public String toString() {
-            return super.toString() + " Level: " + this.level.toString() + " Radius: " + this.radius;
-        }
-    }
+	///////////////////////////////////////////
+	// BLOCK STATES
+	///////////////////////////////////////////
 
-    @Override
-    public ItemStack getCloneItemStack(BlockState state, HitResult target, BlockView world, BlockPos pos, PlayerEntity player) {
-        return this.family.getBranchItem().map(ItemStack::new).orElse(ItemStack.EMPTY);
-    }
+	public int getRadius(BlockState blockState) {
+		return blockState.getBlock() == this ? blockState.get(RADIUS) : 0;
+	}
 
-    ///////////////////////////////////////////
-    // BLOCK STATES
-    ///////////////////////////////////////////
+	public int setRadius(WorldAccess world, BlockPos pos, int radius, int flags) {
+		boolean replacingWater = world.getBlockState(pos).getFluidState() == Fluids.WATER.getStill(false);
+		world.setBlockState(pos, this.getStateForRadius(radius).with(WATERLOGGED, replacingWater), flags);
+		return radius;
+	}
 
-    @Override
-    protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
-        builder.add(RADIUS, GROUNDED, WATERLOGGED);
-    }
+	public BlockState getStateForRadius(int radius) {
+		return this.getDefaultState().with(RADIUS, MathHelper.clamp(radius, 0, getMaxRadius()));
+	}
 
-    public int getRadius(BlockState blockState) {
-        return blockState.getBlock() == this ? blockState.get(RADIUS) : 0;
-    }
+	public int getMaxRadius() {
+		return MAX_RADIUS;
+	}
 
-    public int setRadius(WorldAccess world, BlockPos pos, int radius, int flags) {
-        boolean replacingWater = world.getBlockState(pos).getFluidState() == Fluids.WATER.getStill(false);
-        world.setBlockState(pos, this.getStateForRadius(radius).with(WATERLOGGED, replacingWater), flags);
-        return radius;
-    }
+	public int getRadialHeight(int radius) {
+		return radius * 2;
+	}
 
-    public BlockState getStateForRadius(int radius) {
-        return this.getDefaultState().with(RADIUS, MathHelper.clamp(radius, 0, getMaxRadius()));
-    }
+	@Override
+	public FluidState getFluidState(BlockState state) {
+		return state.get(WATERLOGGED) ? Fluids.WATER.getStill(false) : super.getFluidState(state);
+	}
 
-    public int getMaxRadius() {
-        return MAX_RADIUS;
-    }
+	///////////////////////////////////////////
+	// WATER LOGGING
+	///////////////////////////////////////////
 
-    public int getRadialHeight(int radius) {
-        return radius * 2;
-    }
+	@Override
+	public BlockState getStateForNeighborUpdate(BlockState stateIn, Direction facing, BlockState facingState, WorldAccess worldIn, BlockPos currentPos, BlockPos facingPos) {
+		if (stateIn.get(WATERLOGGED)) {
+			worldIn.getFluidTickScheduler().scheduleTick(new OrderedTick<>(Fluids.WATER, currentPos, Fluids.WATER.getTickRate(worldIn), 1));
+		}
+		return super.getStateForNeighborUpdate(stateIn, facing, facingState, worldIn, currentPos, facingPos);
+	}
 
-    ///////////////////////////////////////////
-    // WATER LOGGING
-    ///////////////////////////////////////////
+	public RootConnections getConnectionData(final BlockRenderView world, final BlockPos pos) {
+		final RootConnections connections = new RootConnections();
 
-    @Override
-    public FluidState getFluidState(BlockState state) {
-        return state.get(WATERLOGGED) ? Fluids.WATER.getStill(false) : super.getFluidState(state);
-    }
+		for (Direction dir : CoordUtils.HORIZONTALS) {
+			final RootConnection connection = this.getSideConnectionRadius(world, pos, dir);
 
-    @Override
-    public BlockState getStateForNeighborUpdate(BlockState stateIn, Direction facing, BlockState facingState, WorldAccess worldIn, BlockPos currentPos, BlockPos facingPos) {
-        if (stateIn.get(WATERLOGGED)) {
-            worldIn.getFluidTickScheduler().scheduleTick(new OrderedTick<>(Fluids.WATER, currentPos, Fluids.WATER.getTickRate(worldIn), 1));
-        }
-        return super.getStateForNeighborUpdate(stateIn, facing, facingState, worldIn, currentPos, facingPos);
-    }
+			if (connection == null) {
+				continue;
+			}
 
-    ///////////////////////////////////////////
-    // RENDERING
-    ///////////////////////////////////////////
+			connections.setRadius(dir, connection.radius);
+			connections.setConnectionLevel(dir, connection.level);
+		}
 
-    public RootConnections getConnectionData(final BlockRenderView world, final BlockPos pos) {
-        final RootConnections connections = new RootConnections();
+		return connections;
+	}
 
-        for (Direction dir : CoordUtils.HORIZONTALS) {
-            final RootConnection connection = this.getSideConnectionRadius(world, pos, dir);
+	///////////////////////////////////////////
+	// RENDERING
+	///////////////////////////////////////////
 
-            if (connection == null) {
-                continue;
-            }
+	@Nonnull
+	@Override
+	public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
+		boolean connectionMade = false;
+		final int thisRadius = getRadius(state);
 
-            connections.setRadius(dir, connection.radius);
-            connections.setConnectionLevel(dir, connection.level);
-        }
+		VoxelShape shape = VoxelShapes.empty();
 
-        return connections;
-    }
+		for (Direction dir : CoordUtils.HORIZONTALS) {
+			final RootConnection conn = this.getSideConnectionRadius(world, pos, dir);
+
+			if (conn == null) {
+				continue;
+			}
+
+			connectionMade = true;
+			final int r = MathHelper.clamp(conn.radius, 1, thisRadius);
+			final double radius = r / 16.0;
+			final double radialHeight = getRadialHeight(r) / 16.0;
+			final double gap = 0.5 - radius;
+
+			Box aabb = new Box(-radius, 0, -radius, radius, radialHeight, radius);
+			aabb = aabb.stretch(dir.getOffsetX() * gap, 0, dir.getOffsetZ() * gap).offset(0.5, 0.0, 0.5);
+			shape = VoxelShapes.combine(shape, VoxelShapes.cuboid(aabb), BooleanBiFunction.OR);
+		}
+
+		if (!connectionMade) {
+			double radius = thisRadius / 16.0;
+			double radialHeight = getRadialHeight(thisRadius) / 16.0;
+			Box aabb = new Box(0.5 - radius, 0, 0.5 - radius, 0.5 + radius, radialHeight, 0.5 + radius);
+			shape = VoxelShapes.combine(shape, VoxelShapes.cuboid(aabb), BooleanBiFunction.OR);
+		}
+
+		return shape;
+	}
 
 
-    ///////////////////////////////////////////
-    // PHYSICAL BOUNDS
-    ///////////////////////////////////////////
+	///////////////////////////////////////////
+	// PHYSICAL BOUNDS
+	///////////////////////////////////////////
 
-    @Nonnull
-    @Override
-    public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-        boolean connectionMade = false;
-        final int thisRadius = getRadius(state);
+	private boolean isAirOrWater(BlockState state) {
+		return state.getBlock() == Blocks.AIR || state.getBlock() == Blocks.WATER;
+	}
 
-        VoxelShape shape = VoxelShapes.empty();
+	@Nullable
+	protected RootConnection getSideConnectionRadius(BlockView blockReader, BlockPos pos, Direction side) {
+		if (!side.getAxis().isHorizontal()) {
+			return null;
+		}
 
-        for (Direction dir : CoordUtils.HORIZONTALS) {
-            final RootConnection conn = this.getSideConnectionRadius(world, pos, dir);
+		BlockPos dPos = pos.offset(side);
+		BlockState state = CoordUtils.getStateSafe(blockReader, dPos);
+		final BlockState upState = CoordUtils.getStateSafe(blockReader, pos.up());
 
-            if (conn == null) {
-                continue;
-            }
+		final RootConnections.ConnectionLevel level = (upState != null && isAirOrWater(upState) && state != null && state.isSolidBlock(blockReader, dPos)) ?
+				RootConnections.ConnectionLevel.HIGH : (state != null && isAirOrWater(state) ? RootConnections.ConnectionLevel.LOW : RootConnections.ConnectionLevel.MID);
 
-            connectionMade = true;
-            final int r = MathHelper.clamp(conn.radius, 1, thisRadius);
-            final double radius = r / 16.0;
-            final double radialHeight = getRadialHeight(r) / 16.0;
-            final double gap = 0.5 - radius;
+		if (level != RootConnections.ConnectionLevel.MID) {
+			dPos = dPos.up(level.getYOffset());
+			state = CoordUtils.getStateSafe(blockReader, dPos);
+		}
 
-            Box aabb = new Box(-radius, 0, -radius, radius, radialHeight, radius);
-            aabb = aabb.stretch(dir.getOffsetX() * gap, 0, dir.getOffsetZ() * gap).offset(0.5, 0.0, 0.5);
-            shape = VoxelShapes.combine(shape, VoxelShapes.cuboid(aabb), BooleanBiFunction.OR);
-        }
+		if (state != null && state.getBlock() instanceof SurfaceRootBlock) {
+			return new RootConnection(level, ((SurfaceRootBlock) state.getBlock()).getRadius(state));
+		} else if (level == RootConnections.ConnectionLevel.MID && TreeHelper.isBranch(state) && TreeHelper.getTreePart(state).getRadius(state) >= 8) {
+			return new RootConnection(RootConnections.ConnectionLevel.MID, 8);
+		}
 
-        if (!connectionMade) {
-            double radius = thisRadius / 16.0;
-            double radialHeight = getRadialHeight(thisRadius) / 16.0;
-            Box aabb = new Box(0.5 - radius, 0, 0.5 - radius, 0.5 + radius, radialHeight, 0.5 + radius);
-            shape = VoxelShapes.combine(shape, VoxelShapes.cuboid(aabb), BooleanBiFunction.OR);
-        }
+		return null;
+	}
 
-        return shape;
-    }
+	@Override
+	public boolean onDestroyedByPlayer(BlockState state, World world, BlockPos pos, PlayerEntity player, boolean willHarvest, FluidState fluid) {
+		final BlockState upstate = world.getBlockState(pos.up());
 
-    private boolean isAirOrWater (BlockState state){
-        return state.getBlock() == Blocks.AIR || state.getBlock() == Blocks.WATER;
-    }
+		if (upstate.getBlock() instanceof TrunkShellBlock) {
+			world.setBlockState(pos, upstate);
+		}
 
-    @Nullable
-    protected RootConnection getSideConnectionRadius(BlockView blockReader, BlockPos pos, Direction side) {
-        if (!side.getAxis().isHorizontal()) {
-            return null;
-        }
+		for (Direction dir : CoordUtils.HORIZONTALS) {
+			final BlockPos dPos = pos.offset(dir).down();
+			world.getBlockState(dPos).neighborUpdate(world, dPos, this, pos, false);
+		}
 
-        BlockPos dPos = pos.offset(side);
-        BlockState state = CoordUtils.getStateSafe(blockReader, dPos);
-        final BlockState upState = CoordUtils.getStateSafe(blockReader, pos.up());
+		return super.onDestroyedByPlayer(state, world, pos, player, willHarvest, fluid);
+	}
 
-        final RootConnections.ConnectionLevel level = (upState != null && isAirOrWater(upState) && state != null && state.isSolidBlock(blockReader, dPos)) ?
-                RootConnections.ConnectionLevel.HIGH : (state != null && isAirOrWater(state) ? RootConnections.ConnectionLevel.LOW : RootConnections.ConnectionLevel.MID);
+	@Override
+	public void neighborUpdate(BlockState state, World world, BlockPos pos, Block blockIn, BlockPos fromPos, boolean isMoving) {
+		if (!canBlockStay(world, pos, state)) {
+			world.removeBlock(pos, false);
+		}
+	}
 
-        if (level != RootConnections.ConnectionLevel.MID) {
-            dPos = dPos.up(level.getYOffset());
-            state = CoordUtils.getStateSafe(blockReader, dPos);
-        }
+	protected boolean canBlockStay(World world, BlockPos pos, BlockState state) {
+		final BlockPos below = pos.down();
+		final BlockState belowState = world.getBlockState(below);
 
-        if (state != null && state.getBlock() instanceof SurfaceRootBlock) {
-            return new RootConnection(level, ((SurfaceRootBlock) state.getBlock()).getRadius(state));
-        } else if (level == RootConnections.ConnectionLevel.MID && TreeHelper.isBranch(state) && TreeHelper.getTreePart(state).getRadius(state) >= 8) {
-            return new RootConnection(RootConnections.ConnectionLevel.MID, 8);
-        }
+		final int radius = getRadius(state);
 
-        return null;
-    }
+		if (belowState.isSolidBlock(world, below)) { // If a root is sitting on a solid block.
+			for (Direction dir : CoordUtils.HORIZONTALS) {
+				final RootConnection conn = this.getSideConnectionRadius(world, pos, dir);
 
-    @Override
-    public boolean onDestroyedByPlayer(BlockState state, World world, BlockPos pos, PlayerEntity player, boolean willHarvest, FluidState fluid) {
-        final BlockState upstate = world.getBlockState(pos.up());
+				if (conn != null && conn.radius > radius) {
+					return true;
+				}
+			}
+		} else { // If the root has no solid block under it.
+			boolean connections = false;
 
-        if (upstate.getBlock() instanceof TrunkShellBlock) {
-            world.setBlockState(pos, upstate);
-        }
+			for (Direction dir : CoordUtils.HORIZONTALS) {
+				final RootConnection conn = this.getSideConnectionRadius(world, pos, dir);
 
-        for (Direction dir : CoordUtils.HORIZONTALS) {
-            final BlockPos dPos = pos.offset(dir).down();
-            world.getBlockState(dPos).neighborUpdate(world, dPos, this, pos, false);
-        }
+				if (conn == null) {
+					continue;
+				}
 
-        return super.onDestroyedByPlayer(state, world, pos, player, willHarvest, fluid);
-    }
+				if (conn.level == RootConnections.ConnectionLevel.MID) {
+					return false;
+				}
 
-    @Override
-    public void neighborUpdate(BlockState state, World world, BlockPos pos, Block blockIn, BlockPos fromPos, boolean isMoving) {
-        if (!canBlockStay(world, pos, state)) {
-            world.removeBlock(pos, false);
-        }
-    }
+				if (conn.radius > radius) {
+					connections = true;
+				}
+			}
 
-    protected boolean canBlockStay(World world, BlockPos pos, BlockState state) {
-        final BlockPos below = pos.down();
-        final BlockState belowState = world.getBlockState(below);
+			return connections;
+		}
 
-        final int radius = getRadius(state);
+		return false;
+	}
 
-        if (belowState.isSolidBlock(world, below)) { // If a root is sitting on a solid block.
-            for (Direction dir : CoordUtils.HORIZONTALS) {
-                final RootConnection conn = this.getSideConnectionRadius(world, pos, dir);
+	public static class RootConnection {
+		public RootConnections.ConnectionLevel level;
+		public int radius;
 
-                if (conn != null && conn.radius > radius) {
-                    return true;
-                }
-            }
-        } else { // If the root has no solid block under it.
-            boolean connections = false;
+		public RootConnection(RootConnections.ConnectionLevel level, int radius) {
+			this.level = level;
+			this.radius = radius;
+		}
 
-            for (Direction dir : CoordUtils.HORIZONTALS) {
-                final RootConnection conn = this.getSideConnectionRadius(world, pos, dir);
-
-                if (conn == null) {
-                    continue;
-                }
-
-                if (conn.level == RootConnections.ConnectionLevel.MID) {
-                    return false;
-                }
-
-                if (conn.radius > radius) {
-                    connections = true;
-                }
-            }
-
-            return connections;
-        }
-
-        return false;
-    }
+		@Override
+		public String toString() {
+			return super.toString() + " Level: " + this.level.toString() + " Radius: " + this.radius;
+		}
+	}
 
 }

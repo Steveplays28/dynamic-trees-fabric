@@ -1,7 +1,9 @@
 package io.github.steveplays28.dynamictreesfabric.api.resource;
 
-import com.google.common.collect.Maps;
 import java.util.function.Supplier;
+
+import com.google.common.collect.Maps;
+
 import net.minecraft.util.Identifier;
 
 /**
@@ -9,20 +11,20 @@ import net.minecraft.util.Identifier;
  */
 public interface ResourceCollector<R> {
 
-    DTResource<R> put(DTResource<R> resource);
+	static <R> ResourceCollector<R> unordered() {
+		return new SimpleResourceCollector<>(Maps::newHashMap);
+	}
 
-    DTResource<R> computeIfAbsent(Identifier key, Supplier<DTResource<R>> resourceSupplier);
+	static <R> ResourceCollector<R> ordered() {
+		return new SimpleResourceCollector<>(Maps::newLinkedHashMap);
+	}
 
-    ResourceAccessor<R> createAccessor();
+	DTResource<R> put(DTResource<R> resource);
 
-    void clear();
+	DTResource<R> computeIfAbsent(Identifier key, Supplier<DTResource<R>> resourceSupplier);
 
-    static <R> ResourceCollector<R> unordered() {
-        return new SimpleResourceCollector<>(Maps::newHashMap);
-    }
+	ResourceAccessor<R> createAccessor();
 
-    static <R> ResourceCollector<R> ordered() {
-        return new SimpleResourceCollector<>(Maps::newLinkedHashMap);
-    }
+	void clear();
 
 }
