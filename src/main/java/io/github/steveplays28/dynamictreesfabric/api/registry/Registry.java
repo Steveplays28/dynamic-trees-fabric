@@ -9,15 +9,10 @@ import java.util.stream.Stream;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
-import net.minecraftforge.eventbus.api.Event;
-import net.minecraftforge.fml.ModLoader;
-import net.minecraftforge.registries.ForgeRegistry;
-
 import net.minecraft.util.Identifier;
 
 /**
- * A custom registry which can be safely unlocked at any point. Largely based off {@link
- * net.minecraftforge.registries.IForgeRegistry}.
+ * A custom registry which can be safely unlocked at any point.
  *
  * @author Harley O'Connor
  * @see AbstractRegistry
@@ -119,8 +114,7 @@ public interface Registry<V extends RegistryEntry<V>> extends Iterable<V> {
 	Runnable generateIfValidRunnable(Identifier registryName, Consumer<V> consumer, Runnable elseRunnable);
 
 	/**
-	 * Posts a {@link RegistryEvent} to the mod event bus. Note that this is posted using {@link
-	 * ModLoader#postEvent(Event)} and as such should only be called during the initial loading phase.
+	 * Posts a {@link RegistryEvent} to the mod event bus. Note that this is posted using  and as such should only be called during the initial loading phase.
 	 */
 	void postRegistryEvent();
 
@@ -130,7 +124,7 @@ public interface Registry<V extends RegistryEntry<V>> extends Iterable<V> {
 	Comparator<V> getComparator();
 
 	/**
-	 * Dumps all entries with their registry names in the debug log, based off the {@link ForgeRegistry} dump method.
+	 * Dumps all entries with their registry names in the debug log..
 	 */
 	void dump();
 
