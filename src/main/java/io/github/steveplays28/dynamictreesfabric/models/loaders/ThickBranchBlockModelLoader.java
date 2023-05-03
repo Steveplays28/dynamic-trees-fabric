@@ -3,15 +3,13 @@ package io.github.steveplays28.dynamictreesfabric.models.loaders;
 import javax.annotation.Nullable;
 
 import io.github.steveplays28.dynamictreesfabric.models.geometry.BranchBlockModelGeometry;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 
 import net.minecraft.util.Identifier;
 
-/**
- * @author Harley O'Connor
- */
-@OnlyIn(Dist.CLIENT)
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+
+@Environment(EnvType.CLIENT)
 public class ThickBranchBlockModelLoader extends BranchBlockModelLoader {
 
 	@Override

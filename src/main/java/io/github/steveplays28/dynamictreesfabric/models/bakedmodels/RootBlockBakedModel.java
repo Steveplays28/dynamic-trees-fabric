@@ -1,11 +1,21 @@
 package io.github.steveplays28.dynamictreesfabric.models.bakedmodels;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import com.google.common.collect.Maps;
 import com.mojang.math.Vector3f;
 import io.github.steveplays28.dynamictreesfabric.blocks.branches.SurfaceRootBlock;
 import io.github.steveplays28.dynamictreesfabric.client.ModelUtils;
 import io.github.steveplays28.dynamictreesfabric.util.CoordUtils;
 import io.github.steveplays28.dynamictreesfabric.util.RootConnections;
+import net.minecraftforge.client.model.IModelBuilder;
+import net.minecraftforge.client.model.data.ModelData;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.client.render.RenderLayer;
@@ -25,20 +35,10 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.BlockRenderView;
 
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.model.IModelBuilder;
-import net.minecraftforge.client.model.data.ModelData;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
-@OnlyIn(Dist.CLIENT)
+@Environment(EnvType.CLIENT)
 public class RootBlockBakedModel extends BranchBlockBakedModel {
 
 	private final BakedModel[][] sleeves = new BakedModel[4][7];

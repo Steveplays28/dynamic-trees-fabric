@@ -45,8 +45,6 @@ import io.github.steveplays28.dynamictreesfabric.init.DTTrees;
 import io.github.steveplays28.dynamictreesfabric.util.BlockBounds;
 import io.github.steveplays28.dynamictreesfabric.util.MutableLazyValue;
 import io.github.steveplays28.dynamictreesfabric.util.Optionals;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.model.generators.BlockModelBuilder;
 import net.minecraftforge.common.data.ExistingFileHelper;
 import org.apache.commons.lang3.tuple.Pair;
@@ -158,9 +156,15 @@ public class Family extends RegistryEntry<Family> implements Resettable<Family> 
 	 * Weather the branch can support cocoa pods on it's surface [default = false]
 	 */
 	public boolean canSupportCocoa = false;
-	@OnlyIn(Dist.CLIENT)
+	import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+
+@Environment(EnvType.CLIENT)
 	public int woodRingColor; // For rooty blocks
-	@OnlyIn(Dist.CLIENT)
+	import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+
+@Environment(EnvType.CLIENT)
 	public int woodBarkColor; // For rooty water
 	protected Species commonSpecies;
 
@@ -476,7 +480,10 @@ public class Family extends RegistryEntry<Family> implements Resettable<Family> 
 		this.maxBranchRadius = maxBranchRadius;
 	}
 
-	@OnlyIn(Dist.CLIENT)
+	import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+
+@Environment(EnvType.CLIENT)
 	public int getRootColor(BlockState state, boolean getBark) {
 		return getBark ? woodBarkColor : woodRingColor;
 	}

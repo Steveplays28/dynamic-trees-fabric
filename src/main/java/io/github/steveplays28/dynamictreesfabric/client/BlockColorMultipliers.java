@@ -1,15 +1,15 @@
 package io.github.steveplays28.dynamictreesfabric.client;
 
-import net.minecraft.client.color.block.BlockColorProvider;
-import net.minecraft.util.Identifier;
-
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-
 import java.util.HashMap;
 import java.util.Map;
 
-@OnlyIn(Dist.CLIENT)
+import net.minecraft.client.color.block.BlockColorProvider;
+import net.minecraft.util.Identifier;
+
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+
+@Environment(EnvType.CLIENT)
 public class BlockColorMultipliers {
 
 	private static Map<String, BlockColorProvider> colorBase = new HashMap<>();

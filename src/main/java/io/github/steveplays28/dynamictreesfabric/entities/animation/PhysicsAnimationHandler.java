@@ -6,8 +6,6 @@ import io.github.steveplays28.dynamictreesfabric.api.TreeHelper;
 import io.github.steveplays28.dynamictreesfabric.blocks.branches.BranchBlock;
 import io.github.steveplays28.dynamictreesfabric.blocks.branches.TrunkShellBlock;
 import io.github.steveplays28.dynamictreesfabric.entities.FallingTreeEntity;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -141,7 +139,10 @@ public class PhysicsAnimationHandler implements AnimationHandler {
 	}
 
 	@Override
-	@OnlyIn(Dist.CLIENT)
+	import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+
+@Environment(EnvType.CLIENT)
 	public void renderTransform(FallingTreeEntity entity, float entityYaw, float partialTicks, MatrixStack matrixStack) {
 		final float yaw = MathHelper.wrapDegrees(io.github.steveplays28.dynamictreesfabric.util.MathHelper.angleDegreesInterpolate(entity.prevYaw, entity.getYaw(), partialTicks));
 		final float pit = MathHelper.wrapDegrees(io.github.steveplays28.dynamictreesfabric.util.MathHelper.angleDegreesInterpolate(entity.prevPitch, entity.getPitch(), partialTicks));
@@ -155,7 +156,10 @@ public class PhysicsAnimationHandler implements AnimationHandler {
 	}
 
 	@Override
-	@OnlyIn(Dist.CLIENT)
+	import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+
+@Environment(EnvType.CLIENT)
 	public boolean shouldRender(FallingTreeEntity entity) {
 		return true;
 	}

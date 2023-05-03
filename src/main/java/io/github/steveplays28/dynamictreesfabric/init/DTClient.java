@@ -19,7 +19,6 @@ import io.github.steveplays28.dynamictreesfabric.entities.render.LingeringEffect
 import io.github.steveplays28.dynamictreesfabric.trees.Family;
 import io.github.steveplays28.dynamictreesfabric.trees.Species;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.client.model.data.ModelData;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -73,7 +72,10 @@ public class DTClient {
 		cleanup();
 	}
 
-	@OnlyIn(Dist.CLIENT)
+	import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+
+@Environment(EnvType.CLIENT)
 	public static void discoverWoodColors() {
 
 		final Function<Identifier, Sprite> bakedTextureGetter = MinecraftClient.getInstance()
@@ -92,7 +94,10 @@ public class DTClient {
 		}
 	}
 
-	@OnlyIn(Dist.CLIENT)
+	import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+
+@Environment(EnvType.CLIENT)
 	private static int getFaceColor(BlockState state, Direction face, Function<Identifier, Sprite> textureGetter) {
 		final BakedModel model = MinecraftClient.getInstance().getBlockRenderManager().getModel(state);
 		List<BakedQuad> quads = model.getQuads(state, face, Random.create(), ModelData.EMPTY, null);

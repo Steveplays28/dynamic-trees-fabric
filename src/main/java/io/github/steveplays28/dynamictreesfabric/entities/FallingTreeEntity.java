@@ -22,8 +22,6 @@ import io.github.steveplays28.dynamictreesfabric.util.BlockBounds;
 import io.github.steveplays28.dynamictreesfabric.util.BlockStates;
 import io.github.steveplays28.dynamictreesfabric.util.BranchDestructionData;
 import io.github.steveplays28.dynamictreesfabric.util.CoordUtils.Surround;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.network.NetworkHooks;
 
 import net.minecraft.block.Block;
@@ -400,7 +398,10 @@ public class FallingTreeEntity extends Entity implements ModelTracker {
 	}
 
 	@Override
-	@OnlyIn(Dist.CLIENT)
+	import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+
+@Environment(EnvType.CLIENT)
 	public void modelCleanup() {
 		FallingTreeEntityModelTrackerCache.cleanupModels(world, this);
 	}
@@ -424,7 +425,10 @@ public class FallingTreeEntity extends Entity implements ModelTracker {
 		return age > 20 && currentAnimationHandler.shouldDie(this); //Give the entity 20 ticks to receive it's data from the server.
 	}
 
-	@OnlyIn(Dist.CLIENT)
+	import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+
+@Environment(EnvType.CLIENT)
 	public boolean shouldRender() {
 		return currentAnimationHandler.shouldRender(this);
 	}

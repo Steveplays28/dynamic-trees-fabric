@@ -4,8 +4,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import io.github.steveplays28.dynamictreesfabric.entities.FallingTreeEntity;
 import io.github.steveplays28.dynamictreesfabric.models.FallingTreeEntityModel;
 import io.github.steveplays28.dynamictreesfabric.models.FallingTreeEntityModelTrackerCache;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 
 import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.RenderLayer;
@@ -17,7 +15,10 @@ import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
 
-@OnlyIn(Dist.CLIENT)
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+
+@Environment(EnvType.CLIENT)
 public class FallingTreeRenderer extends EntityRenderer<FallingTreeEntity> {
 
 	public FallingTreeRenderer(EntityRendererFactory.Context renderManager) {

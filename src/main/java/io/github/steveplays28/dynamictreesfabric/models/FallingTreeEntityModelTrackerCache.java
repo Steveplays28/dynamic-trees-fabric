@@ -6,12 +6,13 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
 
 import io.github.steveplays28.dynamictreesfabric.entities.FallingTreeEntity;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 
 import net.minecraft.world.World;
 
-@OnlyIn(Dist.CLIENT)
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+
+@Environment(EnvType.CLIENT)
 public class FallingTreeEntityModelTrackerCache {
 
 	private static ConcurrentMap<Integer, FallingTreeEntityModel> models = new ConcurrentHashMap<>();

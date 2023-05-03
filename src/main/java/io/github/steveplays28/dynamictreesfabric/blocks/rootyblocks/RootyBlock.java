@@ -24,8 +24,6 @@ import io.github.steveplays28.dynamictreesfabric.trees.Family;
 import io.github.steveplays28.dynamictreesfabric.trees.Species;
 import io.github.steveplays28.dynamictreesfabric.util.BranchDestructionData;
 import io.github.steveplays28.dynamictreesfabric.util.CoordUtils;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockEntityProvider;
@@ -504,7 +502,10 @@ public class RootyBlock extends BlockWithDynamicHardness implements TreePart, Bl
 		return false;
 	}
 
-	@OnlyIn(Dist.CLIENT)
+	import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+
+@Environment(EnvType.CLIENT)
 	public int rootColor(BlockState state, BlockView blockAccess, BlockPos pos) {
 		return getFamily(state, blockAccess, pos).getRootColor(state, getColorFromBark());
 	}

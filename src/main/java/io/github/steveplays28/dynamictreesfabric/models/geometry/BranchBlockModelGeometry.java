@@ -12,10 +12,7 @@ import com.mojang.datafixers.util.Pair;
 import io.github.steveplays28.dynamictreesfabric.client.thickrings.ThickRingTextureManager;
 import io.github.steveplays28.dynamictreesfabric.models.bakedmodels.BasicBranchBlockBakedModel;
 import io.github.steveplays28.dynamictreesfabric.models.bakedmodels.ThickBranchBlockBakedModel;
-import io.github.steveplays28.dynamictreesfabric.models.loaders.BranchBlockModelLoader;
 import io.github.steveplays28.dynamictreesfabric.trees.Family;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.model.geometry.IGeometryBakingContext;
 import net.minecraftforge.client.model.geometry.IUnbakedGeometry;
 
@@ -30,16 +27,10 @@ import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.client.util.SpriteIdentifier;
 import net.minecraft.util.Identifier;
 
-/**
- * Bakes {@link BasicBranchBlockBakedModel} from bark and rings texture locations given by {@link
- * BranchBlockModelLoader}.
- *
- * <p>Can also be used by sub-classes to bake other models, like for roots in
- * {@link RootBlockModelGeometry}.</p>
- *
- * @author Harley O'Connor
- */
-@OnlyIn(Dist.CLIENT)
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+
+@Environment(EnvType.CLIENT)
 public class BranchBlockModelGeometry implements IUnbakedGeometry<BranchBlockModelGeometry> {
 
 	protected final Set<Identifier> textures = new HashSet<>();

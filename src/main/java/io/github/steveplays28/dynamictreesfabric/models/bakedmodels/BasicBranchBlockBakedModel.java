@@ -15,8 +15,6 @@ import io.github.steveplays28.dynamictreesfabric.blocks.branches.BasicBranchBloc
 import io.github.steveplays28.dynamictreesfabric.blocks.branches.BranchBlock;
 import io.github.steveplays28.dynamictreesfabric.client.ModelUtils;
 import io.github.steveplays28.dynamictreesfabric.models.modeldata.ModelConnections;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.model.IModelBuilder;
 import net.minecraftforge.client.model.data.ModelData;
 
@@ -38,7 +36,10 @@ import net.minecraft.util.math.Direction.AxisDirection;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.BlockRenderView;
 
-@OnlyIn(Dist.CLIENT)
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+
+@Environment(EnvType.CLIENT)
 public class BasicBranchBlockBakedModel extends BranchBlockBakedModel {
 
 	// 74 Baked models per tree family to achieve this. I guess it's not my problem.  Wasn't my idea anyway.

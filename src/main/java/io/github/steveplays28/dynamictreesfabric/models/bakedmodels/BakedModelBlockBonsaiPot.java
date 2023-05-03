@@ -8,8 +8,6 @@ import java.util.Map;
 import io.github.steveplays28.dynamictreesfabric.client.QuadManipulator;
 import io.github.steveplays28.dynamictreesfabric.tileentity.PottedSaplingTileEntity;
 import io.github.steveplays28.dynamictreesfabric.trees.Species;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.model.IDynamicBakedModel;
 import net.minecraftforge.client.model.data.ModelData;
 import org.jetbrains.annotations.NotNull;
@@ -27,7 +25,10 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.random.Random;
 
-@OnlyIn(Dist.CLIENT)
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+
+@Environment(EnvType.CLIENT)
 public class BakedModelBlockBonsaiPot implements IDynamicBakedModel {
 
 	protected BakedModel basePotModel;

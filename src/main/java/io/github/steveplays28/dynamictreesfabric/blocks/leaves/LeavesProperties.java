@@ -28,8 +28,6 @@ import io.github.steveplays28.dynamictreesfabric.util.ColorUtil;
 import io.github.steveplays28.dynamictreesfabric.util.MutableLazyValue;
 import io.github.steveplays28.dynamictreesfabric.util.Optionals;
 import io.github.steveplays28.dynamictreesfabric.util.ResourceLocationUtils;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 
@@ -173,7 +171,10 @@ public class LeavesProperties extends RegistryEntry<LeavesProperties> implements
 	// PRIMITIVE LEAVES BLOCK
 	///////////////////////////////////////////
 	private boolean canGrowOnGround = false;
-	@OnlyIn(Dist.CLIENT)
+	import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+
+@Environment(EnvType.CLIENT)
 	private BlockColorProvider colorMultiplier;
 
 	private LeavesProperties() {
@@ -199,7 +200,10 @@ public class LeavesProperties extends RegistryEntry<LeavesProperties> implements
 		this.blockRegistryName = ResourceLocationUtils.suffix(registryName, this.getBlockRegistryNameSuffix());
 	}
 
-	@OnlyIn(Dist.CLIENT)
+	import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+
+@Environment(EnvType.CLIENT)
 	public static void postInitClient() {
 		REGISTRY.getAll().forEach(LeavesProperties::processColor);
 	}
@@ -479,12 +483,18 @@ public class LeavesProperties extends RegistryEntry<LeavesProperties> implements
 		this.colorString = colorString;
 	}
 
-	@OnlyIn(Dist.CLIENT)
+	import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+
+@Environment(EnvType.CLIENT)
 	public int treeFallColorMultiplier(BlockState state, BlockRenderView world, BlockPos pos) {
 		return this.foliageColorMultiplier(state, world, pos);
 	}
 
-	@OnlyIn(Dist.CLIENT)
+	import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+
+@Environment(EnvType.CLIENT)
 	public int foliageColorMultiplier(BlockState state, BlockRenderView world, BlockPos pos) {
 		if (colorMultiplier == null) {
 			return 0x00FF00FF; //purple if broken
@@ -492,7 +502,10 @@ public class LeavesProperties extends RegistryEntry<LeavesProperties> implements
 		return colorMultiplier.getColor(state, world, pos, -1);
 	}
 
-	@OnlyIn(Dist.CLIENT)
+	import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+
+@Environment(EnvType.CLIENT)
 	private void processColor() {
 		int color = -1;
 		if (this.colorNumber != null) {

@@ -1,5 +1,9 @@
 package io.github.steveplays28.dynamictreesfabric.items;
 
+import java.util.List;
+
+import javax.annotation.Nullable;
+
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import io.github.steveplays28.dynamictreesfabric.api.TreeHelper;
@@ -30,13 +34,6 @@ import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-
-import javax.annotation.Nullable;
-
-import java.util.List;
 
 
 /**
@@ -295,7 +292,10 @@ public class Staff extends Item {
 		return code;
 	}
 
-	@OnlyIn(Dist.CLIENT)
+	import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+
+@Environment(EnvType.CLIENT)
 	@Override
 	public void appendTooltip(ItemStack stack, @Nullable World worldIn, List<Text> tooltip, TooltipContext flagIn) {
 		tooltip.add(Text.translatable("tooltip.dynamictrees.species", this.getSpecies(stack).getTextComponent()));
