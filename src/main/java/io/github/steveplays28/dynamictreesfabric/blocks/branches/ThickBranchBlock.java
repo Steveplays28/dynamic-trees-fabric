@@ -20,11 +20,10 @@ import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class ThickBranchBlock extends BasicBranchBlock implements Musable {
-
 	public static final int MAX_RADIUS_TICK = 24;
 
 	protected static final IntProperty RADIUS_DOUBLE = IntProperty.of("radius", 1, MAX_RADIUS_TICK); //39 ?
@@ -177,7 +176,7 @@ public class ThickBranchBlock extends BasicBranchBlock implements Musable {
 		return MAX_RADIUS_TICK;
 	}
 
-	@Nonnull
+	@NotNull
 	@Override
 	public VoxelShape getOutlineShape(BlockState state, BlockView blockReader, BlockPos pos, ShapeContext context) {
 		final int thisRadius = getRadius(state);
@@ -188,7 +187,6 @@ public class ThickBranchBlock extends BasicBranchBlock implements Musable {
 		final double radius = thisRadius / 16.0;
 		return VoxelShapes.cuboid(new Box(0.5 - radius, 0.0, 0.5 - radius, 0.5 + radius, 1.0, 0.5 + radius));
 	}
-
 
 	///////////////////////////////////////////
 	// PHYSICAL BOUNDS
@@ -205,5 +203,4 @@ public class ThickBranchBlock extends BasicBranchBlock implements Musable {
 		BLOCKING,        // This indicates that the block is not replaceable, will NOT be erased, and will prevent the tree from growing.
 		TREEPART        // This indicates that the block is part of a tree, will NOT be erase, and will NOT prevent the tree from growing.
 	}
-
 }

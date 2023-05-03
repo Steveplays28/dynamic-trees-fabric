@@ -1,22 +1,11 @@
 package io.github.steveplays28.dynamictreesfabric.blocks.branches;
 
-import java.util.function.Consumer;
-
-import org.jetbrains.annotations.Nullable;
-
 import io.github.steveplays28.dynamictreesfabric.blocks.BlockWithDynamicHardness;
 import io.github.steveplays28.dynamictreesfabric.util.CoordUtils;
 import io.github.steveplays28.dynamictreesfabric.util.CoordUtils.Surround;
 import io.github.steveplays28.dynamictreesfabric.util.Null;
-import net.minecraftforge.client.extensions.common.IClientBlockExtensions;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockRenderType;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.Material;
-import net.minecraft.block.ShapeContext;
-import net.minecraft.block.Waterloggable;
+import net.minecraft.block.*;
 import net.minecraft.block.piston.PistonBehavior;
 import net.minecraft.client.particle.ParticleManager;
 import net.minecraft.entity.Entity;
@@ -40,11 +29,7 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.util.math.*;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
@@ -56,14 +41,18 @@ import net.minecraft.world.explosion.Explosion;
 import net.minecraft.world.tick.OrderedTick;
 import net.minecraft.world.tick.TickPriority;
 
+import net.minecraftforge.client.extensions.common.IClientBlockExtensions;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.function.Consumer;
+
 @SuppressWarnings("deprecation")
 public class TrunkShellBlock extends BlockWithDynamicHardness implements Waterloggable {
-
 	public static final EnumProperty<Surround> CORE_DIR = EnumProperty.of("coredir", Surround.class);
 	public static final BooleanProperty WATERLOGGED = Properties.WATERLOGGED;
 
 	public TrunkShellBlock() {
-		super(Block.Properties.of(Material.WOOD));
+		super(Settings.of(Material.WOOD));
 		setDefaultState(getDefaultState().with(WATERLOGGED, false));
 	}
 
@@ -88,8 +77,11 @@ public class TrunkShellBlock extends BlockWithDynamicHardness implements Waterlo
 	}
 
 	@Override
-	public boolean onDestroyedByPlayer(BlockState state, World world, BlockPos pos, PlayerEntity player, boolean willHarvest, FluidState fluid) {
-		return Null.applyIfNonnull(this.getMuse(world, state, pos), muse -> muse.state.getBlock().onDestroyedByPlayer(muse.state, world, muse.pos, player, willHarvest, world.getFluidState(pos)), false);
+	public void onBreak(World world, BlockPos pos, BlockState state, PlayerEntity player) {
+		var muse = this.getMuse(world, state, pos);
+		if (muse == null) return;
+
+		super.onBreak(world, muse.pos, muse.state, player);
 	}
 
 	///////////////////////////////////////////
@@ -213,8 +205,11 @@ public class TrunkShellBlock extends BlockWithDynamicHardness implements Waterlo
 	}
 
 	@Override
-	public void onBlockExploded(BlockState state, World world, BlockPos pos, Explosion explosion) {
-		Null.consumeIfNonnull(this.getMuse(world, state, pos), muse -> muse.state.getBlock().onBlockExploded(muse.state, world, muse.pos, explosion));
+	public void onDestroyedByExplosion(World world, BlockPos pos, Explosion explosion) {
+		var muse = this.getMuse(world, world.getBlockState(pos), pos);
+		if (muse == null) return;
+
+		super.onDestroyedByExplosion(world, muse.pos, explosion);
 	}
 
 //    @Override

@@ -1,12 +1,11 @@
 package io.github.steveplays28.dynamictreesfabric.blocks.branches;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
 import io.github.steveplays28.dynamictreesfabric.api.TreeHelper;
 import io.github.steveplays28.dynamictreesfabric.trees.Family;
 import io.github.steveplays28.dynamictreesfabric.util.CoordUtils;
 import io.github.steveplays28.dynamictreesfabric.util.RootConnections;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -52,7 +51,7 @@ public class SurfaceRootBlock extends Block implements Waterloggable {
 	}
 
 	public SurfaceRootBlock(Material material, Family family) {
-		super(Block.Properties.of(material)
+		super(Settings.of(material)
 //                .harvestTool(ToolType.AXE)
 //                .harvestLevel(0)
 				.strength(2.5f, 1.0F)
@@ -212,7 +211,7 @@ public class SurfaceRootBlock extends Block implements Waterloggable {
 	}
 
 	@Override
-	public boolean onDestroyedByPlayer(BlockState state, World world, BlockPos pos, PlayerEntity player, boolean willHarvest, FluidState fluid) {
+	public void onBreak(World world, BlockPos pos, BlockState state, PlayerEntity player) {
 		final BlockState upstate = world.getBlockState(pos.up());
 
 		if (upstate.getBlock() instanceof TrunkShellBlock) {
@@ -224,7 +223,7 @@ public class SurfaceRootBlock extends Block implements Waterloggable {
 			world.getBlockState(dPos).neighborUpdate(world, dPos, this, pos, false);
 		}
 
-		return super.onDestroyedByPlayer(state, world, pos, player, willHarvest, fluid);
+		super.onBreak(world, pos, state, player);
 	}
 
 	@Override

@@ -1,15 +1,5 @@
 package io.github.steveplays28.dynamictreesfabric.blocks.branches;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
 import io.github.steveplays28.dynamictreesfabric.api.FutureBreakable;
 import io.github.steveplays28.dynamictreesfabric.api.TreeHelper;
 import io.github.steveplays28.dynamictreesfabric.api.network.MapSignal;
@@ -29,43 +19,37 @@ import io.github.steveplays28.dynamictreesfabric.systems.nodemappers.SpeciesNode
 import io.github.steveplays28.dynamictreesfabric.systems.nodemappers.StateNode;
 import io.github.steveplays28.dynamictreesfabric.trees.Family;
 import io.github.steveplays28.dynamictreesfabric.trees.Species;
-import io.github.steveplays28.dynamictreesfabric.util.BlockBounds;
-import io.github.steveplays28.dynamictreesfabric.util.BlockStates;
-import io.github.steveplays28.dynamictreesfabric.util.BranchDestructionData;
-import io.github.steveplays28.dynamictreesfabric.util.Connections;
-import io.github.steveplays28.dynamictreesfabric.util.SimpleVoxmap;
+import io.github.steveplays28.dynamictreesfabric.util.*;
 import io.github.steveplays28.dynamictreesfabric.util.SimpleVoxmap.Cell;
-import net.minecraftforge.common.ForgeMod;
-import net.minecraftforge.common.ToolActions;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockRenderType;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.Material;
+import net.minecraft.block.*;
 import net.minecraft.block.piston.PistonBehavior;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.pathing.NavigationType;
+import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.random.Random;
-import net.minecraft.world.BlockRenderView;
-import net.minecraft.world.BlockView;
-import net.minecraft.world.RaycastContext;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldAccess;
+import net.minecraft.world.*;
 import net.minecraft.world.explosion.Explosion;
+
+import net.minecraftforge.common.ForgeMod;
+import net.minecraftforge.common.ToolActions;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("deprecation")
 public abstract class BranchBlock extends BlockWithDynamicHardness implements TreePart, FutureBreakable {
@@ -191,10 +175,9 @@ public abstract class BranchBlock extends BlockWithDynamicHardness implements Tr
 	}
 
 	public boolean canBeStripped(BlockState state, World world, BlockPos pos, PlayerEntity player, ItemStack heldItem) {
-		final int stripRadius = DTConfigs.MIN_RADIUS_FOR_STRIP.get();
-		return stripRadius != 0 && stripRadius <= this.getRadius(state) && this.canBeStripped && heldItem.canPerformAction(ToolActions.AXE_STRIP);
+		final int stripRadius = DTConfigs.MIN_RADIUS_FOR_STRIP;
+		return stripRadius != 0 && stripRadius <= this.getRadius(state) && this.canBeStripped && player.canHarvest(state);
 	}
-
 
 	public void stripBranch(BlockState state, World world, BlockPos pos, PlayerEntity player, ItemStack heldItem) {
 		final int radius = this.getRadius(state);
@@ -218,11 +201,11 @@ public abstract class BranchBlock extends BlockWithDynamicHardness implements Tr
 		);
 	}
 
-	@Override
-	public ItemStack getCloneItemStack(BlockState state, HitResult target, BlockView world, BlockPos pos, PlayerEntity player) {
-		return this.getFamily().getBranchItem().map(ItemStack::new).orElse(ItemStack.EMPTY);
-	}
-
+	// TODO: FABRIC PORT: More ItemStack stuff
+//	@Override
+//	public ItemStack getCloneItemStack(BlockState state, HitResult target, BlockView world, BlockPos pos, PlayerEntity player) {
+//		return this.getFamily().getBranchItem().map(ItemStack::new).orElse(ItemStack.EMPTY);
+//	}
 
 	@Override
 	public boolean canPathfindThrough(BlockState state, BlockView worldIn, BlockPos pos, NavigationType type) {
@@ -233,7 +216,7 @@ public abstract class BranchBlock extends BlockWithDynamicHardness implements Tr
 	// RENDERING
 	///////////////////////////////////////////
 
-	public Connections getConnectionData(@Nonnull BlockRenderView world, @Nonnull BlockPos pos, @Nonnull BlockState state) {
+	public Connections getConnectionData(@NotNull BlockRenderView world, @NotNull BlockPos pos, @NotNull BlockState state) {
 		final Connections connections = new Connections();
 
 		if (state.getBlock() != this) {
@@ -431,7 +414,7 @@ public abstract class BranchBlock extends BlockWithDynamicHardness implements Tr
 	///////////////////////////////////////////
 
 	public List<ItemStack> getLogDrops(World world, BlockPos pos, Species species, NetVolumeNode.Volume volume, ItemStack handStack) {
-		volume.multiplyVolume(DTConfigs.TREE_HARVEST_MULTIPLIER.get()); // For cheaters.. you know who you are.
+		volume.multiplyVolume(DTConfigs.TREE_HARVEST_MULTIPLIER); // For cheaters.. you know who you are.
 		return species.getDrops(
 				DropCreator.Type.LOGS,
 				new LogDropContext(world, pos, species, new ArrayList<>(), volume, handStack)
@@ -541,7 +524,7 @@ public abstract class BranchBlock extends BlockWithDynamicHardness implements Tr
 
 		int damage;
 
-		switch (DTConfigs.AXE_DAMAGE_MODE.get()) {
+		switch (DTConfigs.AXE_DAMAGE_MODE) {
 			default:
 			case VANILLA:
 				damage = 1;
