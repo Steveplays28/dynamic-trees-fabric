@@ -9,7 +9,7 @@ import io.github.steveplays28.dynamictreesfabric.deserialisation.result.Result;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -43,7 +43,7 @@ public class ConfigurationProperty<T> {
 	 * @param <T>        The value the property will store.
 	 * @return The new {@link ConfigurationProperty} object.
 	 */
-	public static <T> ConfigurationProperty<T> property(String identifier, @Nonnull Class<T> type) {
+	public static <T> ConfigurationProperty<T> property(String identifier, @NotNull Class<T> type) {
 		Objects.requireNonNull(type);
 		return new ConfigurationProperty<>(identifier, type);
 	}

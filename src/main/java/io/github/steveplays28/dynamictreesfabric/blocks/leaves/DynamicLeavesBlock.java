@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import io.github.steveplays28.dynamictreesfabric.api.Ageable;
@@ -139,7 +139,7 @@ public class DynamicLeavesBlock extends LeavesBlock implements TreePart, Ageable
 		return this.getFlammability(state, world, pos, face) > 0 || face == Direction.UP;
 	}
 
-	@Nonnull
+	@NotNull
 	public BlockState getStateForNeighborUpdate(@Nonnull BlockState stateIn, Direction facing, BlockState facingState, @Nonnull WorldAccess worldIn, @Nonnull BlockPos currentPos, BlockPos facingPos) {
 		return stateIn;
 	}
@@ -589,7 +589,7 @@ public class DynamicLeavesBlock extends LeavesBlock implements TreePart, Ageable
 	}
 
 	@Override
-	public boolean isShearable(@Nonnull ItemStack item, World world, BlockPos pos) {
+	public boolean isShearable(@NotNull ItemStack item, World world, BlockPos pos) {
 		return this.getProperties(world.getBlockState(pos)).doRequireShears();
 	}
 

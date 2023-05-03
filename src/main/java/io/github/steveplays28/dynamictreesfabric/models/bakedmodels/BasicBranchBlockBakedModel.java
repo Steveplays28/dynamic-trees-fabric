@@ -6,11 +6,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.google.common.collect.Maps;
-import com.mojang.math.Vector3f;
+import net.minecraft.util.math.Vector3f;
 import io.github.steveplays28.dynamictreesfabric.blocks.branches.BasicBranchBlock;
 import io.github.steveplays28.dynamictreesfabric.blocks.branches.BranchBlock;
 import io.github.steveplays28.dynamictreesfabric.client.ModelUtils;
@@ -167,9 +167,10 @@ public class BasicBranchBlockBakedModel extends BranchBlockBakedModel {
 		}
 	}
 
-	@Nonnull
+	@NotNull
+
 	@Override
-	public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @Nonnull Random rand, @Nonnull ModelData extraData, @Nullable RenderLayer renderType) {
+	public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @NotNull Random rand, @NotNull ModelData extraData, @Nullable RenderLayer renderType) {
 		if (state == null || side != null) {
 			return Collections.emptyList();
 		}
@@ -242,9 +243,9 @@ public class BasicBranchBlockBakedModel extends BranchBlockBakedModel {
 	/**
 	 * Checks all neighboring tree parts to determine the connection radius for each side of this branch block.
 	 */
-	@Nonnull
+	@NotNull
 	@Override
-	public ModelData getModelData(@Nonnull BlockRenderView world, @Nonnull BlockPos pos, @Nonnull BlockState state, @Nonnull ModelData tileData) {
+	public ModelData getModelData(@NotNull BlockRenderView world, @NotNull BlockPos pos, @NotNull BlockState state, @NotNull ModelData tileData) {
 		ModelConnections modelConnections;
 		if (state.getBlock() instanceof BranchBlock branchBlock) {
 			modelConnections = new ModelConnections(branchBlock.getConnectionData(world, pos, state)).setFamily(branchBlock.getFamily());
@@ -319,7 +320,7 @@ public class BasicBranchBlockBakedModel extends BranchBlockBakedModel {
 		return false;
 	}
 
-	@Nonnull
+	@NotNull
 	@Override
 	public ModelOverrideList getOverrides() {
 		return ModelOverrideList.EMPTY;

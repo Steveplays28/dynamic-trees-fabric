@@ -1,6 +1,6 @@
 package io.github.steveplays28.dynamictreesfabric.blocks.branches;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import io.github.steveplays28.dynamictreesfabric.api.TreeHelper;
@@ -139,7 +139,7 @@ public class SurfaceRootBlock extends Block implements Waterloggable {
 	// RENDERING
 	///////////////////////////////////////////
 
-	@Nonnull
+	@NotNull
 	@Override
 	public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
 		boolean connectionMade = false;

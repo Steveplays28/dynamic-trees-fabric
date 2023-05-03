@@ -10,14 +10,12 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import io.github.steveplays28.dynamictreesfabric.api.TreeRegistry;
 import io.github.steveplays28.dynamictreesfabric.util.CommonCollectors;
-import net.minecraftforge.fml.ModLoader;
-import net.minecraftforge.registries.ForgeRegistry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Marker;
@@ -309,7 +307,7 @@ public abstract class AbstractRegistry<V extends RegistryEntry<V>> implements Re
 				.filter(RegistryEntry::shouldGenerateData);
 	}
 
-	@Nonnull
+	@NotNull
 	@Override
 	public final Iterator<V> iterator() {
 		return this.getAll().iterator();

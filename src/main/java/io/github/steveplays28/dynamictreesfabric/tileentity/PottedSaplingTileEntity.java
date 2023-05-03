@@ -1,6 +1,6 @@
 package io.github.steveplays28.dynamictreesfabric.tileentity;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import io.github.steveplays28.dynamictreesfabric.api.TreeRegistry;
@@ -105,7 +105,7 @@ public class PottedSaplingTileEntity extends BlockEntity {
 		tag.putString(SPECIES_TAG, this.species.getRegistryName().toString());
 	}
 
-	@Nonnull
+	@NotNull
 	@Override
 	public ModelData getModelData() {
 		return ModelData.builder().with(POT_MIMIC, potState).with(SPECIES, species).build();

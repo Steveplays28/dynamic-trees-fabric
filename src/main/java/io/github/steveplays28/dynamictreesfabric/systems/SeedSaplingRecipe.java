@@ -4,7 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.mojang.serialization.Codec;
@@ -76,17 +76,17 @@ public class SeedSaplingRecipe {
 		return this.getSaplingItem().isPresent();
 	}
 
-	@Nonnull
+	@NotNull
 	public Optional<Block> getSaplingBlock() {
 		return Optionals.ofBlock(saplingBlock);
 	}
 
-	@Nonnull
+	@NotNull
 	public List<Item> getIngredientsForSaplingToSeed() {
 		return new LinkedList<>(extraIngredientsForSaplingToSeed);
 	}
 
-	@Nonnull
+	@NotNull
 	public List<Item> getIngredientsForSeedToSapling() {
 		return new LinkedList<>(extraIngredientsForSeedToSapling);
 	}

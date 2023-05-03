@@ -7,7 +7,6 @@ import io.github.steveplays28.dynamictreesfabric.blocks.branches.BranchBlock;
 import io.github.steveplays28.dynamictreesfabric.blocks.leaves.DynamicLeavesBlock;
 import io.github.steveplays28.dynamictreesfabric.blocks.leaves.LeavesProperties;
 import io.github.steveplays28.dynamictreesfabric.cells.LeafClusters;
-import io.github.steveplays28.dynamictreesfabric.compat.seasons.SeasonHelper;
 import io.github.steveplays28.dynamictreesfabric.data.DTBlockTags;
 import io.github.steveplays28.dynamictreesfabric.event.SpeciesPostGenerationEvent;
 import io.github.steveplays28.dynamictreesfabric.systems.genfeatures.context.PostGenerationContext;
@@ -267,10 +266,10 @@ public class JoCode {
 		}
 
 		// Allow for special decorations by the tree itself.
-		species.postGeneration(new PostGenerationContext(world, rootPos, species, biome, radius, endPoints,
-				safeBounds, initialDirtState, SeasonHelper.getSeasonValue(worldObj, rootPos),
-				species.seasonalFruitProductionFactor(worldObj, rootPos)));
-		MinecraftForge.EVENT_BUS.post(new SpeciesPostGenerationEvent(world, species, rootPos, endPoints, safeBounds, initialDirtState));
+		//species.postGeneration(new PostGenerationContext(world, rootPos, species, biome, radius, endPoints,
+		//		safeBounds, initialDirtState, SeasonHelper.getSeasonValue(worldObj, rootPos),
+		//		species.seasonalFruitProductionFactor(worldObj, rootPos)));
+		//MinecraftForge.EVENT_BUS.post(new SpeciesPostGenerationEvent(world, species, rootPos, endPoints, safeBounds, initialDirtState));
 
 		// Add snow to parts of the tree in chunks where snow was already placed.
 		this.addSnow(leafMap, world, rootPos, biome);

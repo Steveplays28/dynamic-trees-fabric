@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 
 import com.google.common.collect.Iterables;
 import io.github.steveplays28.dynamictreesfabric.api.TreeHelper;
@@ -493,7 +493,7 @@ public class FallingTreeEntity extends Entity implements ModelTracker {
 		}
 	}
 
-	@Nonnull
+	@NotNull
 	@Override
 	public Packet<?> createSpawnPacket() {
 		return NetworkHooks.getEntitySpawningPacket(this);

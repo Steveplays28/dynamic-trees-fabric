@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import io.github.steveplays28.dynamictreesfabric.api.RootyBlockDecayer;
@@ -57,6 +57,8 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 import net.minecraft.world.WorldView;
 import net.minecraft.world.explosion.Explosion;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 
 /**
  * A version of Rooty Dirt block that holds on to a species with a TileEntity.
@@ -174,9 +176,9 @@ public class RootyBlock extends BlockWithDynamicHardness implements TreePart, Bl
 		return getPrimitiveSoilBlock().isFireSource(getDecayBlockState(state, world, pos), world, pos, side);
 	}
 
-	@Nonnull
+	@NotNull
 	@Override
-	public List<ItemStack> getDroppedStacks(@Nonnull BlockState state, @Nonnull LootContext.Builder builder) {
+	public List<ItemStack> getDroppedStacks(@NotNull BlockState state, @NotNull LootContext.Builder builder) {
 		return getPrimitiveSoilState(state).getDroppedStacks(builder);
 	}
 
@@ -317,7 +319,7 @@ public class RootyBlock extends BlockWithDynamicHardness implements TreePart, Bl
 	}
 
 	@Override
-	public void onBreak(World world, @Nonnull BlockPos pos, BlockState state, @Nonnull PlayerEntity player) {
+	public void onBreak(World world, @NotNull BlockPos pos, BlockState state, @NotNull PlayerEntity player) {
 		this.destroyTree(world, pos);
 		super.onBreak(world, pos, state, player);
 	}
@@ -329,7 +331,7 @@ public class RootyBlock extends BlockWithDynamicHardness implements TreePart, Bl
 	}
 
 
-	@Nonnull
+	@NotNull
 	@Override
 	public PistonBehavior getPistonBehavior(BlockState state) {
 		return PistonBehavior.BLOCK;

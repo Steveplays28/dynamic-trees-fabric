@@ -2,7 +2,7 @@ package io.github.steveplays28.dynamictreesfabric.util;
 
 import java.util.function.Supplier;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * @author Harley O'Connor
@@ -17,6 +17,6 @@ public interface MutableLazyValue<T> {
 
 	void reset(Supplier<T> supplier);
 
-	void set(@Nonnull T value);
+	void set(@NotNull T value);
 
 }
