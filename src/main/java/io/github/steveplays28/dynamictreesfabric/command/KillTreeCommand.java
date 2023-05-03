@@ -3,13 +3,12 @@ package io.github.steveplays28.dynamictreesfabric.command;
 import io.github.steveplays28.dynamictreesfabric.api.TreeHelper;
 import io.github.steveplays28.dynamictreesfabric.util.CommandHelper;
 import com.mojang.brigadier.builder.ArgumentBuilder;
-import net.minecraft.ChatFormatting;
-import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Component;
-import net.minecraft.world.level.Level;
-
 import java.util.Objects;
+import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 
 public final class KillTreeCommand extends SubCommand {
 
@@ -24,16 +23,16 @@ public final class KillTreeCommand extends SubCommand {
     }
 
     @Override
-    public ArgumentBuilder<CommandSourceStack, ?> registerArgument() {
+    public ArgumentBuilder<ServerCommandSource, ?> registerArgument() {
         return blockPosArgument().executes(context -> executesSuccess(() -> this.killTree(context.getSource(), rootPosArgument(context))));
     }
 
-    private void killTree(final CommandSourceStack source, final BlockPos rootPos) {
-        final Level world = source.getLevel();
+    private void killTree(final ServerCommandSource source, final BlockPos rootPos) {
+        final World world = source.getWorld();
 
         Objects.requireNonNull(TreeHelper.getRooty(world.getBlockState(rootPos))).destroyTree(world, rootPos);
-        sendSuccessAndLog(source, Component.translatable("commands.dynamictrees.success.kill_tree",
-                CommandHelper.posComponent(rootPos, ChatFormatting.AQUA)));
+        sendSuccessAndLog(source, Text.translatable("commands.dynamictrees.success.kill_tree",
+                CommandHelper.posComponent(rootPos, Formatting.AQUA)));
     }
 
 }

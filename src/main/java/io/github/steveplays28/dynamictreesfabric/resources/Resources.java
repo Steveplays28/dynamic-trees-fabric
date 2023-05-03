@@ -13,13 +13,13 @@ import io.github.steveplays28.dynamictreesfabric.systems.dropcreators.DropCreato
 import io.github.steveplays28.dynamictreesfabric.systems.genfeatures.GenFeature;
 import io.github.steveplays28.dynamictreesfabric.systems.genfeatures.GenFeatureConfiguration;
 import com.google.common.collect.ImmutableMap;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.ReloadableServerResources;
-import net.minecraft.server.packs.resources.PreparableReloadListener;
-import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.util.profiling.ProfilerFiller;
-import net.minecraft.world.item.crafting.Recipe;
-import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.recipe.Recipe;
+import net.minecraft.recipe.RecipeType;
+import net.minecraft.resource.ResourceManager;
+import net.minecraft.resource.ResourceReloader;
+import net.minecraft.server.DataPackContents;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.profiler.Profiler;
 import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModList;
@@ -43,7 +43,7 @@ import java.util.concurrent.Executor;
 @Mod.EventBusSubscriber(modid = io.github.steveplays28.dynamictreesfabric.DynamicTreesFabric.MOD_ID)
 public final class Resources {
 
-    public static final ResourceLocation RESOURCE_LOCATION = io.github.steveplays28.dynamictreesfabric.DynamicTreesFabric.resLoc("registry_name");
+    public static final Identifier RESOURCE_LOCATION = io.github.steveplays28.dynamictreesfabric.DynamicTreesFabric.resLoc("registry_name");
 
     public static final String TREES = "trees";
 
@@ -90,7 +90,7 @@ public final class Resources {
         registerModTreePacks();
         registerFlatTreePack();
 
-        LogManager.getLogger().debug("Successfully loaded " + MANAGER.listPacks().count() + " tree packs.");
+        LogManager.getLogger().debug("Successfully loaded " + MANAGER.streamResourcePacks().count() + " tree packs.");
     }
 
     private static void addDefaultLoaders() {
@@ -157,23 +157,23 @@ public final class Resources {
      * Listens for datapack reloads for actions such as reloading the trees resource manager and registering dirt bucket
      * recipes.
      */
-    public static final class ReloadListener implements PreparableReloadListener {
-        private final ReloadableServerResources dataPackRegistries;
+    public static final class ReloadListener implements ResourceReloader {
+        private final DataPackContents dataPackRegistries;
 
-        public ReloadListener(ReloadableServerResources dataPackRegistries) {
+        public ReloadListener(DataPackContents dataPackRegistries) {
             this.dataPackRegistries = dataPackRegistries;
         }
 
 
         @Override
-        public CompletableFuture<Void> reload(PreparationBarrier stage, ResourceManager resourceManager,
-                                              ProfilerFiller preparationsProfiler, ProfilerFiller reloadProfiler,
+        public CompletableFuture<Void> reload(Synchronizer stage, ResourceManager resourceManager,
+                                              Profiler preparationsProfiler, Profiler reloadProfiler,
                                               Executor backgroundExecutor, Executor gameExecutor) {
             final CompletableFuture<?>[] futures = MANAGER.prepareReload(gameExecutor, backgroundExecutor);
 
             // Reload all reload listeners in the trees resource manager and registers dirt bucket recipes.
             return CompletableFuture.allOf(futures)
-                    .thenCompose(stage::wait)
+                    .thenCompose(stage::whenPrepared)
                     .thenAcceptAsync(v -> MANAGER.reload(futures), gameExecutor)
                     .thenRunAsync(this::registerDirtBucketRecipes, gameExecutor);
         }
@@ -183,7 +183,7 @@ public final class Resources {
                 return;
             }
 
-            final Map<RecipeType<?>, Map<ResourceLocation, Recipe<?>>> recipes = new HashMap<>();
+            final Map<RecipeType<?>, Map<Identifier, Recipe<?>>> recipes = new HashMap<>();
 
             // Put the recipes into the new map and make each type's recipes mutable.
             this.dataPackRegistries.getRecipeManager().recipes.forEach(((recipeType, currentRecipes) ->

@@ -4,11 +4,11 @@ import io.github.steveplays28.dynamictreesfabric.deserialisation.result.JsonResu
 import io.github.steveplays28.dynamictreesfabric.deserialisation.result.Result;
 import io.github.steveplays28.dynamictreesfabric.systems.SeedSaplingRecipe;
 import io.github.steveplays28.dynamictreesfabric.util.JsonMapWrapper;
+import net.minecraft.block.Block;
+import net.minecraft.item.Item;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.serialization.JsonOps;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.level.block.Block;
 
 public final class SeedSaplingRecipeDeserialiser implements JsonDeserialiser<SeedSaplingRecipe> {
 

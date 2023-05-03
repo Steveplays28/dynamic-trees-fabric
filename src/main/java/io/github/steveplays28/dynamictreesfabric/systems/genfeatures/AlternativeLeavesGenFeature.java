@@ -11,25 +11,24 @@ import io.github.steveplays28.dynamictreesfabric.systems.nodemappers.FindEndsNod
 import io.github.steveplays28.dynamictreesfabric.trees.Species;
 import io.github.steveplays28.dynamictreesfabric.util.BlockBounds;
 import io.github.steveplays28.dynamictreesfabric.util.SafeChunkBounds;
-import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.LeavesBlock;
-import net.minecraft.world.level.block.state.BlockState;
-
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.LeavesBlock;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
+import net.minecraft.world.WorldAccess;
 
 public class AlternativeLeavesGenFeature extends GenFeature {
 
     public static final ConfigurationProperty<LeavesProperties> ALT_LEAVES = ConfigurationProperty.property("alternative_leaves", LeavesProperties.class);
     public static final ConfigurationProperty<Block> ALT_LEAVES_BLOCK = ConfigurationProperty.block("alternative_leaves_block");
 
-    public AlternativeLeavesGenFeature(ResourceLocation registryName) {
+    public AlternativeLeavesGenFeature(Identifier registryName) {
         super(registryName);
     }
 
@@ -64,7 +63,7 @@ public class AlternativeLeavesGenFeature extends GenFeature {
             return false;
         }
 
-        final Level world = context.world();
+        final World world = context.world();
         final Species species = context.species();
 
         final FindEndsNode endFinder = new FindEndsNode();
@@ -88,32 +87,32 @@ public class AlternativeLeavesGenFeature extends GenFeature {
         return properties.getDynamicLeavesBlock().get();
     }
 
-    private BlockState getSwapBlockState(GenFeatureConfiguration configuration, LevelAccessor world, Species species, BlockState state, boolean worldgen) {
+    private BlockState getSwapBlockState(GenFeatureConfiguration configuration, WorldAccess world, Species species, BlockState state, boolean worldgen) {
         DynamicLeavesBlock originalLeaves = species.getLeavesBlock().orElse(null);
         Block alt = getAltLeavesBlock(configuration);
         DynamicLeavesBlock altLeaves = alt instanceof DynamicLeavesBlock ? (DynamicLeavesBlock) alt : null;
         if (originalLeaves != null && altLeaves != null) {
             if (worldgen || world.getRandom().nextFloat() < configuration.get(PLACE_CHANCE)) {
                 if (state.getBlock() == originalLeaves) {
-                    return altLeaves.properties.getDynamicLeavesState(state.getValue(LeavesBlock.DISTANCE));
+                    return altLeaves.properties.getDynamicLeavesState(state.get(LeavesBlock.DISTANCE));
                 }
             } else {
                 if (state.getBlock() == altLeaves) {
-                    return originalLeaves.properties.getDynamicLeavesState(state.getValue(LeavesBlock.DISTANCE));
+                    return originalLeaves.properties.getDynamicLeavesState(state.get(LeavesBlock.DISTANCE));
                 }
             }
         }
         return state;
     }
 
-    private boolean setAltLeaves(GenFeatureConfiguration configuration, LevelAccessor world, BlockBounds leafPositions, SafeChunkBounds safeBounds, Species species) {
+    private boolean setAltLeaves(GenFeatureConfiguration configuration, WorldAccess world, BlockBounds leafPositions, SafeChunkBounds safeBounds, Species species) {
         boolean worldGen = safeBounds != SafeChunkBounds.ANY;
 
         if (worldGen) {
             AtomicBoolean isSet = new AtomicBoolean(false);
             leafPositions.iterator().forEachRemaining((pos) -> {
                 if (safeBounds.inBounds(pos, true) && world.getRandom().nextFloat() < configuration.get(PLACE_CHANCE)) {
-                    if (world.setBlock(pos, getSwapBlockState(configuration, world, species, world.getBlockState(pos), true), 2)) {
+                    if (world.setBlockState(pos, getSwapBlockState(configuration, world, species, world.getBlockState(pos), true), 2)) {
                         isSet.set(true);
                     }
                 }
@@ -130,7 +129,7 @@ public class AlternativeLeavesGenFeature extends GenFeature {
             }
             for (int i = 0; i < configuration.get(QUANTITY); i++) {
                 BlockPos pos = posList.get(world.getRandom().nextInt(posList.size()));
-                if (world.setBlock(pos, getSwapBlockState(configuration, world, species, world.getBlockState(pos), false), 2)) {
+                if (world.setBlockState(pos, getSwapBlockState(configuration, world, species, world.getBlockState(pos), false), 2)) {
                     isSet = true;
                 }
             }

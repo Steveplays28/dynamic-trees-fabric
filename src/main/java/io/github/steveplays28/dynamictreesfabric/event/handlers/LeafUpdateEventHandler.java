@@ -1,9 +1,9 @@
 package io.github.steveplays28.dynamictreesfabric.event.handlers;
 
 import io.github.steveplays28.dynamictreesfabric.api.TreeHelper;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
+import net.minecraft.world.WorldAccess;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -13,7 +13,7 @@ public class LeafUpdateEventHandler {
 
     @SubscribeEvent(priority = EventPriority.HIGH)
     public void UpdateNeighbour(BlockEvent.NeighborNotifyEvent event) {
-        LevelAccessor world = event.getLevel();
+        WorldAccess world = event.getLevel();
         for (Direction facing : event.getNotifiedSides()) {
             BlockPos blockPos = event.getPos().relative(facing);
             if (TreeHelper.isLeaves(world.getBlockState(blockPos))) {

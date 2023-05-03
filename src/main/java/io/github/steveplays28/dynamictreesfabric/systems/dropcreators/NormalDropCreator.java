@@ -7,10 +7,9 @@ import io.github.steveplays28.dynamictreesfabric.systems.dropcreators.context.Dr
 import io.github.steveplays28.dynamictreesfabric.systems.dropcreators.context.LogDropContext;
 import io.github.steveplays28.dynamictreesfabric.systems.dropcreators.drops.Drops;
 import com.google.common.collect.Maps;
-import net.minecraft.resources.ResourceLocation;
-
 import java.util.HashMap;
 import java.util.Map;
+import net.minecraft.util.Identifier;
 
 /**
  * @author Harley O'Connor
@@ -28,7 +27,7 @@ public final class NormalDropCreator extends DropCreator {
         );
     }
 
-    public NormalDropCreator(ResourceLocation registryName) {
+    public NormalDropCreator(Identifier registryName) {
         super(registryName);
     }
 

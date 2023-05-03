@@ -11,10 +11,10 @@ import io.github.steveplays28.dynamictreesfabric.init.DTTrees;
 import io.github.steveplays28.dynamictreesfabric.systems.GrowSignal;
 import io.github.steveplays28.dynamictreesfabric.trees.Species;
 import io.github.steveplays28.dynamictreesfabric.util.MathHelper;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.block.BlockState;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 
 /**
  * A growth logic kit defines how/in what shape a tree should grow.
@@ -41,7 +41,7 @@ public abstract class GrowthLogicKit extends ConfigurableRegistryEntry<GrowthLog
     public static final ConfigurableRegistry<GrowthLogicKit, GrowthLogicKitConfiguration> REGISTRY =
             new ConfigurableRegistry<>(GrowthLogicKit.class, DEFAULT, GrowthLogicKitConfiguration.TEMPLATES);
 
-    public GrowthLogicKit(final ResourceLocation registryName) {
+    public GrowthLogicKit(final Identifier registryName) {
         super(registryName);
     }
 
@@ -111,11 +111,11 @@ public abstract class GrowthLogicKit extends ConfigurableRegistryEntry<GrowthLog
 
         for (Direction dir : Direction.values()) {
             if (!dir.equals(originDir)) {
-                final BlockPos deltaPos = context.pos().relative(dir);
+                final BlockPos deltaPos = context.pos().offset(dir);
                 // Check probability for surrounding blocks.
                 // Typically, Air: 1, Leaves: 2, Branches: 2 + radius
                 final BlockState deltaBlockState = context.world().getBlockState(deltaPos);
-                probMap[dir.get3DDataValue()] += TreeHelper.getTreePart(deltaBlockState)
+                probMap[dir.getId()] += TreeHelper.getTreePart(deltaBlockState)
                         .probabilityForBlock(deltaBlockState, context.world(), deltaPos, context.branch());
             }
         }

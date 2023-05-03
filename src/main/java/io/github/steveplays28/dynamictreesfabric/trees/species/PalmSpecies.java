@@ -15,15 +15,14 @@ import io.github.steveplays28.dynamictreesfabric.trees.Species;
 import io.github.steveplays28.dynamictreesfabric.util.BranchDestructionData;
 import io.github.steveplays28.dynamictreesfabric.util.CoordUtils;
 import io.github.steveplays28.dynamictreesfabric.util.SafeChunkBounds;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.block.LeavesBlock;
-import net.minecraft.world.level.block.state.BlockState;
-
 import javax.annotation.Nullable;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.LeavesBlock;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
+import net.minecraft.world.World;
+import net.minecraft.world.WorldAccess;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -32,13 +31,13 @@ import java.util.Set;
 public class PalmSpecies extends Species {
     public static final TypedRegistry.EntryType<Species> TYPE = createDefaultType(PalmSpecies::new);
 
-    public PalmSpecies(ResourceLocation name, Family family, LeavesProperties leavesProperties) {
+    public PalmSpecies(Identifier name, Family family, LeavesProperties leavesProperties) {
         super(name, family, leavesProperties);
         setGrowthLogicKit(GrowthLogicKits.PALM); //palm growth logic kit by default
     }
 
     @Override
-    public boolean postGrow(Level world, BlockPos rootPos, BlockPos treePos, int fertility, boolean natural) {
+    public boolean postGrow(World world, BlockPos rootPos, BlockPos treePos, int fertility, boolean natural) {
         BlockState trunkBlockState = world.getBlockState(treePos);
         BranchBlock branch = TreeHelper.getBranch(trunkBlockState);
         if (branch == null) {
@@ -54,7 +53,7 @@ public class PalmSpecies extends Species {
         }
 
         // Make sure the bottom block is always just a little thicker that the block above it.
-        int radius = branch.getRadius(world.getBlockState(treePos.above()));
+        int radius = branch.getRadius(world.getBlockState(treePos.up()));
         if (radius != 0) {
             branch.setRadius(world, treePos, radius + 1, null);
         }
@@ -62,17 +61,17 @@ public class PalmSpecies extends Species {
         return super.postGrow(world, rootPos, treePos, fertility, natural);
     }
 
-    public boolean transitionToTree(Level world, BlockPos pos) {
+    public boolean transitionToTree(World world, BlockPos pos) {
         //Ensure planting conditions are right
         Family family = getFamily();
-        if (world.isEmptyBlock(pos.above()) && isAcceptableSoil(world, pos.below(), world.getBlockState(pos.below()))) {
+        if (world.isAir(pos.up()) && isAcceptableSoil(world, pos.down(), world.getBlockState(pos.down()))) {
             family.getBranch().ifPresent(branch ->
                     // Set to a single branch with 1 radius.
                     branch.setRadius(world, pos, family.getPrimaryThickness(), null)
             );
-            world.setBlockAndUpdate(pos.above(), getLeavesProperties().getDynamicLeavesState().setValue(DynamicLeavesBlock.DISTANCE, 4));//Place 2 leaf blocks on top
-            world.setBlockAndUpdate(pos.above(2), getLeavesProperties().getDynamicLeavesState().setValue(DynamicLeavesBlock.DISTANCE, 3));
-            placeRootyDirtBlock(world, pos.below(), 15);//Set to fully fertilized rooty dirt underneath
+            world.setBlockState(pos.up(), getLeavesProperties().getDynamicLeavesState().with(DynamicLeavesBlock.DISTANCE, 4));//Place 2 leaf blocks on top
+            world.setBlockState(pos.up(2), getLeavesProperties().getDynamicLeavesState().with(DynamicLeavesBlock.DISTANCE, 3));
+            placeRootyDirtBlock(world, pos.down(), 15);//Set to fully fertilized rooty dirt underneath
             return true;
         }
         return false;
@@ -80,18 +79,18 @@ public class PalmSpecies extends Species {
 
     @Override
     public void postGeneration(PostGenerationContext context) {
-        final LevelAccessor world = context.world();
+        final WorldAccess world = context.world();
 
         if (!context.endPoints().isEmpty()) {
-            BlockPos tip = context.endPoints().get(0).above(2);
+            BlockPos tip = context.endPoints().get(0).up(2);
             if (context.bounds().inBounds(tip, true)) {
                 if (world.getBlockState(tip).getBlock() instanceof DynamicLeavesBlock) {
                     for (CoordUtils.Surround surr : CoordUtils.Surround.values()) {
-                        BlockPos leafPos = tip.offset(surr.getOffset());
+                        BlockPos leafPos = tip.add(surr.getOffset());
                         BlockState leafState = world.getBlockState(leafPos);
                         if (leafState.getBlock() instanceof DynamicLeavesBlock) {
                             DynamicLeavesBlock block = (DynamicLeavesBlock) leafState.getBlock();
-                            world.setBlock(leafPos, block.getLeavesBlockStateForPlacement(world, leafPos, leafState, leafState.getValue(LeavesBlock.DISTANCE), true), 2);
+                            world.setBlockState(leafPos, block.getLeavesBlockStateForPlacement(world, leafPos, leafState, leafState.get(LeavesBlock.DISTANCE), true), 2);
                         }
                     }
                 }
@@ -113,8 +112,8 @@ public class PalmSpecies extends Species {
         HashMap<BlockPos, BlockState> leaves = new HashMap<>();
 
         for (int i = 0; i < endPointsNum; i++) {
-            BlockPos relPos = destructionData.getEndPointRelPos(i).above(2);//A palm tree is only supposed to have one endpoint at it's top.
-            relPos = relPos.below();
+            BlockPos relPos = destructionData.getEndPointRelPos(i).up(2);//A palm tree is only supposed to have one endpoint at it's top.
+            relPos = relPos.down();
             LeavesProperties leavesProperties = destructionData.species.getLeavesProperties();
 
             Set<BlockPos> existingLeaves = new HashSet<>();
@@ -125,15 +124,15 @@ public class PalmSpecies extends Species {
             if (existingLeaves.contains(relPos)) {
                     leaves.put(relPos, leavesProperties.getDynamicLeavesState(4));//The barky overlapping part of the palm frond cluster
                 }
-            if (existingLeaves.contains(relPos.above())) {
-                leaves.put(relPos.above(), leavesProperties.getDynamicLeavesState(3));//The leafy top of the palm frond cluster
+            if (existingLeaves.contains(relPos.up())) {
+                leaves.put(relPos.up(), leavesProperties.getDynamicLeavesState(3));//The leafy top of the palm frond cluster
             }
 
             //The 4 corners and 4 sides of the palm frond cluster
             for (int hydro = 1; hydro <= 2; hydro++) {
                 BlockState state = leavesProperties.getDynamicLeavesState(hydro);
                 for (CoordUtils.Surround surr : PalmLeavesProperties.DynamicPalmLeavesBlock.hydroSurroundMap[hydro]) {
-                    BlockPos leafPos = relPos.above().offset(surr.getOpposite().getOffset());
+                    BlockPos leafPos = relPos.up().add(surr.getOpposite().getOffset());
                     if (existingLeaves.contains(leafPos)) {
                         leaves.put(leafPos, PalmLeavesProperties.DynamicPalmLeavesBlock.getDirectionState(state, surr));
                     }

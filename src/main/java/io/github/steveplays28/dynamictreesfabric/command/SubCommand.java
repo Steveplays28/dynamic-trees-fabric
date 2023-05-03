@@ -15,31 +15,30 @@ import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
-import net.minecraft.ChatFormatting;
-import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.Commands;
-import net.minecraft.commands.SharedSuggestionProvider;
-import net.minecraft.commands.arguments.ResourceLocationArgument;
-import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
-import net.minecraft.commands.arguments.coordinates.Coordinates;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Vec3i;
-import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
-
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import net.minecraft.command.CommandSource;
+import net.minecraft.command.argument.BlockPosArgumentType;
+import net.minecraft.command.argument.IdentifierArgumentType;
+import net.minecraft.command.argument.PosArgument;
+import net.minecraft.server.command.CommandManager;
+import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3i;
 
 /**
  * @author Harley O'Connor
  */
 public abstract class SubCommand {
 
-    protected static final DynamicCommandExceptionType NO_TREE_FOUND = new DynamicCommandExceptionType(pos -> Component.translatable("commands.dynamictrees.error.get_tree", Component.translatable("chat.coordinates", getVector3i(pos).getX(), getVector3i(pos).getY(), getVector3i(pos).getZ()).withStyle(style -> style.withColor(ChatFormatting.DARK_RED))));
-    protected static final DynamicCommandExceptionType SPECIES_UNKNOWN = new DynamicCommandExceptionType(resLocStr -> Component.translatable("commands.dynamictrees.error.unknown_species", darkRed(resLocStr)));
-    protected static final DynamicCommandExceptionType SPECIES_NOT_TRANSFORMABLE = new DynamicCommandExceptionType(nonTransformableSpecies -> Component.translatable("commands.dynamictrees.error.not_transformable", darkRed(nonTransformableSpecies)));
+    protected static final DynamicCommandExceptionType NO_TREE_FOUND = new DynamicCommandExceptionType(pos -> Text.translatable("commands.dynamictrees.error.get_tree", Text.translatable("chat.coordinates", getVector3i(pos).getX(), getVector3i(pos).getY(), getVector3i(pos).getZ()).styled(style -> style.withColor(Formatting.DARK_RED))));
+    protected static final DynamicCommandExceptionType SPECIES_UNKNOWN = new DynamicCommandExceptionType(resLocStr -> Text.translatable("commands.dynamictrees.error.unknown_species", darkRed(resLocStr)));
+    protected static final DynamicCommandExceptionType SPECIES_NOT_TRANSFORMABLE = new DynamicCommandExceptionType(nonTransformableSpecies -> Text.translatable("commands.dynamictrees.error.not_transformable", darkRed(nonTransformableSpecies)));
 
     private static Vec3i getVector3i(final Object vecObj) {
         if (vecObj instanceof Vec3i) {
@@ -62,15 +61,15 @@ public abstract class SubCommand {
      */
     protected abstract int getPermissionLevel();
 
-    public ArgumentBuilder<CommandSourceStack, ?> register() {
-        final LiteralArgumentBuilder<CommandSourceStack> argumentBuilder = Commands.literal(this.getName())
-                .requires(commandSource -> commandSource.hasPermission(this.getPermissionLevel()));
+    public ArgumentBuilder<ServerCommandSource, ?> register() {
+        final LiteralArgumentBuilder<ServerCommandSource> argumentBuilder = CommandManager.literal(this.getName())
+                .requires(commandSource -> commandSource.hasPermissionLevel(this.getPermissionLevel()));
 
         this.registerArguments().forEach(argumentBuilder::then);
         return argumentBuilder;
     }
 
-    protected List<ArgumentBuilder<CommandSourceStack, ?>> registerArguments() {
+    protected List<ArgumentBuilder<ServerCommandSource, ?>> registerArguments() {
         return Lists.newArrayList(this.registerArgument());
     }
 
@@ -79,75 +78,75 @@ public abstract class SubCommand {
      *
      * @return The {@link ArgumentBuilder} created.
      */
-    public abstract ArgumentBuilder<CommandSourceStack, ?> registerArgument();
+    public abstract ArgumentBuilder<ServerCommandSource, ?> registerArgument();
 
     protected static int executesSuccess(final ThrowableRunnable<CommandSyntaxException> executeRunnable) throws CommandSyntaxException {
         executeRunnable.run();
         return 1;
     }
 
-    protected static int executesSuccess(final CommandContext<CommandSourceStack> context, final Consumer<CommandContext<CommandSourceStack>> executeConsumer) {
+    protected static int executesSuccess(final CommandContext<ServerCommandSource> context, final Consumer<CommandContext<ServerCommandSource>> executeConsumer) {
         executeConsumer.accept(context);
         return 1;
     }
 
-    protected static RequiredArgumentBuilder<CommandSourceStack, Boolean> booleanArgument(final String name) {
-        return Commands.argument(name, BoolArgumentType.bool());
+    protected static RequiredArgumentBuilder<ServerCommandSource, Boolean> booleanArgument(final String name) {
+        return CommandManager.argument(name, BoolArgumentType.bool());
     }
 
-    protected static boolean booleanArgument(final CommandContext<CommandSourceStack> context, final String name) {
+    protected static boolean booleanArgument(final CommandContext<ServerCommandSource> context, final String name) {
         return BoolArgumentType.getBool(context, name);
     }
 
-    protected static RequiredArgumentBuilder<CommandSourceStack, Integer> intArgument(final String name) {
-        return Commands.argument(name, IntegerArgumentType.integer());
+    protected static RequiredArgumentBuilder<ServerCommandSource, Integer> intArgument(final String name) {
+        return CommandManager.argument(name, IntegerArgumentType.integer());
     }
 
-    protected static int intArgument(final CommandContext<CommandSourceStack> context, final String name) {
+    protected static int intArgument(final CommandContext<ServerCommandSource> context, final String name) {
         return IntegerArgumentType.getInteger(context, name);
     }
 
-    protected static RequiredArgumentBuilder<CommandSourceStack, String> stringArgument(final String name) {
-        return Commands.argument(name, StringArgumentType.string());
+    protected static RequiredArgumentBuilder<ServerCommandSource, String> stringArgument(final String name) {
+        return CommandManager.argument(name, StringArgumentType.string());
     }
 
-    protected static RequiredArgumentBuilder<CommandSourceStack, String> stringArgument(final String name, final Collection<String> suggestions) {
-        return Commands.argument(name, StringArgumentType.string()).suggests(((context, builder) -> SharedSuggestionProvider.suggest(suggestions, builder)));
+    protected static RequiredArgumentBuilder<ServerCommandSource, String> stringArgument(final String name, final Collection<String> suggestions) {
+        return CommandManager.argument(name, StringArgumentType.string()).suggests(((context, builder) -> CommandSource.suggestMatching(suggestions, builder)));
     }
 
-    protected static String stringArgument(final CommandContext<CommandSourceStack> context, final String name) {
+    protected static String stringArgument(final CommandContext<ServerCommandSource> context, final String name) {
         return StringArgumentType.getString(context, name);
     }
 
-    protected static RequiredArgumentBuilder<CommandSourceStack, Coordinates> blockPosArgument() {
-        return Commands.argument(CommandConstants.LOCATION, BlockPosArgument.blockPos());
+    protected static RequiredArgumentBuilder<ServerCommandSource, PosArgument> blockPosArgument() {
+        return CommandManager.argument(CommandConstants.LOCATION, BlockPosArgumentType.blockPos());
     }
 
-    protected static BlockPos blockPosArgument(final CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-        return BlockPosArgument.getLoadedBlockPos(context, CommandConstants.LOCATION);
+    protected static BlockPos blockPosArgument(final CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+        return BlockPosArgumentType.getLoadedBlockPos(context, CommandConstants.LOCATION);
     }
 
-    protected static BlockPos rootPosArgument(final CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+    protected static BlockPos rootPosArgument(final CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         final BlockPos pos = blockPosArgument(context);
-        final BlockPos rootPos = TreeHelper.findRootNode(context.getSource().getLevel(), pos);
+        final BlockPos rootPos = TreeHelper.findRootNode(context.getSource().getWorld(), pos);
 
-        if (rootPos == BlockPos.ZERO) {
+        if (rootPos == BlockPos.ORIGIN) {
             throw NO_TREE_FOUND.create(pos);
         }
 
         return rootPos;
     }
 
-    protected static RequiredArgumentBuilder<CommandSourceStack, ResourceLocation> speciesArgument() {
+    protected static RequiredArgumentBuilder<ServerCommandSource, Identifier> speciesArgument() {
         return resourceLocationArgument(CommandConstants.SPECIES, Species.REGISTRY::getRegistryNames);
     }
 
-    protected static RequiredArgumentBuilder<CommandSourceStack, ResourceLocation> transformableSpeciesArgument() {
+    protected static RequiredArgumentBuilder<ServerCommandSource, Identifier> transformableSpeciesArgument() {
         return resourceLocationArgument(CommandConstants.SPECIES, TreeRegistry::getTransformableSpeciesLocations);
     }
 
-    protected static Species speciesArgument(final CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-        final ResourceLocation registryName = ResourceLocationArgument.getId(context, CommandConstants.SPECIES);
+    protected static Species speciesArgument(final CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+        final Identifier registryName = IdentifierArgumentType.getIdentifier(context, CommandConstants.SPECIES);
         final Species species = TreeRegistry.findSpecies(registryName);
 
         if (!species.isValid()) {
@@ -157,31 +156,31 @@ public abstract class SubCommand {
         return species;
     }
 
-    protected static RequiredArgumentBuilder<CommandSourceStack, ResourceLocation> resourceLocationArgument(final String name, final Supplier<Collection<ResourceLocation>> suggestionsSupplier) {
-        return Commands.argument(name, ResourceLocationArgument.id())
-                .suggests((context, builder) -> SharedSuggestionProvider.suggestResource(suggestionsSupplier.get(), builder));
+    protected static RequiredArgumentBuilder<ServerCommandSource, Identifier> resourceLocationArgument(final String name, final Supplier<Collection<Identifier>> suggestionsSupplier) {
+        return CommandManager.argument(name, IdentifierArgumentType.identifier())
+                .suggests((context, builder) -> CommandSource.suggestIdentifiers(suggestionsSupplier.get(), builder));
     }
 
-    protected static Component aqua(final Object object) {
-        return CommandHelper.colour(object, ChatFormatting.AQUA);
+    protected static Text aqua(final Object object) {
+        return CommandHelper.colour(object, Formatting.AQUA);
     }
 
-    protected static Component darkRed(final Object object) {
-        return CommandHelper.colour(object, ChatFormatting.DARK_RED);
+    protected static Text darkRed(final Object object) {
+        return CommandHelper.colour(object, Formatting.DARK_RED);
     }
 
-    protected static void sendSuccess(final CommandSourceStack source, final Component component) {
-        source.sendSuccess(component.copy().withStyle(style -> style.withColor(ChatFormatting.GREEN)),
+    protected static void sendSuccess(final ServerCommandSource source, final Text component) {
+        source.sendFeedback(component.copy().styled(style -> style.withColor(Formatting.GREEN)),
                 false);
     }
 
-    protected static void sendSuccessAndLog(final CommandSourceStack source, final Component component) {
-        source.sendSuccess(component.copy().withStyle(style -> style.withColor(ChatFormatting.GREEN)),
+    protected static void sendSuccessAndLog(final ServerCommandSource source, final Text component) {
+        source.sendFeedback(component.copy().styled(style -> style.withColor(Formatting.GREEN)),
                 true);
     }
 
-    protected static void sendFailure(final CommandSourceStack source, final Component component) {
-        source.sendFailure(component.copy().withStyle(style -> style.withColor(ChatFormatting.RED)));
+    protected static void sendFailure(final ServerCommandSource source, final Text component) {
+        source.sendError(component.copy().styled(style -> style.withColor(Formatting.RED)));
     }
 
 }

@@ -12,12 +12,12 @@ import io.github.steveplays28.dynamictreesfabric.util.holderset.NameRegexMatchHo
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.minecraft.ResourceLocationException;
-import net.minecraft.core.HolderSet;
-import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagKey;
-import net.minecraft.world.level.biome.Biome;
+import net.minecraft.registry.Registry;
+import net.minecraft.registry.entry.RegistryEntryList;
+import net.minecraft.registry.tag.TagKey;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.InvalidIdentifierException;
+import net.minecraft.world.biome.Biome;
 import net.minecraftforge.registries.holdersets.OrHolderSet;
 import net.minecraftforge.server.ServerLifecycleHooks;
 import org.apache.logging.log4j.LogManager;
@@ -44,11 +44,11 @@ public final class BiomeListDeserialiser implements JsonDeserialiser<DTBiomeHold
             tagString = tagString.substring(1);
 
         try {
-            ResourceLocation tagLocation = new ResourceLocation(tagString);
-            TagKey<Biome> tagKey = TagKey.create(Registry.BIOME_REGISTRY, tagLocation);
+            Identifier tagLocation = new Identifier(tagString);
+            TagKey<Biome> tagKey = TagKey.of(Registry.BIOME_REGISTRY, tagLocation);
 
             (notOperator ? biomeList.getExcludeComponents() : biomeList.getIncludeComponents()).add(new DelayedTagEntriesHolderSet<>(DELAYED_BIOME_REGISTRY, tagKey));
-        } catch (ResourceLocationException e) {
+        } catch (InvalidIdentifierException e) {
             return PropertyApplierResult.failure(e.getMessage());
         }
 
@@ -73,8 +73,8 @@ public final class BiomeListDeserialiser implements JsonDeserialiser<DTBiomeHold
                 .mapEachIfArray(String.class, (Result.SimpleMapper<String, String>) String::toLowerCase)
                 .orElse(Collections.emptyList(), LogManager.getLogger()::error, LogManager.getLogger()::warn);
 
-        List<HolderSet<Biome>> orIncludes = new ArrayList<>();
-        List<HolderSet<Biome>> orExcludes = new ArrayList<>();
+        List<RegistryEntryList<Biome>> orIncludes = new ArrayList<>();
+        List<RegistryEntryList<Biome>> orExcludes = new ArrayList<>();
         nameRegexes.forEach(nameRegex -> {
             nameRegex = nameRegex.toLowerCase();
             final boolean notOperator = usingNotOperator(nameRegex);

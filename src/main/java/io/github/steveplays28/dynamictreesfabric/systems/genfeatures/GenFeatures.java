@@ -1,7 +1,7 @@
 package io.github.steveplays28.dynamictreesfabric.systems.genfeatures;
 
 import io.github.steveplays28.dynamictreesfabric.api.registry.Registry;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Identifier;
 
 /**
  * Stores all {@link GenFeature} objects created by Dynamic Trees.
@@ -44,8 +44,8 @@ public final class GenFeatures {
 
     public static final GenFeature ALTERNATIVE_LEAVES = new AlternativeLeavesGenFeature(regName("alt_leaves"));
 
-    private static ResourceLocation regName(String name) {
-        return new ResourceLocation(io.github.steveplays28.dynamictreesfabric.DynamicTreesFabric.MOD_ID, name);
+    private static Identifier regName(String name) {
+        return new Identifier(io.github.steveplays28.dynamictreesfabric.DynamicTreesFabric.MOD_ID, name);
     }
 
     public static void register(final Registry<GenFeature> registry) {

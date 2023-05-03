@@ -12,14 +12,13 @@ import io.github.steveplays28.dynamictreesfabric.systems.genfeatures.context.Pos
 import io.github.steveplays28.dynamictreesfabric.systems.nodemappers.FindEndsNode;
 import io.github.steveplays28.dynamictreesfabric.trees.Species;
 import com.google.common.collect.Sets;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.BlockState;
-
 import java.util.Set;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.particle.ParticleTypes;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
+import net.minecraft.world.WorldAccess;
 
 /**
  * @author Harley O'Connor
@@ -49,7 +48,7 @@ public class HarvestSubstance implements SubstanceEffect {
     }
 
     @Override
-    public boolean apply(Level world, BlockPos rootPos) {
+    public boolean apply(World world, BlockPos rootPos) {
         final BlockState rootState = world.getBlockState(rootPos);
         final RootyBlock rootyBlock = TreeHelper.getRooty(rootState);
 
@@ -70,26 +69,26 @@ public class HarvestSubstance implements SubstanceEffect {
         return true;
     }
 
-    private void recalculateFruitPositions(final LevelAccessor world, final BlockPos rootPos, final RootyBlock rootyBlock) {
+    private void recalculateFruitPositions(final WorldAccess world, final BlockPos rootPos, final RootyBlock rootyBlock) {
         this.fruitPositions.clear();
 
         final FindEndsNode findEndsNode = new FindEndsNode();
         rootyBlock.startAnalysis(world, rootPos, new MapSignal(findEndsNode));
 
         findEndsNode.getEnds().forEach(endPos ->
-                BlockPos.betweenClosedStream(endPos.offset(-3, -3, -3), endPos.offset(3, 3, 3)).forEach(pos -> {
+                BlockPos.stream(endPos.add(-3, -3, -3), endPos.add(3, 3, 3)).forEach(pos -> {
                     final BlockState state = world.getBlockState(pos);
                     final Block block = state.getBlock();
 
                     if (block instanceof FruitBlock && this.compatibleFruitBlocks.contains(block)) {
-                        this.fruitPositions.add(pos.immutable());
+                        this.fruitPositions.add(pos.toImmutable());
                     }
                 })
         );
     }
 
     @Override
-    public boolean update(Level world, BlockPos rootPos, int deltaTicks, int fertility) {
+    public boolean update(World world, BlockPos rootPos, int deltaTicks, int fertility) {
         if (deltaTicks > this.duration) {
             return false;
         }
@@ -100,7 +99,7 @@ public class HarvestSubstance implements SubstanceEffect {
             return false;
         }
 
-        if (world.isClientSide) {
+        if (world.isClient) {
             if (deltaTicks % this.ticksPerParticlePulse == 0) {
                 // Recalculate fruit positions every time in case new fruit spawned.
                 this.recalculateFruitPositions(world, rootPos, rootyBlock);
@@ -147,7 +146,7 @@ public class HarvestSubstance implements SubstanceEffect {
                                         world,
                                         rootPos,
                                         species,
-                                        rootPos.relative(rootyBlock.getTrunkDirection(world, rootPos)),
+                                        rootPos.offset(rootyBlock.getTrunkDirection(world, rootPos)),
                                         fertility,
                                         true
                                 )

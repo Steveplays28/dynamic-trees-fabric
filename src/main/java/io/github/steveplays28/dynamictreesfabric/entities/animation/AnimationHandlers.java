@@ -1,7 +1,7 @@
 package io.github.steveplays28.dynamictreesfabric.entities.animation;
 
 import io.github.steveplays28.dynamictreesfabric.entities.FallingTreeEntity;
-import net.minecraft.core.Direction;
+import net.minecraft.util.math.Direction;
 
 /**
  * This class hold different animation handlers for EntityFallingTree. The idea is that a unique animation could be used
@@ -25,7 +25,7 @@ public class AnimationHandlers {
             super.initMotion(entity);
 
             Direction cutDir = entity.getDestroyData().cutDir;
-            entity.push(cutDir.getOpposite().getStepX() * 0.1, cutDir.getOpposite().getStepY() * 0.1, cutDir.getOpposite().getStepZ() * 0.1);
+            entity.addVelocity(cutDir.getOpposite().getOffsetX() * 0.1, cutDir.getOpposite().getOffsetY() * 0.1, cutDir.getOpposite().getOffsetZ() * 0.1);
         }
 
     };
@@ -42,7 +42,7 @@ public class AnimationHandlers {
         }
 
         public boolean shouldDie(FallingTreeEntity entity) {
-            return entity.landed || entity.tickCount > 200;
+            return entity.landed || entity.age > 200;
         }
 
     };

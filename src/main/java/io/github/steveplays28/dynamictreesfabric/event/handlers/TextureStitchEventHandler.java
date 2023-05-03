@@ -1,10 +1,10 @@
 package io.github.steveplays28.dynamictreesfabric.event.handlers;
 
 import io.github.steveplays28.dynamictreesfabric.client.thickrings.ThickRingTextureManager;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.texture.TextureAtlas;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.ReloadableResourceManager;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.texture.SpriteAtlasTexture;
+import net.minecraft.resource.ReloadableResourceManagerImpl;
+import net.minecraft.util.Identifier;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -20,16 +20,16 @@ public class TextureStitchEventHandler {
 
     @SubscribeEvent
     public static void onTextureStitchEventPre(TextureStitchEvent.Pre event) {
-        ResourceLocation eventAtlasLocation = event.getAtlas().location();
-        if (eventAtlasLocation.equals(TextureAtlas.LOCATION_BLOCKS)) {
-            ReloadableResourceManager manager = (ReloadableResourceManager) Minecraft.getInstance().getResourceManager();
+        Identifier eventAtlasLocation = event.getAtlas().location();
+        if (eventAtlasLocation.equals(SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE)) {
+            ReloadableResourceManagerImpl manager = (ReloadableResourceManagerImpl) MinecraftClient.getInstance().getResourceManager();
 
-            List<ResourceLocation> ringLocationsToGenerate = new LinkedList<>();
-            for (Map.Entry<ResourceLocation, ResourceLocation> reslocs : ThickRingTextureManager.getThickRingEntrySet()) {
-                ResourceLocation thickLogResLoc = reslocs.getValue();
+            List<Identifier> ringLocationsToGenerate = new LinkedList<>();
+            for (Map.Entry<Identifier, Identifier> reslocs : ThickRingTextureManager.getThickRingEntrySet()) {
+                Identifier thickLogResLoc = reslocs.getValue();
 
                 boolean textureNotFound =
-                        manager.getResource(new ResourceLocation(thickLogResLoc.getNamespace(),String.format(Locale.ROOT, "textures/%s%s", thickLogResLoc.getPath(), ".png"))).isEmpty();
+                        manager.getResource(new Identifier(thickLogResLoc.getNamespace(),String.format(Locale.ROOT, "textures/%s%s", thickLogResLoc.getPath(), ".png"))).isEmpty();
 
                 if (textureNotFound) {
                     ringLocationsToGenerate.add(thickLogResLoc);

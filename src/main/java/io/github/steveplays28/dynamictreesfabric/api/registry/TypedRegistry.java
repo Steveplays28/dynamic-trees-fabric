@@ -11,7 +11,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Identifier;
 import net.minecraftforge.fml.ModLoader;
 import org.apache.logging.log4j.LogManager;
 
@@ -35,7 +35,7 @@ public class TypedRegistry<V extends RegistryEntry<V>> extends SimpleRegistry<V>
      * RegistryEntry}. This is useful for other mods to register sub-classes of the registry entry that can then be
      * referenced from a Json file via a simple resource location.
      */
-    private final Map<ResourceLocation, EntryType<V>> typeRegistry = new HashMap<>();
+    private final Map<Identifier, EntryType<V>> typeRegistry = new HashMap<>();
 
     /**
      * The default {@link EntryType<V>}, the base {@link TypedRegistry.EntryType} for this registry.
@@ -70,25 +70,25 @@ public class TypedRegistry<V extends RegistryEntry<V>> extends SimpleRegistry<V>
 
     /**
      * Registers a custom {@link EntryType}, allowing custom sub-classes of the registry entry to be created and then
-     * referenced from Json via the registry name {@link ResourceLocation}.
+     * referenced from Json via the registry name {@link Identifier}.
      *
-     * @param registryName The registry name {@link ResourceLocation}.
+     * @param registryName The registry name {@link Identifier}.
      * @param type         The {@link EntryType<V>} to register.
      */
-    public final void registerType(final ResourceLocation registryName, final EntryType<V> type) {
+    public final void registerType(final Identifier registryName, final EntryType<V> type) {
         this.typeRegistry.put(registryName, type.setRegistry(this));
     }
 
-    public final boolean hasType(final ResourceLocation registryName) {
+    public final boolean hasType(final Identifier registryName) {
         return this.typeRegistry.containsKey(registryName);
     }
 
     @Nullable
-    public final EntryType<V> getType(final ResourceLocation registryName) {
+    public final EntryType<V> getType(final Identifier registryName) {
         return this.typeRegistry.get(registryName);
     }
 
-    public final EntryType<V> getType(final JsonObject jsonObject, final ResourceLocation registryName) {
+    public final EntryType<V> getType(final JsonObject jsonObject, final Identifier registryName) {
         final AtomicReference<EntryType<V>> type = new AtomicReference<>(this.defaultType);
         final JsonElement typeElement = jsonObject.get("type");
 
@@ -120,7 +120,7 @@ public class TypedRegistry<V extends RegistryEntry<V>> extends SimpleRegistry<V>
     }
 
     /**
-     * Handles creation of the registry entry. Custom types can be registered via {@link #registerType(ResourceLocation,
+     * Handles creation of the registry entry. Custom types can be registered via {@link #registerType(Identifier,
      * EntryType)}.
      *
      * @param <V> The {@link RegistryEntry} sub-class.
@@ -159,14 +159,14 @@ public class TypedRegistry<V extends RegistryEntry<V>> extends SimpleRegistry<V>
 
     }
 
-    public static JsonObject putJsonRegistryName(final JsonObject jsonObject, final ResourceLocation registryName) {
+    public static JsonObject putJsonRegistryName(final JsonObject jsonObject, final Identifier registryName) {
         jsonObject.add(Resources.RESOURCE_LOCATION.toString(), new JsonPrimitive(registryName.toString()));
         return jsonObject;
     }
 
-    public static <V extends RegistryEntry<V>> Codec<V> createDefaultCodec(final Function<ResourceLocation, V> constructor) {
+    public static <V extends RegistryEntry<V>> Codec<V> createDefaultCodec(final Function<Identifier, V> constructor) {
         return RecordCodecBuilder.create(instance -> instance
-                .group(ResourceLocation.CODEC.fieldOf(Resources.RESOURCE_LOCATION.toString()).forGetter(RegistryEntry::getRegistryName))
+                .group(Identifier.CODEC.fieldOf(Resources.RESOURCE_LOCATION.toString()).forGetter(RegistryEntry::getRegistryName))
                 .apply(instance, constructor));
     }
 
@@ -174,7 +174,7 @@ public class TypedRegistry<V extends RegistryEntry<V>> extends SimpleRegistry<V>
         return new EntryType<>(codec);
     }
 
-    public static <V extends RegistryEntry<V>> EntryType<V> newType(final Function<ResourceLocation, V> constructor) {
+    public static <V extends RegistryEntry<V>> EntryType<V> newType(final Function<Identifier, V> constructor) {
         return newType(createDefaultCodec(constructor));
     }
 

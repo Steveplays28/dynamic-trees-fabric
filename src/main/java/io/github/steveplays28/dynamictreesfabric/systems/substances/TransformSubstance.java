@@ -6,10 +6,10 @@ import io.github.steveplays28.dynamictreesfabric.api.substances.SubstanceEffect;
 import io.github.steveplays28.dynamictreesfabric.blocks.rootyblocks.RootyBlock;
 import io.github.steveplays28.dynamictreesfabric.systems.nodemappers.TransformNode;
 import io.github.steveplays28.dynamictreesfabric.trees.Species;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.block.BlockState;
+import net.minecraft.particle.ParticleTypes;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 
 public class TransformSubstance implements SubstanceEffect {
 
@@ -20,7 +20,7 @@ public class TransformSubstance implements SubstanceEffect {
     }
 
     @Override
-    public boolean apply(Level world, BlockPos rootPos) {
+    public boolean apply(World world, BlockPos rootPos) {
 
         final BlockState rootyState = world.getBlockState(rootPos);
         final RootyBlock dirt = TreeHelper.getRooty(rootyState);
@@ -28,7 +28,7 @@ public class TransformSubstance implements SubstanceEffect {
         if (dirt != null && this.toSpecies.isValid()) {
             Species fromSpecies = dirt.getSpecies(rootyState, world, rootPos);
             if (fromSpecies.isTransformable() && fromSpecies != this.toSpecies) {
-                if (world.isClientSide) {
+                if (world.isClient) {
                     TreeHelper.treeParticles(world, rootPos, ParticleTypes.FIREWORK, 8);
                 } else {
                     dirt.startAnalysis(world, rootPos, new MapSignal(new TransformNode(fromSpecies, toSpecies)));

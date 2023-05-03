@@ -2,14 +2,14 @@ package io.github.steveplays28.dynamictreesfabric.data;
 
 import io.github.steveplays28.dynamictreesfabric.init.DTRegistries;
 import io.github.steveplays28.dynamictreesfabric.trees.Species;
-import net.minecraft.core.NonNullList;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.Recipe;
-import net.minecraft.world.item.crafting.ShapelessRecipe;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.recipe.Ingredient;
+import net.minecraft.recipe.Recipe;
+import net.minecraft.recipe.ShapelessRecipe;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.collection.DefaultedList;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.logging.log4j.LogManager;
 
@@ -27,14 +27,14 @@ import java.util.stream.Collectors;
  */
 public final class DTRecipes {
 
-    public static void registerDirtBucketRecipes(final Map<ResourceLocation, Recipe<?>> craftingRecipes) {
+    public static void registerDirtBucketRecipes(final Map<Identifier, Recipe<?>> craftingRecipes) {
         for (final Species species : Species.REGISTRY.getAll()) {
             // If the species doesn't have a seed it doesn't need any recipes.
             if (!species.hasSeed()) {
                 continue;
             }
 
-            final ResourceLocation registryName = species.getRegistryName();
+            final Identifier registryName = species.getRegistryName();
 
             species.getPrimitiveSaplingRecipes().forEach(saplingRecipe -> {
                 final Item saplingItem = saplingRecipe.getSaplingItem().orElse(null);
@@ -44,7 +44,7 @@ public final class DTRecipes {
                 }
 
                 if (saplingRecipe.canCraftSaplingToSeed()) {
-                    final ResourceLocation saplingToSeed = new ResourceLocation(registryName.getNamespace(),
+                    final Identifier saplingToSeed = new Identifier(registryName.getNamespace(),
                             separate(ForgeRegistries.ITEMS.getKey(saplingItem)) + "_to_" + registryName.getPath() + "_seed");
 
                     List<Item> ingredients = saplingRecipe.getIngredientsForSaplingToSeed();
@@ -56,7 +56,7 @@ public final class DTRecipes {
                 }
 
                 if (saplingRecipe.canCraftSeedToSapling()) {
-                    final ResourceLocation seedToSapling = new ResourceLocation(registryName.getNamespace(),
+                    final Identifier seedToSapling = new Identifier(registryName.getNamespace(),
                             registryName.getPath() + "_seed_to_" + separate(ForgeRegistries.ITEMS.getKey(saplingItem)));
 
                     List<Item> ingredients = saplingRecipe.getIngredientsForSeedToSapling();
@@ -71,12 +71,12 @@ public final class DTRecipes {
         }
     }
 
-    private static String separate(final ResourceLocation resourceLocation) {
+    private static String separate(final Identifier resourceLocation) {
         return resourceLocation.getNamespace() + "_" + resourceLocation.getPath();
     }
 
-    private static ShapelessRecipe createShapeless(final ResourceLocation registryName, final ItemStack out, final Ingredient... ingredients) {
-        return new ShapelessRecipe(registryName, "CRAFTING_MISC", out, NonNullList.of(Ingredient.EMPTY, ingredients));
+    private static ShapelessRecipe createShapeless(final Identifier registryName, final ItemStack out, final Ingredient... ingredients) {
+        return new ShapelessRecipe(registryName, "CRAFTING_MISC", out, DefaultedList.copyOf(Ingredient.EMPTY, ingredients));
     }
 
     private static Ingredient[] ingredients(Collection<Item> items) {
@@ -85,7 +85,7 @@ public final class DTRecipes {
 
     private static Ingredient[] ingredients(final Item... items) {
         if (items.length == 0) return new Ingredient[]{Ingredient.EMPTY};
-        return Arrays.stream(items).map(item -> Ingredient.of(new ItemStack(item))).collect(Collectors.toSet()).toArray(new Ingredient[]{});
+        return Arrays.stream(items).map(item -> Ingredient.ofStacks(new ItemStack(item))).collect(Collectors.toSet()).toArray(new Ingredient[]{});
     }
 
 }

@@ -8,18 +8,17 @@ import io.github.steveplays28.dynamictreesfabric.trees.Species;
 import io.github.steveplays28.dynamictreesfabric.util.CoordUtils;
 import io.github.steveplays28.dynamictreesfabric.util.SafeChunkBounds;
 import io.github.steveplays28.dynamictreesfabric.util.SimpleVoxmap;
-import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.Mth;
-import net.minecraft.util.RandomSource;
-import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.LeavesBlock;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.Vec3;
-
 import javax.annotation.Nullable;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.LeavesBlock;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.random.Random;
+import net.minecraft.world.WorldAccess;
 
 public class BushGenFeature extends GenFeature {
 
@@ -45,7 +44,7 @@ public class BushGenFeature extends GenFeature {
     public static final ConfigurationProperty<Integer> SECONDARY_LEAVES_CHANCE =
             ConfigurationProperty.integer("secondary_leaves_chance");
 
-    public BushGenFeature(ResourceLocation registryName) {
+    public BushGenFeature(Identifier registryName) {
         super(registryName);
     }
 
@@ -81,19 +80,19 @@ public class BushGenFeature extends GenFeature {
         return false;
     }
 
-    protected void commonGen(GenFeatureConfiguration configuration, LevelAccessor world, BlockPos rootPos, Species species,
-            RandomSource random, int radius, SafeChunkBounds safeBounds) {
+    protected void commonGen(GenFeatureConfiguration configuration, WorldAccess world, BlockPos rootPos, Species species,
+            Random random, int radius, SafeChunkBounds safeBounds) {
         if (radius <= 2) {
             return;
         }
 
         final boolean worldGen = safeBounds != SafeChunkBounds.ANY;
 
-        Vec3 vTree = new Vec3(rootPos.getX(), rootPos.getY(), rootPos.getZ()).add(0.5, 0.5, 0.5);
+        Vec3d vTree = new Vec3d(rootPos.getX(), rootPos.getY(), rootPos.getZ()).add(0.5, 0.5, 0.5);
 
         for (int i = 0; i < 2; i++) {
-            int rad = Mth.clamp(random.nextInt(radius - 2) + 2, 2, radius - 1);
-            Vec3 v = vTree.add(new Vec3(1, 0, 0).scale(rad).yRot((float) (random.nextFloat() * Math.PI * 2)));
+            int rad = MathHelper.clamp(random.nextInt(radius - 2) + 2, 2, radius - 1);
+            Vec3d v = vTree.add(new Vec3d(1, 0, 0).multiply(rad).rotateY((float) (random.nextFloat() * Math.PI * 2)));
             BlockPos vPos = new BlockPos(v);
 
             if (!safeBounds.inBounds(vPos, true)) {
@@ -103,14 +102,14 @@ public class BushGenFeature extends GenFeature {
             final BlockPos groundPos = CoordUtils.findWorldSurface(world, vPos, worldGen);
             final BlockState soilBlockState = world.getBlockState(groundPos);
 
-            final BlockPos pos = groundPos.above();
+            final BlockPos pos = groundPos.up();
             if (!world.getBlockState(groundPos).getMaterial().isLiquid() &&
                     species.isAcceptableSoil(world, groundPos, soilBlockState)) {
-                world.setBlock(pos, configuration.get(LOG).defaultBlockState(), 3);
+                world.setBlockState(pos, configuration.get(LOG).getDefaultState(), 3);
 
                 SimpleVoxmap leafMap = LeafClusters.BUSH;
-                BlockPos.MutableBlockPos leafPos = new BlockPos.MutableBlockPos();
-                for (BlockPos.MutableBlockPos dPos : leafMap.getAllNonZero()) {
+                BlockPos.Mutable leafPos = new BlockPos.Mutable();
+                for (BlockPos.Mutable dPos : leafMap.getAllNonZero()) {
                     leafPos.set(pos.getX() + dPos.getX(), pos.getY() + dPos.getY(), pos.getZ() + dPos.getZ());
                     if (safeBounds.inBounds(leafPos, true) && (coordHashCode(leafPos) % 5) != 0 &&
                             world.getBlockState(leafPos).getMaterial().isReplaceable()) {
@@ -121,25 +120,25 @@ public class BushGenFeature extends GenFeature {
         }
     }
 
-    private void placeLeaves(GenFeatureConfiguration configuration, LevelAccessor world, RandomSource random,
+    private void placeLeaves(GenFeatureConfiguration configuration, WorldAccess world, Random random,
                              BlockPos leafPos) {
         final Block leavesBlock = selectLeavesBlock(random, configuration.get(SECONDARY_LEAVES_CHANCE),
                 configuration.get(LEAVES), configuration.getAsOptional(SECONDARY_LEAVES).orElse(null));
         placeLeavesBlock(world, leafPos, leavesBlock);
     }
 
-    private Block selectLeavesBlock(RandomSource random, int secondaryLeavesChance, Block leavesBlock,
+    private Block selectLeavesBlock(Random random, int secondaryLeavesChance, Block leavesBlock,
                                     @Nullable Block secondaryLeavesBlock) {
         return secondaryLeavesBlock == null || random.nextInt(secondaryLeavesChance) != 0 ? leavesBlock :
                 secondaryLeavesBlock;
     }
 
-    private void placeLeavesBlock(LevelAccessor world, BlockPos leafPos, Block leavesBlock) {
-        BlockState leafState = leavesBlock.defaultBlockState();
+    private void placeLeavesBlock(WorldAccess world, BlockPos leafPos, Block leavesBlock) {
+        BlockState leafState = leavesBlock.getDefaultState();
         if (leavesBlock instanceof LeavesBlock) {
-            leafState = leafState.setValue(LeavesBlock.PERSISTENT, true);
+            leafState = leafState.with(LeavesBlock.PERSISTENT, true);
         }
-        world.setBlock(leafPos, leafState, 3);
+        world.setBlockState(leafPos, leafState, 3);
     }
 
     public static int coordHashCode(BlockPos pos) {

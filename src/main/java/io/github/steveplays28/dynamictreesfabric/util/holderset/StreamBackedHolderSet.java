@@ -1,13 +1,6 @@
 package io.github.steveplays28.dynamictreesfabric.util.holderset;
 
 import com.mojang.datafixers.util.Either;
-import net.minecraft.Util;
-import net.minecraft.core.Holder;
-import net.minecraft.core.HolderSet;
-import net.minecraft.core.Registry;
-import net.minecraft.tags.TagKey;
-import net.minecraft.util.RandomSource;
-
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
@@ -15,13 +8,19 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.Spliterator;
 import java.util.stream.Collectors;
+import net.minecraft.registry.Registry;
+import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.registry.entry.RegistryEntryList;
+import net.minecraft.registry.tag.TagKey;
+import net.minecraft.util.Util;
+import net.minecraft.util.math.random.Random;
 
-public abstract class StreamBackedHolderSet<T> implements HolderSet<T> {
-    public List<Holder<T>> contents() {
+public abstract class StreamBackedHolderSet<T> implements RegistryEntryList<T> {
+    public List<RegistryEntry<T>> contents() {
         return this.stream().collect(Collectors.toList());
     }
 
-    public Set<Holder<T>> contentsSet() {
+    public Set<RegistryEntry<T>> contentsSet() {
         return this.stream().collect(Collectors.toSet());
     }
 
@@ -29,19 +28,19 @@ public abstract class StreamBackedHolderSet<T> implements HolderSet<T> {
         return this.contents().size();
     }
 
-    public Spliterator<Holder<T>> spliterator() {
+    public Spliterator<RegistryEntry<T>> spliterator() {
         return this.stream().spliterator();
     }
 
-    public Iterator<Holder<T>> iterator() {
+    public Iterator<RegistryEntry<T>> iterator() {
         return this.stream().iterator();
     }
 
-    public Optional<Holder<T>> getRandomElement(RandomSource random) {
-        return Util.getRandomSafe(this.contents(), random);
+    public Optional<RegistryEntry<T>> getRandom(Random random) {
+        return Util.getRandomOrEmpty(this.contents(), random);
     }
 
-    public Holder<T> get(int index) {
+    public RegistryEntry<T> get(int index) {
         return this.contents().get(index);
     }
 
@@ -50,12 +49,12 @@ public abstract class StreamBackedHolderSet<T> implements HolderSet<T> {
     }
 
     @Override
-    public Either<TagKey<T>, List<Holder<T>>> unwrap() {
+    public Either<TagKey<T>, List<RegistryEntry<T>>> getStorage() {
         return Either.right(this.contents());
     }
 
     @Override
-    public boolean contains(Holder<T> holder) {
+    public boolean contains(RegistryEntry<T> holder) {
         return this.stream().anyMatch(h -> Objects.equals(h, holder));
     }
 }

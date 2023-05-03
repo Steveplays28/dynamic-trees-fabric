@@ -5,7 +5,7 @@ import io.github.steveplays28.dynamictreesfabric.api.configurations.TemplateRegi
 import io.github.steveplays28.dynamictreesfabric.growthlogic.context.DirectionManipulationContext;
 import io.github.steveplays28.dynamictreesfabric.growthlogic.context.DirectionSelectionContext;
 import io.github.steveplays28.dynamictreesfabric.growthlogic.context.PositionalSpeciesContext;
-import net.minecraft.core.Direction;
+import net.minecraft.util.math.Direction;
 
 /**
  * @author Harley O'Connor

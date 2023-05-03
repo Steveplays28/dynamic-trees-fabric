@@ -6,7 +6,7 @@ import io.github.steveplays28.dynamictreesfabric.api.cells.CellNull;
 import io.github.steveplays28.dynamictreesfabric.api.cells.CellSolver;
 import io.github.steveplays28.dynamictreesfabric.api.registry.Registry;
 import io.github.steveplays28.dynamictreesfabric.util.SimpleVoxmap;
-import net.minecraft.core.Direction;
+import net.minecraft.util.math.Direction;
 
 public class CellKits {
 

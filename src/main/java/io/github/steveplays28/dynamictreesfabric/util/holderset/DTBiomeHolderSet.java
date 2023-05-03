@@ -1,6 +1,6 @@
 package io.github.steveplays28.dynamictreesfabric.util.holderset;
 
-import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.biome.Biome;
 import net.minecraftforge.registries.holdersets.AndHolderSet;
 
 import java.util.ArrayList;

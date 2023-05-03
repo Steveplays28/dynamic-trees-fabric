@@ -10,14 +10,14 @@ import io.github.steveplays28.dynamictreesfabric.trees.Species;
 import io.github.steveplays28.dynamictreesfabric.util.RandomXOR;
 import io.github.steveplays28.dynamictreesfabric.util.SafeChunkBounds;
 import io.github.steveplays28.dynamictreesfabric.worldgen.BiomeDatabase.Entry;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Holder;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.DyeColor;
-import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.WorldGenLevel;
-import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.block.BlockState;
+import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.util.DyeColor;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.StructureWorldAccess;
+import net.minecraft.world.WorldAccess;
+import net.minecraft.world.biome.Biome;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.Objects;
@@ -70,15 +70,15 @@ public class TreeGenerator {
         return circleProvider;
     }
 
-    public void makeConcreteCircle(LevelAccessor world, PoissonDisc circle, int h, GeneratorResult resultType, SafeChunkBounds safeBounds) {
+    public void makeConcreteCircle(WorldAccess world, PoissonDisc circle, int h, GeneratorResult resultType, SafeChunkBounds safeBounds) {
         makeConcreteCircle(world, circle, h, resultType, safeBounds, 0);
     }
 
     private BlockState getConcreteByColor(DyeColor color) {
-        return Objects.requireNonNull(ForgeRegistries.BLOCKS.getValue(new ResourceLocation(color + "_concrete"))).defaultBlockState();
+        return Objects.requireNonNull(ForgeRegistries.BLOCKS.getValue(new Identifier(color + "_concrete"))).defaultBlockState();
     }
 
-    public void makeConcreteCircle(LevelAccessor world, PoissonDisc circle, int h, GeneratorResult resultType, SafeChunkBounds safeBounds, int flags) {
+    public void makeConcreteCircle(WorldAccess world, PoissonDisc circle, int h, GeneratorResult resultType, SafeChunkBounds safeBounds, int flags) {
         for (int ix = -circle.radius; ix <= circle.radius; ix++) {
             for (int iz = -circle.radius; iz <= circle.radius; iz++) {
                 if (circle.isEdge(circle.x + ix, circle.z + iz)) {
@@ -91,14 +91,14 @@ public class TreeGenerator {
             final BlockPos pos = new BlockPos(circle.x, h, circle.z);
             final DyeColor color = resultType.getColor();
             safeBounds.setBlockState(world, pos, this.getConcreteByColor(color), true);
-            safeBounds.setBlockState(world, pos.above(), this.getConcreteByColor(color), true);
+            safeBounds.setBlockState(world, pos.up(), this.getConcreteByColor(color), true);
         }
     }
 
-    public void makeTrees(WorldGenLevel world, BiomeDatabase biomeDataBase, PoissonDisc circle, SafeChunkBounds safeBounds) {
+    public void makeTrees(StructureWorldAccess world, BiomeDatabase biomeDataBase, PoissonDisc circle, SafeChunkBounds safeBounds) {
         circle.add(8, 8); // Move the circle into the "stage".
         // TODO: De-couple ground finder from biomes, now that they can vary based on height.
-        BlockPos pos = new BlockPos(circle.x, world.getMaxBuildHeight(), circle.z);
+        BlockPos pos = new BlockPos(circle.x, world.getTopY(), circle.z);
         final Entry entry = biomeDataBase.getEntry(world.getBiome(pos));
         for (BlockPos groundPos : entry.getGroundFinder().findGround(world, pos)) {
             makeTree(world, entry, circle, groundPos, safeBounds);
@@ -106,15 +106,15 @@ public class TreeGenerator {
         circle.sub(8, 8); // Move the circle back to normal coords.
     }
 
-    public GeneratorResult makeTree(WorldGenLevel world, BiomeDatabase.Entry biomeEntry, PoissonDisc circle, BlockPos groundPos, SafeChunkBounds safeBounds) {
+    public GeneratorResult makeTree(StructureWorldAccess world, BiomeDatabase.Entry biomeEntry, PoissonDisc circle, BlockPos groundPos, SafeChunkBounds safeBounds) {
 
-        final Holder<Biome> biome = world.getBiome(groundPos);
+        final RegistryEntry<Biome> biome = world.getBiome(groundPos);
 
         if (biomeEntry.isBlacklisted()) {
             return GeneratorResult.UNHANDLED_BIOME;
         }
 
-        if (groundPos == BlockPos.ZERO) {
+        if (groundPos == BlockPos.ORIGIN) {
             return GeneratorResult.NO_GROUND;
         }
 
@@ -137,7 +137,7 @@ public class TreeGenerator {
 //                }
                 if (species.isAcceptableSoilForWorldgen(world, groundPos, dirtState)) {
                     if (biomeEntry.getChanceSelector().getChance(random, species, circle.radius) == Chance.OK) {
-                        if (!species.generate(world.getLevel(), world, groundPos, biome, random, circle.radius, safeBounds)) {
+                        if (!species.generate(world.toServerWorld(), world, groundPos, biome, random, circle.radius, safeBounds)) {
                             result = GeneratorResult.FAIL_GENERATION;
                         }
                     } else {

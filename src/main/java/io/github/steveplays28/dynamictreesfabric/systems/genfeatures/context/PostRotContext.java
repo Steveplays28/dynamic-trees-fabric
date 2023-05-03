@@ -1,13 +1,13 @@
 package io.github.steveplays28.dynamictreesfabric.systems.genfeatures.context;
 
 import io.github.steveplays28.dynamictreesfabric.trees.Species;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.WorldAccess;
 
 /**
  * @author Harley O'Connor
  */
-public class PostRotContext extends GenerationContext<LevelAccessor> {
+public class PostRotContext extends GenerationContext<WorldAccess> {
 
     private final int radius;
     private final int neighbourCount;
@@ -26,7 +26,7 @@ public class PostRotContext extends GenerationContext<LevelAccessor> {
      * @param rapid          {@code true} if this rot is happening during generation as opposed to natural tree
      *                       updates.
      */
-    public PostRotContext(LevelAccessor world, BlockPos pos, Species species, int radius, int neighbourCount, int fertility, boolean rapid) {
+    public PostRotContext(WorldAccess world, BlockPos pos, Species species, int radius, int neighbourCount, int fertility, boolean rapid) {
         super(world, pos, species);
         this.radius = radius;
         this.neighbourCount = neighbourCount;

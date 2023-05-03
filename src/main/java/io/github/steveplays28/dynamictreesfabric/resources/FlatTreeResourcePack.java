@@ -3,10 +3,10 @@ package io.github.steveplays28.dynamictreesfabric.resources;
 import io.github.steveplays28.dynamictreesfabric.api.resource.TreeResourcePack;
 import io.github.steveplays28.dynamictreesfabric.util.CommonCollectors;
 import com.google.common.base.Joiner;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.AbstractPackResources;
-import net.minecraft.server.packs.PackType;
+import net.minecraft.resource.AbstractFileResourcePack;
+import net.minecraft.resource.ResourceType;
 import net.minecraft.server.packs.ResourcePackFileNotFoundException;
+import net.minecraft.util.Identifier;
 import net.minecraftforge.resource.PathPackResources;
 
 import javax.annotation.Nullable;
@@ -27,7 +27,7 @@ import java.util.function.Predicate;
  *
  * @author Harley O'Connor
  */
-public class FlatTreeResourcePack extends AbstractPackResources implements TreeResourcePack {
+public class FlatTreeResourcePack extends AbstractFileResourcePack implements TreeResourcePack {
 
     protected final Path path;
 
@@ -37,7 +37,7 @@ public class FlatTreeResourcePack extends AbstractPackResources implements TreeR
     }
 
     @Override
-    public InputStream getResource(@Nullable PackType type, ResourceLocation location) throws IOException {
+    public InputStream open(@Nullable ResourceType type, Identifier location) throws IOException {
         final Path path = this.getPath(location.getNamespace(), location.getPath());
         if (!Files.exists(path)) {
             throw new FileNotFoundException("Could not find tree resource for path '" + path + "'.");
@@ -46,13 +46,13 @@ public class FlatTreeResourcePack extends AbstractPackResources implements TreeR
     }
 
     @Override
-    protected InputStream getResource(String resourcePath) throws IOException {
+    protected InputStream openFile(String resourcePath) throws IOException {
         // We never use this method, so just throw an exception.
         throw new ResourcePackFileNotFoundException(this.file, resourcePath);
     }
 
     @Override
-    public boolean hasResource(ResourceLocation location) {
+    public boolean hasResource(Identifier location) {
         return Files.exists(this.getPath(location.getNamespace(), location.getPath()));
     }
 
@@ -63,7 +63,7 @@ public class FlatTreeResourcePack extends AbstractPackResources implements TreeR
     }
 
     @Override
-    public Collection<ResourceLocation> getResources(@Nullable PackType type, String namespace, String pathIn, Predicate<ResourceLocation> filter) {
+    public Collection<Identifier> findResources(@Nullable ResourceType type, String namespace, String pathIn, Predicate<Identifier> filter) {
         try {
             Path root = this.getPath(namespace);
             Path inputPath = root.getFileSystem().getPath(pathIn);
@@ -73,8 +73,8 @@ public class FlatTreeResourcePack extends AbstractPackResources implements TreeR
                     .filter(path -> !path.toString().endsWith(".mcmeta") && path.startsWith(inputPath))
                     // It is VERY IMPORTANT that we do not rely on Path.toString as this is inconsistent between operating systems
                     // Join the path names ourselves to force forward slashes #8813
-                    .filter(path -> ResourceLocation.isValidPath(Joiner.on('/').join(path))) // Only process valid paths Fixes the case where people put invalid resources in their jar.
-                    .map(path -> new ResourceLocation(namespace, Joiner.on('/').join(path)))
+                    .filter(path -> Identifier.isPathValid(Joiner.on('/').join(path))) // Only process valid paths Fixes the case where people put invalid resources in their jar.
+                    .map(path -> new Identifier(namespace, Joiner.on('/').join(path)))
                     .filter(filter)
                     .collect(CommonCollectors.toAlternateLinkedSet());
         } catch (IOException e) {
@@ -83,7 +83,7 @@ public class FlatTreeResourcePack extends AbstractPackResources implements TreeR
     }
 
     @Override
-    public Set<String> getNamespaces(@Nullable final PackType type) {
+    public Set<String> getNamespaces(@Nullable final ResourceType type) {
         try {
             Path root = this.getPath();
 

@@ -2,15 +2,15 @@ package io.github.steveplays28.dynamictreesfabric.systems.genfeatures;
 
 import io.github.steveplays28.dynamictreesfabric.api.configurations.ConfigurationProperty;
 import io.github.steveplays28.dynamictreesfabric.systems.genfeatures.context.PreGenerationContext;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Vec3i;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3i;
 
 public class ClearVolumeGenFeature extends GenFeature {
 
     public static final ConfigurationProperty<Integer> HEIGHT = ConfigurationProperty.integer("height");
 
-    public ClearVolumeGenFeature(ResourceLocation registryName) {
+    public ClearVolumeGenFeature(Identifier registryName) {
         super(registryName);
     }
 
@@ -30,9 +30,9 @@ public class ClearVolumeGenFeature extends GenFeature {
         final BlockPos rootPos = context.pos();
 
         // Erase a volume of blocks that could potentially get in the way.
-        for (BlockPos pos : BlockPos.betweenClosed(
-                rootPos.offset(new Vec3i(-1, 1, -1)),
-                rootPos.offset(new Vec3i(1, configuration.get(HEIGHT), 1))
+        for (BlockPos pos : BlockPos.iterate(
+                rootPos.add(new Vec3i(-1, 1, -1)),
+                rootPos.add(new Vec3i(1, configuration.get(HEIGHT), 1))
         )) {
             context.world().removeBlock(pos, false);
         }

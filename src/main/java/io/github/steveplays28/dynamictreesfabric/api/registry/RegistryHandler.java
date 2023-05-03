@@ -1,9 +1,9 @@
 package io.github.steveplays28.dynamictreesfabric.api.registry;
 
 import io.github.steveplays28.dynamictreesfabric.util.ResourceLocationUtils;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.level.block.Block;
+import net.minecraft.block.Block;
+import net.minecraft.item.Item;
+import net.minecraft.util.Identifier;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -69,7 +69,7 @@ public class RegistryHandler extends RegistryEntry<RegistryHandler> {
      * @return The {@link RegistryHandler} object.
      */
     public static RegistryHandler get(final String modId) {
-        return REGISTRY.get(new ResourceLocation(modId, modId));
+        return REGISTRY.get(new Identifier(modId, modId));
     }
 
     /**
@@ -85,14 +85,14 @@ public class RegistryHandler extends RegistryEntry<RegistryHandler> {
 
     /**
      * Ensures the given registry name is 'correct'. This will change the namespace to
-     * <tt>dynamictrees</tt> if the namespace for the given {@link ResourceLocation}
+     * <tt>dynamictrees</tt> if the namespace for the given {@link Identifier}
      * doesn't have a {@link RegistryHandler} registered, so that we don't register blocks or items to mod without a
      * {@link RegistryHandler} (non-add-on mods).
      *
-     * @param registryName The {@link ResourceLocation} registry name.
-     * @return The correct {@link ResourceLocation} registry name.
+     * @param registryName The {@link Identifier} registry name.
+     * @return The correct {@link Identifier} registry name.
      */
-    public static ResourceLocation correctRegistryName(ResourceLocation registryName) {
+    public static Identifier correctRegistryName(Identifier registryName) {
         if (!get(registryName.getNamespace()).isValid()) {
             registryName = ResourceLocationUtils.namespace(registryName, io.github.steveplays28.dynamictreesfabric.DynamicTreesFabric.MOD_ID);
         }
@@ -102,12 +102,12 @@ public class RegistryHandler extends RegistryEntry<RegistryHandler> {
     /**
      * Adds a {@link Block} to be registered with the given registry name, for the namespace of that registry name.
      *
-     * @param registryName The {@link ResourceLocation} registry name to set for the block.
+     * @param registryName The {@link Identifier} registry name to set for the block.
      * @param blockSup The supplier of the {@link Block} object to register.
      * @param <T> The {@link Class} of the {@link Block}.
      * @return The supplier of the {@link Block}, allowing for this to be called in-line.
      */
-    public static <T extends Block> RegistryObject<T> addBlock(ResourceLocation registryName, Supplier<T> blockSup) {
+    public static <T extends Block> RegistryObject<T> addBlock(Identifier registryName, Supplier<T> blockSup) {
         registryName = correctRegistryName(registryName);
         return get(registryName.getNamespace()).putBlock(registryName, blockSup);
     }
@@ -115,12 +115,12 @@ public class RegistryHandler extends RegistryEntry<RegistryHandler> {
     /**
      * Adds an {@link Item} to be registered with the given registry name, for the namespace of that registry name.
      *
-     * @param registryName The {@link ResourceLocation} registry name to set for the block.
+     * @param registryName The {@link Identifier} registry name to set for the block.
      * @param itemSup The supplier of the {@link Item} object to register.
      * @param <T> The {@link Class} of the {@link Item}.
      * @return The supplier of the {@link Item}, allowing for this to be called in-line.
      */
-    public static <T extends Item> RegistryObject<T> addItem(ResourceLocation registryName, Supplier<T> itemSup) {
+    public static <T extends Item> RegistryObject<T> addItem(Identifier registryName, Supplier<T> itemSup) {
         registryName = correctRegistryName(registryName);
         return get(registryName.getNamespace()).putItem(registryName, itemSup);
     }
@@ -136,21 +136,21 @@ public class RegistryHandler extends RegistryEntry<RegistryHandler> {
      * @param modId The mod ID for the relevant mod.
      */
     public RegistryHandler(final String modId) {
-        super(new ResourceLocation(modId, modId));
+        super(new Identifier(modId, modId));
     }
 
     @Nullable
-    public RegistryObject<Block> getBlock(final ResourceLocation registryName) {
+    public RegistryObject<Block> getBlock(final Identifier registryName) {
         return RegistryObject.create(registryName, ForgeRegistries.BLOCKS);
     }
 
     @Nullable
-    public RegistryObject<Item> getItem(final ResourceLocation registryName) {
+    public RegistryObject<Item> getItem(final Identifier registryName) {
         return RegistryObject.create(registryName, ForgeRegistries.ITEMS);
     }
 
     @SuppressWarnings("unchecked")
-    public <T extends Block> RegistryObject<T> putBlock(final ResourceLocation registryName, final Supplier<T> blockSup) {
+    public <T extends Block> RegistryObject<T> putBlock(final Identifier registryName, final Supplier<T> blockSup) {
         if (this.warnIfInvalid("Block", registryName)) {
             return (RegistryObject<T>) getBlock(registryName);
         }
@@ -159,7 +159,7 @@ public class RegistryHandler extends RegistryEntry<RegistryHandler> {
     }
 
     @SuppressWarnings("unchecked")
-    public <T extends Item> RegistryObject<T> putItem(final ResourceLocation registryName, final Supplier<T> itemSup) {
+    public <T extends Item> RegistryObject<T> putItem(final Identifier registryName, final Supplier<T> itemSup) {
         if (this.warnIfInvalid("Item", registryName)) {
             return (RegistryObject<T>) getItem(registryName);
         }
@@ -171,10 +171,10 @@ public class RegistryHandler extends RegistryEntry<RegistryHandler> {
      * Checks if this {@link RegistryHandler} is valid, and if not prints a warning to the console.
      *
      * @param type The type of registry being added.
-     * @param registryName The {@link ResourceLocation} registry name.
+     * @param registryName The {@link Identifier} registry name.
      * @return True if it was invalid.
      */
-    private boolean warnIfInvalid(final String type, final ResourceLocation registryName) {
+    private boolean warnIfInvalid(final String type, final Identifier registryName) {
         if (!this.isValid()) {
             LogManager.getLogger().warn("{} '{}' was added to null registry handler.", type, registryName);
         }

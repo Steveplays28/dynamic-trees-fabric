@@ -8,16 +8,15 @@ import io.github.steveplays28.dynamictreesfabric.util.ItemUtils;
 import io.github.steveplays28.dynamictreesfabric.worldgen.JoCode;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
-import net.minecraft.ChatFormatting;
-import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.Commands;
-import net.minecraft.commands.SharedSuggestionProvider;
-import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Component;
-import net.minecraft.world.item.ItemStack;
-
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import net.minecraft.command.CommandSource;
+import net.minecraft.item.ItemStack;
+import net.minecraft.server.command.CommandManager;
+import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
+import net.minecraft.util.math.BlockPos;
 
 import static io.github.steveplays28.dynamictreesfabric.command.CommandConstants.DEFAULT_JO_CODE;
 import static io.github.steveplays28.dynamictreesfabric.command.CommandConstants.JO_CODE;
@@ -43,27 +42,27 @@ public final class CreateStaffCommand extends SubCommand {
     private static final int DEFAULT_MAX_USES = 64;
 
     @Override
-    public ArgumentBuilder<CommandSourceStack, ?> registerArgument() {
+    public ArgumentBuilder<ServerCommandSource, ?> registerArgument() {
         return blockPosArgument()
                 .then(speciesArgument().executes(context -> this.spawnStaff(context.getSource(), blockPosArgument(context), speciesArgument(context),
                                 DEFAULT_JO_CODE, DEFAULT_COLOUR, DEFAULT_READ_ONLY, DEFAULT_MAX_USES))
-                        .then(stringArgument(JO_CODE).suggests(((context, builder) -> SharedSuggestionProvider.suggest(speciesArgument(context).getJoCodes()
+                        .then(stringArgument(JO_CODE).suggests(((context, builder) -> CommandSource.suggestMatching(speciesArgument(context).getJoCodes()
                                         .stream().map(JoCode::toString).collect(Collectors.toList()), builder)))
                                 .executes(context -> this.spawnStaff(context.getSource(), blockPosArgument(context), speciesArgument(context),
                                         stringArgument(context, JO_CODE), DEFAULT_COLOUR, DEFAULT_READ_ONLY, DEFAULT_MAX_USES))
-                                .then(Commands.argument(COLOR, HexColorArgument.hex()).executes(context -> this.spawnStaff(context.getSource(), blockPosArgument(context),
+                                .then(CommandManager.argument(COLOR, HexColorArgument.hex()).executes(context -> this.spawnStaff(context.getSource(), blockPosArgument(context),
                                                 speciesArgument(context), stringArgument(context, JO_CODE), HexColorArgument.getHexCode(context, COLOR), DEFAULT_READ_ONLY,
                                                 DEFAULT_MAX_USES))
-                                        .then(Commands.argument(READ_ONLY, BoolArgumentType.bool()).executes(context -> this.spawnStaff(context.getSource(), blockPosArgument(context),
+                                        .then(CommandManager.argument(READ_ONLY, BoolArgumentType.bool()).executes(context -> this.spawnStaff(context.getSource(), blockPosArgument(context),
                                                         speciesArgument(context), stringArgument(context, JO_CODE), HexColorArgument.getHexCode(context, COLOR),
                                                         BoolArgumentType.getBool(context, READ_ONLY), DEFAULT_MAX_USES))
-                                                .then(intArgument(MAX_USES).suggests(((context, builder) -> SharedSuggestionProvider.suggest(Stream.of(1, 3, 32, 64, 128).map(String::valueOf).collect(Collectors.toList()), builder)))
+                                                .then(intArgument(MAX_USES).suggests(((context, builder) -> CommandSource.suggestMatching(Stream.of(1, 3, 32, 64, 128).map(String::valueOf).collect(Collectors.toList()), builder)))
                                                         .executes(context -> this.spawnStaff(context.getSource(), blockPosArgument(context), speciesArgument(context),
                                                                 stringArgument(context, JO_CODE), HexColorArgument.getHexCode(context, COLOR), BoolArgumentType.getBool(context, READ_ONLY),
                                                                 intArgument(context, MAX_USES))))))));
     }
 
-    private int spawnStaff(final CommandSourceStack source, final BlockPos pos, final Species species, final String code, final int colour, final boolean readOnly, final int maxUses) {
+    private int spawnStaff(final ServerCommandSource source, final BlockPos pos, final Species species, final String code, final int colour, final boolean readOnly, final int maxUses) {
         final Staff staff = DTRegistries.STAFF.get();
 
         final ItemStack wandStack = new ItemStack(staff, 1);
@@ -75,10 +74,10 @@ public final class CreateStaffCommand extends SubCommand {
                 .setMaxUses(wandStack, maxUses)
                 .setUses(wandStack, maxUses);
 
-        ItemUtils.spawnItemStack(source.getLevel(), pos, wandStack, true);
+        ItemUtils.spawnItemStack(source.getWorld(), pos, wandStack, true);
 
-        sendSuccessAndLog(source, Component.translatable("commands.dynamictrees.success.create_staff", species.getTextComponent(),
-                new JoCode(code).getTextComponent(), aqua(String.format("#%08X", colour)), aqua(readOnly), aqua(maxUses), CommandHelper.posComponent(pos, ChatFormatting.AQUA)));
+        sendSuccessAndLog(source, Text.translatable("commands.dynamictrees.success.create_staff", species.getTextComponent(),
+                new JoCode(code).getTextComponent(), aqua(String.format("#%08X", colour)), aqua(readOnly), aqua(maxUses), CommandHelper.posComponent(pos, Formatting.AQUA)));
 
         return 1;
     }

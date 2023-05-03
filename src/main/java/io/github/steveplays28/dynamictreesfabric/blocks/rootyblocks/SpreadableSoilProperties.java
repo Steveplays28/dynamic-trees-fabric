@@ -2,23 +2,22 @@ package io.github.steveplays28.dynamictreesfabric.blocks.rootyblocks;
 
 import io.github.steveplays28.dynamictreesfabric.api.registry.TypedRegistry;
 import io.github.steveplays28.dynamictreesfabric.init.DTClient;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.RandomSource;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.BlockBehaviour;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.BlockHitResult;
-
 import java.util.*;
+import net.minecraft.block.AbstractBlock;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.particle.ParticleTypes;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.Hand;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.random.Random;
+import net.minecraft.world.World;
 
 /**
  * @author Max Hyper
@@ -39,12 +38,12 @@ public class SpreadableSoilProperties extends SoilProperties {
         this.spread_item = item;
     }
 
-    public SpreadableSoilProperties(final ResourceLocation registryName) {
+    public SpreadableSoilProperties(final Identifier registryName) {
         super(null, registryName);
     }
 
     @Override
-    protected RootyBlock createBlock(BlockBehaviour.Properties blockProperties) {
+    protected RootyBlock createBlock(AbstractBlock.Settings blockProperties) {
         return new SpreadableRootyBlock(this, blockProperties);
     }
 
@@ -63,7 +62,7 @@ public class SpreadableSoilProperties extends SoilProperties {
 
     public static class SpreadableRootyBlock extends RootyBlock {
 
-        public SpreadableRootyBlock(SpreadableSoilProperties properties, Properties blockProperties) {
+        public SpreadableRootyBlock(SpreadableSoilProperties properties, Settings blockProperties) {
             super(properties, blockProperties);
         }
 
@@ -77,62 +76,62 @@ public class SpreadableSoilProperties extends SoilProperties {
         }
 
         @Override
-        public InteractionResult use(BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand handIn, BlockHitResult hit) {
+        public ActionResult onUse(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockHitResult hit) {
             SpreadableSoilProperties properties = getSoilProperties();
             if (properties.spread_item != null) {
-                ItemStack handStack = player.getItemInHand(handIn);
+                ItemStack handStack = player.getStackInHand(handIn);
                 if (handStack.getItem().equals(properties.spread_item)) {
                     List<Block> foundBlocks = new LinkedList<>();
 
-                    for (BlockPos blockpos : BlockPos.betweenClosed(pos.offset(-1, -1, -1), pos.offset(1, 1, 1))) {
+                    for (BlockPos blockpos : BlockPos.iterate(pos.add(-1, -1, -1), pos.add(1, 1, 1))) {
                         Block block = worldIn.getBlockState(blockpos).getBlock();
                         if (properties.spreadable_soils.stream().anyMatch(prop -> prop.getPrimitiveSoilBlock() == block)) {
                             foundBlocks.add(block);
                         }
                     }
                     if (foundBlocks.size() > 0) {
-                        if (!worldIn.isClientSide()) {
+                        if (!worldIn.isClient()) {
                             int blockInt = worldIn.random.nextInt(foundBlocks.size());
                             this.getRootyBlock(foundBlocks.get(blockInt)).ifPresent(rootyBlock ->
-                                    worldIn.setBlock(pos, rootyBlock.defaultBlockState(), 3)
+                                    worldIn.setBlockState(pos, rootyBlock.getDefaultState(), 3)
                             );
                         }
                         if (!player.isCreative()) {
-                            handStack.shrink(1);
+                            handStack.decrement(1);
                         }
-                        DTClient.spawnParticles(worldIn, ParticleTypes.HAPPY_VILLAGER, pos.above(), 2 + worldIn.random.nextInt(5), worldIn.random);
-                        return InteractionResult.SUCCESS;
+                        DTClient.spawnParticles(worldIn, ParticleTypes.HAPPY_VILLAGER, pos.up(), 2 + worldIn.random.nextInt(5), worldIn.random);
+                        return ActionResult.SUCCESS;
                     }
                 }
             }
-            return super.use(state, worldIn, pos, player, handIn, hit);
+            return super.onUse(state, worldIn, pos, player, handIn, hit);
         }
 
         @Override
-        public void randomTick(BlockState state, ServerLevel world, BlockPos pos, RandomSource random) {
+        public void randomTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
             super.randomTick(state, world, pos, random);
             SpreadableSoilProperties properties = getSoilProperties();
             //this is a similar behaviour to vanilla grass spreading but inverted to be handled by the dirt block
-            if (!world.isClientSide && properties.required_light != null) {
+            if (!world.isClient && properties.required_light != null) {
                 if (!world.isAreaLoaded(pos, 3)) {
                     return; // Forge: prevent loading unloaded chunks when checking neighbor's light and spreading
                 }
-                if (world.getMaxLocalRawBrightness(pos.above()) >= properties.required_light) {
+                if (world.getLightLevel(pos.up()) >= properties.required_light) {
                     for (int i = 0; i < 4; ++i) {
-                        BlockPos thatPos = pos.offset(random.nextInt(3) - 1, random.nextInt(5) - 3, random.nextInt(3) - 1);
+                        BlockPos thatPos = pos.add(random.nextInt(3) - 1, random.nextInt(5) - 3, random.nextInt(3) - 1);
 
-                        if (thatPos.getY() >= 0 && thatPos.getY() < 256 && !world.hasChunkAt(thatPos)) {
+                        if (thatPos.getY() >= 0 && thatPos.getY() < 256 && !world.isChunkLoaded(thatPos)) {
                             return;
                         }
 
-                        BlockState thatStateUp = world.getBlockState(thatPos.above());
+                        BlockState thatStateUp = world.getBlockState(thatPos.up());
                         BlockState thatState = world.getBlockState(thatPos);
 
                         for (SoilProperties spreadable : properties.spreadable_soils) {
                             RootyBlock block = spreadable.getBlock().orElse(null);
-                            if (block != null && (thatState.getBlock() == spreadable.getPrimitiveSoilBlock() || thatState.getBlock() == block) && world.getMaxLocalRawBrightness(pos.above()) >= properties.required_light && thatStateUp.getLightBlock(world, thatPos.above()) <= 2) {
-                                if (state.hasProperty(FERTILITY)) {
-                                    world.setBlockAndUpdate(pos, block.defaultBlockState().setValue(FERTILITY, state.getValue(FERTILITY)));
+                            if (block != null && (thatState.getBlock() == spreadable.getPrimitiveSoilBlock() || thatState.getBlock() == block) && world.getLightLevel(pos.up()) >= properties.required_light && thatStateUp.getOpacity(world, thatPos.up()) <= 2) {
+                                if (state.contains(FERTILITY)) {
+                                    world.setBlockState(pos, block.getDefaultState().with(FERTILITY, state.get(FERTILITY)));
                                 }
                                 return;
                             }

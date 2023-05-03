@@ -11,8 +11,8 @@ import io.github.steveplays28.dynamictreesfabric.deserialisation.ResourceLocatio
 import io.github.steveplays28.dynamictreesfabric.deserialisation.result.JsonResult;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.level.block.Block;
+import net.minecraft.block.Block;
+import net.minecraft.item.Item;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.ObjectHolderRegistry;
 

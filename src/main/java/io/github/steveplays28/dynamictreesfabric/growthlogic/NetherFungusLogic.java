@@ -6,16 +6,16 @@ import io.github.steveplays28.dynamictreesfabric.growthlogic.context.DirectionMa
 import io.github.steveplays28.dynamictreesfabric.growthlogic.context.DirectionSelectionContext;
 import io.github.steveplays28.dynamictreesfabric.growthlogic.context.PositionalSpeciesContext;
 import io.github.steveplays28.dynamictreesfabric.util.CoordUtils;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.Level;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
+import net.minecraft.world.World;
 
 public class NetherFungusLogic extends GrowthLogicKit {
 
     public static final ConfigurationProperty<Integer> MIN_CAP_HEIGHT = ConfigurationProperty.integer("min_cap_height");
 
-    public NetherFungusLogic(final ResourceLocation registryName) {
+    public NetherFungusLogic(final Identifier registryName) {
         super(registryName);
     }
 
@@ -46,28 +46,28 @@ public class NetherFungusLogic extends GrowthLogicKit {
         final int[] probMap = super.populateDirectionProbabilityMap(configuration, context);
 
         if (context.signal().isInTrunk()) {
-            if (TreeHelper.isBranch(context.world().getBlockState(context.pos().above())) &&
-                    !TreeHelper.isBranch(context.world().getBlockState(context.pos().above(3)))) {
+            if (TreeHelper.isBranch(context.world().getBlockState(context.pos().up())) &&
+                    !TreeHelper.isBranch(context.world().getBlockState(context.pos().up(3)))) {
                 context.probMap(new int[]{0, 0, 0, 0, 0, 0});
             } else if (!context.species().isMegaSpecies()) {
                 for (Direction direction : CoordUtils.HORIZONTALS) {
                     if (TreeHelper.isBranch(
-                            context.world().getBlockState(context.pos().offset(direction.getOpposite().getNormal())))) {
-                        probMap[direction.get3DDataValue()] = 0;
+                            context.world().getBlockState(context.pos().add(direction.getOpposite().getVector())))) {
+                        probMap[direction.getId()] = 0;
                     }
                 }
             }
-            probMap[Direction.UP.get3DDataValue()] = 4;
+            probMap[Direction.UP.getId()] = 4;
         } else {
-            probMap[Direction.UP.get3DDataValue()] = 0;
+            probMap[Direction.UP.getId()] = 0;
         }
         return probMap;
     }
 
-    private float getHashedVariation(GrowthLogicKitConfiguration configuration, Level world, BlockPos pos) {
-        long day = world.getGameTime() / 24000L;
+    private float getHashedVariation(GrowthLogicKitConfiguration configuration, World world, BlockPos pos) {
+        long day = world.getTime() / 24000L;
         int month = (int) day / 30;//Change the hashs every in-game month
-        return (CoordUtils.coordHashCode(pos.above(month), 2) %
+        return (CoordUtils.coordHashCode(pos.up(month), 2) %
                 configuration.get(HEIGHT_VARIATION));//Vary the height energy by a psuedorandom hash function
     }
 

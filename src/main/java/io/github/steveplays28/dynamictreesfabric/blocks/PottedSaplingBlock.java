@@ -5,62 +5,66 @@ import io.github.steveplays28.dynamictreesfabric.trees.Species;
 import io.github.steveplays28.dynamictreesfabric.util.BlockStates;
 import io.github.steveplays28.dynamictreesfabric.util.ItemUtils;
 import io.github.steveplays28.dynamictreesfabric.util.Null;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.Level;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockRenderType;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.BlockWithEntity;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.FlowerPotBlock;
+import net.minecraft.block.Material;
+import net.minecraft.block.ShapeContext;
+import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.entity.ai.pathing.NavigationType;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.fluid.FluidState;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.Hand;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.shape.VoxelShape;
+import net.minecraft.util.shape.VoxelShapes;
+import net.minecraft.world.BlockView;
+import net.minecraft.world.World;
 import net.minecraft.world.level.block.*;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.FluidState;
-import net.minecraft.world.level.material.Material;
-import net.minecraft.world.level.pathfinder.PathComputationType;
-import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.HitResult;
-import net.minecraft.world.phys.shapes.CollisionContext;
-import net.minecraft.world.phys.shapes.Shapes;
-import net.minecraft.world.phys.shapes.VoxelShape;
-
 import javax.annotation.Nullable;
 
 @SuppressWarnings("deprecation")
-public class PottedSaplingBlock extends BaseEntityBlock {
+public class PottedSaplingBlock extends BlockWithEntity {
 
-    public static final ResourceLocation REG_NAME = io.github.steveplays28.dynamictreesfabric.DynamicTreesFabric.resLoc("potted_sapling");
+    public static final Identifier REG_NAME = io.github.steveplays28.dynamictreesfabric.DynamicTreesFabric.resLoc("potted_sapling");
 
-    protected static final AABB FLOWER_POT_AABB = new AABB(0.3125D, 0.0D, 0.3125D, 0.6875D, 0.375D, 0.6875D);
+    protected static final Box FLOWER_POT_AABB = new Box(0.3125D, 0.0D, 0.3125D, 0.6875D, 0.375D, 0.6875D);
 
     public PottedSaplingBlock() {
-        super(Block.Properties.of(Material.DECORATION).instabreak().noOcclusion());
+        super(Block.Properties.of(Material.DECORATION).breakInstantly().nonOpaque());
     }
 
     //////////////////////////////
     // Properties
     //////////////////////////////
 
-    public Species getSpecies(BlockGetter world, BlockPos pos) {
+    public Species getSpecies(BlockView world, BlockPos pos) {
         return Null.applyIfNonnull(this.getTileEntityPottedSapling(world, pos),
                 PottedSaplingTileEntity::getSpecies, Species.NULL_SPECIES);
     }
 
-    public boolean setSpecies(Level world, BlockPos pos, BlockState state, Species species) {
+    public boolean setSpecies(World world, BlockPos pos, BlockState state, Species species) {
         return Null.consumeIfNonnull(this.getTileEntityPottedSapling(world, pos),
                 pottedSaplingTileEntity -> pottedSaplingTileEntity.setSpecies(species));
     }
 
-    public BlockState getPotState(Level world, BlockPos pos) {
+    public BlockState getPotState(World world, BlockPos pos) {
         return Null.applyIfNonnull(this.getTileEntityPottedSapling(world, pos),
-                PottedSaplingTileEntity::getPot, Blocks.FLOWER_POT.defaultBlockState());
+                PottedSaplingTileEntity::getPot, Blocks.FLOWER_POT.getDefaultState());
     }
 
-    public boolean setPotState(Level world, BlockState potState, BlockPos pos) {
+    public boolean setPotState(World world, BlockState potState, BlockPos pos) {
         return Null.consumeIfNonnull(this.getTileEntityPottedSapling(world, pos),
                 pottedSaplingTileEntity -> pottedSaplingTileEntity.setPot(potState));
     }
@@ -71,14 +75,14 @@ public class PottedSaplingBlock extends BaseEntityBlock {
     ///////////////////////////////////////////
 
     @Nullable
-    private PottedSaplingTileEntity getTileEntityPottedSapling(BlockGetter world, BlockPos pos) {
+    private PottedSaplingTileEntity getTileEntityPottedSapling(BlockView world, BlockPos pos) {
         final BlockEntity tileEntity = world.getBlockEntity(pos);
         return tileEntity instanceof PottedSaplingTileEntity ? (PottedSaplingTileEntity) tileEntity : null;
     }
 
     @org.jetbrains.annotations.Nullable
     @Override
-    public BlockEntity newBlockEntity(BlockPos pPos, BlockState pState) {
+    public BlockEntity createBlockEntity(BlockPos pPos, BlockState pState) {
         return new PottedSaplingTileEntity(pPos,pState);
     }
 
@@ -89,41 +93,41 @@ public class PottedSaplingBlock extends BaseEntityBlock {
 
     // Unlike a regular flower pot this is only used to eject the contents.
     @Override
-    public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
-        final ItemStack heldItem = player.getItemInHand(hand);
+    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+        final ItemStack heldItem = player.getStackInHand(hand);
         final Species species = this.getSpecies(world, pos);
 
         if (!species.isValid()) {
-            return InteractionResult.FAIL;
+            return ActionResult.FAIL;
         }
 
         final ItemStack seedStack = species.getSeedStack(1);
 
         // If they are holding the seed do not empty the pot.
-        if (heldItem.getItem() == seedStack.getItem() || (hand == InteractionHand.OFF_HAND &&
-                player.getItemInHand(InteractionHand.MAIN_HAND).getItem() == seedStack.getItem())) {
-            return InteractionResult.PASS;
+        if (heldItem.getItem() == seedStack.getItem() || (hand == Hand.OFF_HAND &&
+                player.getStackInHand(Hand.MAIN_HAND).getItem() == seedStack.getItem())) {
+            return ActionResult.PASS;
         }
 
         if (heldItem.isEmpty()) {
             // If they're holding nothing, put it in their hand.
-            player.setItemInHand(hand, seedStack);
+            player.setStackInHand(hand, seedStack);
             // Otherwise try to add it to their inventory.
-        } else if (!player.addItem(seedStack)) {
+        } else if (!player.giveItemStack(seedStack)) {
             // If their inventory is full, drop it instead.
-            player.drop(seedStack, false);
+            player.dropItem(seedStack, false);
         }
 
         // Set the block back to the original pot state.
-        world.setBlock(pos, this.getPotState(world, pos), 3);
+        world.setBlockState(pos, this.getPotState(world, pos), 3);
 
-        return InteractionResult.sidedSuccess(world.isClientSide);
+        return ActionResult.success(world.isClient);
     }
 
     @Override
-    public ItemStack getCloneItemStack(BlockState state, HitResult target, BlockGetter world, BlockPos pos, Player player) {
+    public ItemStack getCloneItemStack(BlockState state, HitResult target, BlockView world, BlockPos pos, PlayerEntity player) {
 
-        if (target.getType() == HitResult.Type.BLOCK && ((BlockHitResult) target).getDirection() == Direction.UP) {
+        if (target.getType() == HitResult.Type.BLOCK && ((BlockHitResult) target).getSide() == Direction.UP) {
             final Species species = this.getSpecies(world, pos);
             if (species.isValid()) {
                 return species.getSeedStack(1);
@@ -145,15 +149,15 @@ public class PottedSaplingBlock extends BaseEntityBlock {
     }
 
     @Override
-    public void neighborChanged(BlockState state, Level world, BlockPos pos, Block block, BlockPos fromPos, boolean isMoving) {
-        if (!world.getBlockState(pos.below()).isFaceSturdy(world, pos, Direction.UP)) {
+    public void neighborUpdate(BlockState state, World world, BlockPos pos, Block block, BlockPos fromPos, boolean isMoving) {
+        if (!world.getBlockState(pos.down()).isSideSolidFullSquare(world, pos, Direction.UP)) {
             this.spawnDrops(world, pos);
-            world.setBlockAndUpdate(pos, BlockStates.AIR);
+            world.setBlockState(pos, BlockStates.AIR);
         }
     }
 
     @Override
-    public boolean onDestroyedByPlayer(BlockState state, Level world, BlockPos pos, Player player, boolean willHarvest, FluidState fluid) {
+    public boolean onDestroyedByPlayer(BlockState state, World world, BlockPos pos, PlayerEntity player, boolean willHarvest, FluidState fluid) {
         if (willHarvest) {
             return true; // If it will harvest, delay deletion of the block until after getDrops.
         }
@@ -162,13 +166,13 @@ public class PottedSaplingBlock extends BaseEntityBlock {
     }
 
     @Override
-    public void playerDestroy(Level world, Player player, BlockPos pos, BlockState state, @Nullable BlockEntity te, ItemStack stack) {
-        super.playerDestroy(world, player, pos, state, te, stack);
+    public void afterBreak(World world, PlayerEntity player, BlockPos pos, BlockState state, @Nullable BlockEntity te, ItemStack stack) {
+        super.afterBreak(world, player, pos, state, te, stack);
         this.spawnDrops(world, pos);
-        world.setBlockAndUpdate(pos, Blocks.AIR.defaultBlockState());
+        world.setBlockState(pos, Blocks.AIR.getDefaultState());
     }
 
-    public void spawnDrops(Level world, BlockPos pos) {
+    public void spawnDrops(World world, BlockPos pos) {
         ItemUtils.spawnItemStack(world, pos, new ItemStack(Blocks.FLOWER_POT), false);
         if (this.getSpecies(world, pos) != Species.NULL_SPECIES) { // Safety check in case for whatever reason the species was not set.
             ItemUtils.spawnItemStack(world, pos, this.getSpecies(world, pos).getSeedStack(1), false);
@@ -176,7 +180,7 @@ public class PottedSaplingBlock extends BaseEntityBlock {
     }
 
     @Override
-    public boolean isPathfindable(BlockState state, BlockGetter world, BlockPos pos, PathComputationType pathType) {
+    public boolean canPathfindThrough(BlockState state, BlockView world, BlockPos pos, NavigationType pathType) {
         return false;
     }
 
@@ -185,8 +189,8 @@ public class PottedSaplingBlock extends BaseEntityBlock {
     ///////////////////////////////////////////
 
     @Override
-    public VoxelShape getShape(BlockState state, BlockGetter worldIn, BlockPos pos, CollisionContext context) {
-        return Shapes.create(FLOWER_POT_AABB);
+    public VoxelShape getOutlineShape(BlockState state, BlockView worldIn, BlockPos pos, ShapeContext context) {
+        return VoxelShapes.cuboid(FLOWER_POT_AABB);
     }
 
 
@@ -195,8 +199,8 @@ public class PottedSaplingBlock extends BaseEntityBlock {
     ///////////////////////////////////////////
 
     @Override
-    public RenderShape getRenderShape(BlockState state) {
-        return RenderShape.MODEL;
+    public BlockRenderType getRenderType(BlockState state) {
+        return BlockRenderType.MODEL;
     }
 
 }

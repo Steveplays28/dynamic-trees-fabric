@@ -1,7 +1,7 @@
 package io.github.steveplays28.dynamictreesfabric.cells;
 
 import io.github.steveplays28.dynamictreesfabric.util.SimpleVoxmap;
-import net.minecraft.core.BlockPos;
+import net.minecraft.util.math.BlockPos;
 
 /**
  * A voxelmap of a leaf cluster for a species.  Values represent hydration value. This leaf cluster map is "stamped" on

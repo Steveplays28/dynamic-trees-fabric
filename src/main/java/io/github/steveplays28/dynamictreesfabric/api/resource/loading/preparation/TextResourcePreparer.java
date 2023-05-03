@@ -2,13 +2,12 @@ package io.github.steveplays28.dynamictreesfabric.api.resource.loading.preparati
 
 import io.github.steveplays28.dynamictreesfabric.api.resource.DTResource;
 import io.github.steveplays28.dynamictreesfabric.api.resource.ResourceCollector;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.Resource;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import net.minecraft.resource.Resource;
+import net.minecraft.util.Identifier;
 
 
 public class TextResourcePreparer extends AbstractResourcePreparer<List<String>> {
@@ -24,14 +23,14 @@ public class TextResourcePreparer extends AbstractResourcePreparer<List<String>>
     }
 
     @Override
-    protected void readAndPutResource(Resource resource, ResourceLocation resourceName)
+    protected void readAndPutResource(Resource resource, Identifier resourceName)
             throws IOException {
         final List<String> lines = this.readResource(resource);
         this.resourceCollector.put(new DTResource<>(resourceName, lines));
     }
 
     private List<String> readResource(Resource resource) throws IOException {
-        return this.readLines(resource.openAsReader(), new ArrayList<>());
+        return this.readLines(resource.getReader(), new ArrayList<>());
     }
 
     private List<String> readLines(BufferedReader reader, List<String> lines) throws IOException {

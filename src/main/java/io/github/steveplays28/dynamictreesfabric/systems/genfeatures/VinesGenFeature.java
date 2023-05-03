@@ -11,21 +11,20 @@ import io.github.steveplays28.dynamictreesfabric.systems.nodemappers.FindEndsNod
 import io.github.steveplays28.dynamictreesfabric.trees.Species;
 import io.github.steveplays28.dynamictreesfabric.util.CoordUtils;
 import io.github.steveplays28.dynamictreesfabric.util.SafeChunkBounds;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.Mth;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.GrowingPlantHeadBlock;
-import net.minecraft.world.level.block.VineBlock;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.minecraft.world.phys.BlockHitResult;
-
 import javax.annotation.Nullable;
+import net.minecraft.block.AbstractPlantStemBlock;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.VineBlock;
+import net.minecraft.state.property.BooleanProperty;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.World;
+import net.minecraft.world.WorldAccess;
 import java.util.List;
 
 public class VinesGenFeature extends GenFeature {
@@ -48,7 +47,7 @@ public class VinesGenFeature extends GenFeature {
     public static final ConfigurationProperty<Block> TIP_BLOCK = ConfigurationProperty.block("tip_block");
     public static final ConfigurationProperty<VineType> VINE_TYPE = ConfigurationProperty.property("vine_type", VineType.class);
 
-    public VinesGenFeature(ResourceLocation registryName) {
+    public VinesGenFeature(Identifier registryName) {
         super(registryName);
     }
 
@@ -98,7 +97,7 @@ public class VinesGenFeature extends GenFeature {
 
     @Override
     protected boolean postGrow(GenFeatureConfiguration configuration, PostGrowContext context) {
-        final Level world = context.world();
+        final World world = context.world();
         final BlockPos rootPos = context.pos();
         final Species species = context.species();
         final int fruitingRadius = configuration.get(FRUITING_RADIUS);
@@ -134,7 +133,7 @@ public class VinesGenFeature extends GenFeature {
         return true;
     }
 
-    protected void addSideVines(GenFeatureConfiguration configuration, LevelAccessor world, Species species, BlockPos rootPos, BlockPos branchPos, SafeChunkBounds safeBounds, boolean worldgen) {
+    protected void addSideVines(GenFeatureConfiguration configuration, WorldAccess world, Species species, BlockPos rootPos, BlockPos branchPos, SafeChunkBounds safeBounds, boolean worldgen) {
         // Uses branch ray tracing to find a place on the side of the tree to begin generating vines.
         final BlockHitResult result = CoordUtils.branchRayTrace(world, species, rootPos, branchPos, 90, configuration.get(VERTICAL_SPREAD), configuration.get(RAY_DISTANCE), safeBounds);
 
@@ -142,21 +141,21 @@ public class VinesGenFeature extends GenFeature {
             return;
         }
 
-        final BlockPos vinePos = result.getBlockPos().relative(result.getDirection());
-        if (vinePos == BlockPos.ZERO || !safeBounds.inBounds(vinePos, true)) {
+        final BlockPos vinePos = result.getBlockPos().offset(result.getSide());
+        if (vinePos == BlockPos.ORIGIN || !safeBounds.inBounds(vinePos, true)) {
             return;
         }
 
-        final BooleanProperty vineSide = this.sideVineStates[result.getDirection().getOpposite().ordinal()];
+        final BooleanProperty vineSide = this.sideVineStates[result.getSide().getOpposite().ordinal()];
         if (vineSide == null) {
             return;
         }
 
-        final BlockState vineState = configuration.get(BLOCK).defaultBlockState().setValue(vineSide, true);
+        final BlockState vineState = configuration.get(BLOCK).getDefaultState().with(vineSide, true);
         this.placeVines(world, vinePos, vineState, configuration.get(MAX_LENGTH), null, configuration.get(VINE_TYPE), worldgen);
     }
 
-    protected void addVerticalVines(GenFeatureConfiguration configuration, LevelAccessor world, Species species, BlockPos rootPos, BlockPos branchPos, SafeChunkBounds safeBounds, boolean worldgen) {
+    protected void addVerticalVines(GenFeatureConfiguration configuration, WorldAccess world, Species species, BlockPos rootPos, BlockPos branchPos, SafeChunkBounds safeBounds, boolean worldgen) {
         // Uses fruit ray trace method to grab a position under the tree's leaves.
         BlockPos vinePos = CoordUtils.getRayTraceFruitPos(world, species, rootPos, branchPos, safeBounds);
 
@@ -168,48 +167,48 @@ public class VinesGenFeature extends GenFeature {
             vinePos = this.findGround(world, vinePos);
         }
 
-        if (vinePos == BlockPos.ZERO) {
+        if (vinePos == BlockPos.ORIGIN) {
             return;
         }
 
-        this.placeVines(world, vinePos, configuration.get(BLOCK).defaultBlockState(),
+        this.placeVines(world, vinePos, configuration.get(BLOCK).getDefaultState(),
                 configuration.get(MAX_LENGTH),
                 configuration.getAsOptional(TIP_BLOCK)
-                        .map(block -> block.defaultBlockState().setValue(GrowingPlantHeadBlock.AGE, worldgen ? 25 : 0))
+                        .map(block -> block.getDefaultState().with(AbstractPlantStemBlock.AGE, worldgen ? 25 : 0))
                         .orElse(null),
                 configuration.get(VINE_TYPE), worldgen);
     }
 
     // This is WIP (and isn't needed in the base mod anyway, as well as the fact that there's almost certainly a better way of doing this).
-    private BlockPos findGround(LevelAccessor world, BlockPos vinePos) {
-        BlockPos.MutableBlockPos mPos = new BlockPos.MutableBlockPos(vinePos.getX(), vinePos.getY(), vinePos.getZ());
+    private BlockPos findGround(WorldAccess world, BlockPos vinePos) {
+        BlockPos.Mutable mPos = new BlockPos.Mutable(vinePos.getX(), vinePos.getY(), vinePos.getZ());
         do {
             mPos.move(Direction.DOWN);
             if (mPos.getY() <= 0) {
-                return BlockPos.ZERO;
+                return BlockPos.ORIGIN;
             }
-        } while (world.isEmptyBlock(vinePos) || world.getBlockState(vinePos).getBlock() instanceof DynamicLeavesBlock);
+        } while (world.isAir(vinePos) || world.getBlockState(vinePos).getBlock() instanceof DynamicLeavesBlock);
 
-        return mPos.above();
+        return mPos.up();
     }
 
-    protected void placeVines(LevelAccessor world, BlockPos vinePos, BlockState vinesState, int maxLength, @Nullable BlockState tipState, VineType vineType, boolean worldgen) {
+    protected void placeVines(WorldAccess world, BlockPos vinePos, BlockState vinesState, int maxLength, @Nullable BlockState tipState, VineType vineType, boolean worldgen) {
         // Generate a random length for the vine.
-        final int len = worldgen ? Mth.clamp(world.getRandom().nextInt(maxLength) + 3, 3, maxLength) : 1;
-        final BlockPos.MutableBlockPos mPos = new BlockPos.MutableBlockPos(vinePos.getX(), vinePos.getY(), vinePos.getZ());
+        final int len = worldgen ? MathHelper.clamp(world.getRandom().nextInt(maxLength) + 3, 3, maxLength) : 1;
+        final BlockPos.Mutable mPos = new BlockPos.Mutable(vinePos.getX(), vinePos.getY(), vinePos.getZ());
 
         tipState = tipState == null ? vinesState : tipState;
 
         for (int i = 0; i < len; i++) {
-            if (world.isEmptyBlock(mPos)) {
+            if (world.isAir(mPos)) {
                 // Set the current block either to a vine block or a tip block if it's set.
-                world.setBlock(mPos, (i == len - 1) ? tipState : vinesState, 3);
+                world.setBlockState(mPos, (i == len - 1) ? tipState : vinesState, 3);
                 // Move current position down/up depending on vine type.
                 mPos.setY(mPos.getY() + (vineType == VineType.FLOOR ? 1 : -1));
             } else {
                 if (i > 0 && vineType != VineType.SIDE) {
                     mPos.setY(mPos.getY() + (vineType == VineType.FLOOR ? -1 : 1)); //if the vine is cut short set the tip on the last block
-                    world.setBlock(mPos, tipState, 3);
+                    world.setBlockState(mPos, tipState, 3);
                 }
                 break;
             }

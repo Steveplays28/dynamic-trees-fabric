@@ -3,7 +3,7 @@ package io.github.steveplays28.dynamictreesfabric.util;
 import io.github.steveplays28.dynamictreesfabric.blocks.branches.BranchBlock;
 import io.github.steveplays28.dynamictreesfabric.models.bakedmodels.BasicBranchBlockBakedModel;
 import io.github.steveplays28.dynamictreesfabric.models.modeldata.ModelConnections;
-import net.minecraft.core.Direction;
+import net.minecraft.util.math.Direction;
 
 /**
  * This holds connection data for branches.
@@ -36,7 +36,7 @@ public class Connections {
      * @param radius The connection radius for that direction.
      */
     public void setRadius(Direction dir, int radius) {
-        radii[dir.get3DDataValue()] = radius;
+        radii[dir.getId()] = radius;
     }
 
     public int[] getAllRadii() {

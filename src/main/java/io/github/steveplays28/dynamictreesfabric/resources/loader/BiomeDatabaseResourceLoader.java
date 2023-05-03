@@ -26,9 +26,6 @@ import io.github.steveplays28.dynamictreesfabric.worldgen.BiomeDatabases;
 import io.github.steveplays28.dynamictreesfabric.worldgen.FeatureCancellationRegistry;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.world.level.levelgen.GenerationStep;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -36,6 +33,9 @@ import java.util.Deque;
 import java.util.LinkedList;
 import java.util.function.Consumer;
 import java.util.stream.StreamSupport;
+import net.minecraft.resource.ResourceManager;
+import net.minecraft.util.Identifier;
+import net.minecraft.world.gen.GenerationStep;
 
 import static io.github.steveplays28.dynamictreesfabric.api.resource.loading.ApplierResourceLoader.postApplierEvent;
 import static io.github.steveplays28.dynamictreesfabric.deserialisation.JsonHelper.throwIfShouldNotLoad;
@@ -90,9 +90,9 @@ public final class BiomeDatabaseResourceLoader
                 .register("type", FeatureCanceller.class, BiomePropertySelectors.FeatureCancellations::putCanceller)
                 .registerArrayApplier("types", FeatureCanceller.class,
                         BiomePropertySelectors.FeatureCancellations::putCanceller)
-                .register("stage", GenerationStep.Decoration.class,
+                .register("stage", GenerationStep.Feature.class,
                         BiomePropertySelectors.FeatureCancellations::putStage)
-                .registerArrayApplier("stages", GenerationStep.Decoration.class,
+                .registerArrayApplier("stages", GenerationStep.Feature.class,
                         BiomePropertySelectors.FeatureCancellations::putStage);
 
         postApplierEvent(new EntryApplierRegistryEvent<>(this.entryAppliers, ENTRY_APPLIERS));
@@ -181,7 +181,7 @@ public final class BiomeDatabaseResourceLoader
         );
     }
 
-    private void readCancellers(final ResourceLocation location, final JsonElement json) {
+    private void readCancellers(final Identifier location, final JsonElement json) {
         LOGGER.debug("Reading cancellers from Json biome populator \"{}\".", location);
 
         try {
@@ -202,7 +202,7 @@ public final class BiomeDatabaseResourceLoader
         }
     }
 
-    private void readCancellersInSection(final ResourceLocation location, final JsonObject json)
+    private void readCancellersInSection(final Identifier location, final JsonObject json)
             throws DeserialisationException, IgnoreThrowable {
 
         final Consumer<String> errorConsumer = error -> LOGGER.error("Error loading populator \"{}\": {}",
@@ -237,7 +237,7 @@ public final class BiomeDatabaseResourceLoader
                 .orElseThrow();
     }
 
-    private PropertyApplierResult applyCanceller(ResourceLocation location,
+    private PropertyApplierResult applyCanceller(Identifier location,
                                                  Consumer<String> errorConsumer,
                                                  Consumer<String> warningConsumer, DTBiomeHolderSet biomes,
                                                  JsonObject json) {
@@ -257,7 +257,7 @@ public final class BiomeDatabaseResourceLoader
         return PropertyApplierResult.success();
     }
 
-    private void applyCancellationAppliers(ResourceLocation location, JsonObject json,
+    private void applyCancellationAppliers(Identifier location, JsonObject json,
                                            BiomePropertySelectors.FeatureCancellations cancellations) {
         this.cancellationAppliers.applyAll(new JsonMapWrapper(json), cancellations)
                 .forEachErrorWarning(
@@ -327,12 +327,12 @@ public final class BiomeDatabaseResourceLoader
         );
     }
 
-    private void readDimensionalPopulator(ResourceLocation dimensionLocation, JsonElement dimensionalPopulator) {
+    private void readDimensionalPopulator(Identifier dimensionLocation, JsonElement dimensionalPopulator) {
         this.readPopulator(BiomeDatabases.getOrCreateDimensional(dimensionLocation), dimensionLocation,
                 dimensionalPopulator);
     }
 
-    private void readPopulator(BiomeDatabase database, ResourceLocation location, JsonElement json) {
+    private void readPopulator(BiomeDatabase database, Identifier location, JsonElement json) {
         LOGGER.debug("Loading Json biome populator \"{}\".", location);
 
         try {
@@ -348,7 +348,7 @@ public final class BiomeDatabaseResourceLoader
         }
     }
 
-    private void readPopulatorSection(BiomeDatabase database, ResourceLocation location, JsonObject json)
+    private void readPopulatorSection(BiomeDatabase database, Identifier location, JsonObject json)
             throws DeserialisationException {
 
         final DTBiomeHolderSet biomes = this.collectBiomes(json, warning ->
@@ -387,7 +387,7 @@ public final class BiomeDatabaseResourceLoader
     //             !suppress.getAsJsonPrimitive().getAsBoolean();
     // }
 
-    private void applyWhite(BiomeDatabase database, ResourceLocation location, DTBiomeHolderSet biomes, String type)
+    private void applyWhite(BiomeDatabase database, Identifier location, DTBiomeHolderSet biomes, String type)
             throws DeserialisationException {
         if (type.equalsIgnoreCase("all")) {
             DTBiomeHolderSet allBiomes = new DTBiomeHolderSet();
@@ -401,7 +401,7 @@ public final class BiomeDatabaseResourceLoader
         }
     }
 
-    private boolean isDefaultPopulator(final ResourceLocation key) {
+    private boolean isDefaultPopulator(final Identifier key) {
         return key.getPath().equals(DEFAULT_POPULATOR);
     }
 

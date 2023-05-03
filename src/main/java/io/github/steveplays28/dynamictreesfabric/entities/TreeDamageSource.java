@@ -1,6 +1,6 @@
 package io.github.steveplays28.dynamictreesfabric.entities;
 
-import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.entity.damage.DamageSource;
 
 public class TreeDamageSource extends DamageSource {
 

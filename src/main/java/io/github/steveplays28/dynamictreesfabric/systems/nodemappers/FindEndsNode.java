@@ -1,13 +1,12 @@
 package io.github.steveplays28.dynamictreesfabric.systems.nodemappers;
 
 import io.github.steveplays28.dynamictreesfabric.api.network.NodeInspector;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.block.state.BlockState;
-
 import java.util.ArrayList;
 import java.util.List;
+import net.minecraft.block.BlockState;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
+import net.minecraft.world.WorldAccess;
 
 /**
  * Finds all branch end points.
@@ -25,16 +24,16 @@ public class FindEndsNode implements NodeInspector {
 
     public FindEndsNode(List<BlockPos> ends) { //Or use your own
         this.endPoints = ends;
-        last = BlockPos.ZERO;
+        last = BlockPos.ORIGIN;
     }
 
     @Override
-    public boolean run(BlockState blockState, LevelAccessor world, BlockPos pos, Direction fromDir) {
+    public boolean run(BlockState blockState, WorldAccess world, BlockPos pos, Direction fromDir) {
         return true;
     }
 
     @Override
-    public boolean returnRun(BlockState blockState, LevelAccessor world, BlockPos pos, Direction fromDir) {
+    public boolean returnRun(BlockState blockState, WorldAccess world, BlockPos pos, Direction fromDir) {
 
         //Okay.. so.. a little explanation. If we are only one block away from the last block we returned from then we can't be on an end
         BlockPos dPos = pos.subtract(last);

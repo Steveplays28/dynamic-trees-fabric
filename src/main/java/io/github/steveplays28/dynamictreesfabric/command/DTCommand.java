@@ -3,12 +3,11 @@ package io.github.steveplays28.dynamictreesfabric.command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.tree.LiteralCommandNode;
-import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.Commands;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import net.minecraft.server.command.CommandManager;
+import net.minecraft.server.command.ServerCommandSource;
 
 public final class DTCommand {
 
@@ -21,9 +20,9 @@ public final class DTCommand {
                 new CreateTransformPotionCommand(), new TransformCommand(), new ClearOrphanedCommand(), new PurgeTreesCommand());
     }
 
-    public void registerDTCommand(CommandDispatcher<CommandSourceStack> dispatcher) {
+    public void registerDTCommand(CommandDispatcher<ServerCommandSource> dispatcher) {
         // Create DT command builder.
-        LiteralArgumentBuilder<CommandSourceStack> dtCommandBuilder = LiteralArgumentBuilder.literal(CommandConstants.COMMAND);
+        LiteralArgumentBuilder<ServerCommandSource> dtCommandBuilder = LiteralArgumentBuilder.literal(CommandConstants.COMMAND);
 
         // Add sub-commands.
         for (SubCommand subCommand : this.subCommands) {
@@ -31,11 +30,11 @@ public final class DTCommand {
         }
 
         // Register command.
-        LiteralCommandNode<CommandSourceStack> dtCommand = dispatcher.register(dtCommandBuilder);
+        LiteralCommandNode<ServerCommandSource> dtCommand = dispatcher.register(dtCommandBuilder);
 
         // Create 'dynamictrees' alias.
-        dispatcher.register(Commands.literal(CommandConstants.COMMAND_ALIAS)
-                .requires(commandSource -> commandSource.hasPermission(2))
+        dispatcher.register(CommandManager.literal(CommandConstants.COMMAND_ALIAS)
+                .requires(commandSource -> commandSource.hasPermissionLevel(2))
                 .redirect(dtCommand)
         );
     }

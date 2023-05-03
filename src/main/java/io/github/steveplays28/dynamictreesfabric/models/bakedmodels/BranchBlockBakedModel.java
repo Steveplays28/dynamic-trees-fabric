@@ -1,9 +1,9 @@
 package io.github.steveplays28.dynamictreesfabric.models.bakedmodels;
 
 import io.github.steveplays28.dynamictreesfabric.event.handlers.BakedModelEventHandler;
-import net.minecraft.client.renderer.block.model.BlockModel;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.render.model.json.JsonUnbakedModel;
+import net.minecraft.client.render.model.json.ModelTransformation;
+import net.minecraft.util.Identifier;
 import net.minecraftforge.client.model.IDynamicBakedModel;
 
 import java.util.ArrayList;
@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 
 /**
- * Holds general model data and sets up a {@link BlockModel} for branch block baked models.
+ * Holds general model data and sets up a {@link JsonUnbakedModel} for branch block baked models.
  *
  * <p>Main implementation is {@link BasicBranchBlockBakedModel}, which is the baked model
  * for dynamic branches with radius 1-8.</p>
@@ -26,14 +26,14 @@ public abstract class BranchBlockBakedModel implements IDynamicBakedModel {
      */
     public static final List<BranchBlockBakedModel> INSTANCES = new ArrayList<>();
 
-    protected final BlockModel blockModel;
+    protected final JsonUnbakedModel blockModel;
 
-    protected final ResourceLocation modelResLoc;
-    protected final ResourceLocation barkResLoc;
-    protected final ResourceLocation ringsResLoc;
+    protected final Identifier modelResLoc;
+    protected final Identifier barkResLoc;
+    protected final Identifier ringsResLoc;
 
-    public BranchBlockBakedModel(ResourceLocation modelResLoc, ResourceLocation barkResLoc, ResourceLocation ringsResLoc) {
-        this.blockModel = new BlockModel(null, new ArrayList<>(), new HashMap<>(), false, BlockModel.GuiLight.FRONT, ItemTransforms.NO_TRANSFORMS, new ArrayList<>());
+    public BranchBlockBakedModel(Identifier modelResLoc, Identifier barkResLoc, Identifier ringsResLoc) {
+        this.blockModel = new JsonUnbakedModel(null, new ArrayList<>(), new HashMap<>(), false, JsonUnbakedModel.GuiLight.ITEM, ModelTransformation.NONE, new ArrayList<>());
 
         this.modelResLoc = modelResLoc;
         this.barkResLoc = barkResLoc;

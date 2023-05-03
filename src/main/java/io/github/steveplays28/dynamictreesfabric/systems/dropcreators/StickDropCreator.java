@@ -2,9 +2,9 @@ package io.github.steveplays28.dynamictreesfabric.systems.dropcreators;
 
 import io.github.steveplays28.dynamictreesfabric.api.configurations.ConfigurationProperty;
 import io.github.steveplays28.dynamictreesfabric.systems.dropcreators.context.DropContext;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.util.Identifier;
 
 /**
  * A drop creator for the sticks that can be harvested from leaves. Rarity of 1 equals a 1/50 chance of getting between
@@ -19,7 +19,7 @@ public class StickDropCreator extends DropCreator {
 
     public static final ItemStack STICK_STACK = new ItemStack(Items.STICK);
 
-    public StickDropCreator(ResourceLocation registryName) {
+    public StickDropCreator(Identifier registryName) {
         super(registryName);
     }
 
@@ -61,9 +61,9 @@ public class StickDropCreator extends DropCreator {
                         context.species().getSeedStack(1));
                 while (num > 0) {
                     ItemStack drop = stack.copy();
-                    drop.setCount(Math.min(num, stack.getMaxStackSize()));
+                    drop.setCount(Math.min(num, stack.getMaxCount()));
                     context.drops().add(drop);
-                    num -= stack.getMaxStackSize();
+                    num -= stack.getMaxCount();
                 }
             }
         }

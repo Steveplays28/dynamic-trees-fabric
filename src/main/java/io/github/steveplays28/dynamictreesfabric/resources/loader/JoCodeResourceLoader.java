@@ -6,15 +6,15 @@ import io.github.steveplays28.dynamictreesfabric.api.resource.loading.AbstractRe
 import io.github.steveplays28.dynamictreesfabric.trees.Species;
 import io.github.steveplays28.dynamictreesfabric.worldgen.JoCode;
 import io.github.steveplays28.dynamictreesfabric.worldgen.JoCodeRegistry;
-import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.ResourceManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import net.minecraft.resource.ResourceManager;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.math.Direction;
 
 /**
  * Loads {@link JoCode} objects to the {@link JoCodeRegistry}.
@@ -37,7 +37,7 @@ public final class JoCodeResourceLoader extends AbstractResourceLoader<List<Stri
         );
     }
 
-    private void registerCodes(ResourceLocation location, List<String> lines) {
+    private void registerCodes(Identifier location, List<String> lines) {
         final Species species = TreeRegistry.findSpecies(location);
         lines.forEach(line -> this.registerCodeForLine(species, line));
         LOGGER.debug("Successfully loaded JoCodes for species \"{}\".", location);

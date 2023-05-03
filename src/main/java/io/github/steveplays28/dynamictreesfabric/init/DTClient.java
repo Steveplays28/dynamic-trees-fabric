@@ -14,26 +14,26 @@ import io.github.steveplays28.dynamictreesfabric.entities.render.FallingTreeRend
 import io.github.steveplays28.dynamictreesfabric.entities.render.LingeringEffectorRenderer;
 import io.github.steveplays28.dynamictreesfabric.trees.Family;
 import io.github.steveplays28.dynamictreesfabric.trees.Species;
-import net.minecraft.client.Minecraft;
+import net.minecraft.block.BlockState;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.color.block.BlockColors;
+import net.minecraft.client.color.world.FoliageColors;
 import net.minecraft.client.particle.Particle;
-import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.core.particles.BlockParticleOption;
-import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.core.particles.SimpleParticleType;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.RandomSource;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.inventory.InventoryMenu;
-import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.FoliageColor;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.client.render.model.BakedModel;
+import net.minecraft.client.render.model.BakedQuad;
+import net.minecraft.client.texture.Sprite;
+import net.minecraft.entity.Entity;
+import net.minecraft.particle.BlockStateParticleEffect;
+import net.minecraft.particle.DefaultParticleType;
+import net.minecraft.particle.ParticleTypes;
+import net.minecraft.screen.PlayerScreenHandler;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.random.Random;
+import net.minecraft.world.BlockView;
+import net.minecraft.world.World;
+import net.minecraft.world.WorldAccess;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.EntityRenderersEvent;
@@ -75,15 +75,15 @@ public class DTClient {
     @OnlyIn(Dist.CLIENT)
     public static void discoverWoodColors() {
 
-        final Function<ResourceLocation, TextureAtlasSprite> bakedTextureGetter = Minecraft.getInstance()
-                .getTextureAtlas(InventoryMenu.BLOCK_ATLAS);
+        final Function<Identifier, Sprite> bakedTextureGetter = MinecraftClient.getInstance()
+                .getSpriteAtlas(PlayerScreenHandler.BLOCK_ATLAS_TEXTURE);
 
         for (Family family : Species.REGISTRY.getAll().stream().map(Species::getFamily).distinct().collect(Collectors.toList())) {
             family.woodRingColor = 0xFFF1AE;
             family.woodBarkColor = 0xB3A979;
             if (family != Family.NULL_FAMILY) {
                 family.getPrimitiveLog().ifPresent(branch -> {
-                    BlockState state = branch.defaultBlockState();
+                    BlockState state = branch.getDefaultState();
                     family.woodRingColor = getFaceColor(state, Direction.DOWN, bakedTextureGetter);
                     family.woodBarkColor = getFaceColor(state, Direction.NORTH, bakedTextureGetter);
                 });
@@ -92,18 +92,18 @@ public class DTClient {
     }
 
     @OnlyIn(Dist.CLIENT)
-    private static int getFaceColor(BlockState state, Direction face, Function<ResourceLocation, TextureAtlasSprite> textureGetter) {
-        final BakedModel model = Minecraft.getInstance().getBlockRenderer().getBlockModel(state);
-        List<BakedQuad> quads = model.getQuads(state, face, RandomSource.create(), ModelData.EMPTY, null);
+    private static int getFaceColor(BlockState state, Direction face, Function<Identifier, Sprite> textureGetter) {
+        final BakedModel model = MinecraftClient.getInstance().getBlockRenderManager().getModel(state);
+        List<BakedQuad> quads = model.getQuads(state, face, Random.create(), ModelData.EMPTY, null);
         if (quads.isEmpty()) // If the quad list is empty, means there is no face on that side, so we try with null.
         {
-            quads = model.getQuads(state, null, RandomSource.create(), ModelData.EMPTY, null);
+            quads = model.getQuads(state, null, Random.create(), ModelData.EMPTY, null);
         }
         if (quads.isEmpty()) { // If null still returns empty, there is nothing we can do so we just warn and exit.
             LogManager.getLogger().warn("Could not get color of " + face + " side for " + state.getBlock() + "! Branch needs to be handled manually!");
             return 0;
         }
-        final ResourceLocation resLoc = quads.get(0).getSprite().getName(); // Now we get the texture location of that selected face.
+        final Identifier resLoc = quads.get(0).getSprite().getName(); // Now we get the texture location of that selected face.
         if (!resLoc.toString().isEmpty()) {
             final TextureUtils.PixelBuffer pixelBuffer = new TextureUtils.PixelBuffer(textureGetter.apply(resLoc));
             final int u = pixelBuffer.w / 16;
@@ -119,7 +119,7 @@ public class DTClient {
         BlockColorMultipliers.cleanUp();
     }
 
-    private static boolean isValid(BlockGetter access, BlockPos pos) {
+    private static boolean isValid(BlockView access, BlockPos pos) {
         return access != null && pos != null;
     }
 
@@ -129,11 +129,11 @@ public class DTClient {
 
         // BLOCKS
 
-        final BlockColors blockColors = Minecraft.getInstance().getBlockColors();
+        final BlockColors blockColors = MinecraftClient.getInstance().getBlockColors();
 
         // Register Rooty Colorizers
         for (RootyBlock roots : SoilHelper.getRootyBlocksList()) {
-            blockColors.register((state, world, pos, tintIndex) -> roots.colorMultiplier(blockColors, state, world, pos, tintIndex), roots);
+            blockColors.registerColorProvider((state, world, pos, tintIndex) -> roots.colorMultiplier(blockColors, state, world, pos, tintIndex), roots);
         }
 
         // Register Bonsai Pot Colorizer
@@ -171,8 +171,8 @@ public class DTClient {
 
     private static void registerJsonColorMultipliers() {
         // Register programmable custom block color providers for LeavesPropertiesJson
-        BlockColorMultipliers.register("birch", (state, worldIn, pos, tintIndex) -> FoliageColor.getBirchColor());
-        BlockColorMultipliers.register("spruce", (state, worldIn, pos, tintIndex) -> FoliageColor.getEvergreenColor());
+        BlockColorMultipliers.register("birch", (state, worldIn, pos, tintIndex) -> FoliageColors.getBirchColor());
+        BlockColorMultipliers.register("spruce", (state, worldIn, pos, tintIndex) -> FoliageColors.getSpruceColor());
     }
 
     public static void registerClientEventHandlers() {
@@ -186,7 +186,7 @@ public class DTClient {
         event.registerEntityRenderer(DTRegistries.LINGERING_EFFECTOR.get(), LingeringEffectorRenderer::new);
     }
 
-    private static int getFoliageColor(LeavesProperties leavesProperties, Level world, BlockState blockState, BlockPos pos) {
+    private static int getFoliageColor(LeavesProperties leavesProperties, World world, BlockState blockState, BlockPos pos) {
         return leavesProperties.foliageColorMultiplier(blockState, world, pos);
     }
 
@@ -194,19 +194,19 @@ public class DTClient {
     // PARTICLES
     ///////////////////////////////////////////
 
-    private static void addDustParticle(Level world, double fx, double fy, double fz, double mx, double my, double mz, BlockState blockState, float r, float g, float b) {
-        if (world.isClientSide) {
-            Particle particle = Minecraft.getInstance().particleEngine.createParticle(new BlockParticleOption(ParticleTypes.BLOCK, blockState), fx, fy, fz, mx, my, mz);
+    private static void addDustParticle(World world, double fx, double fy, double fz, double mx, double my, double mz, BlockState blockState, float r, float g, float b) {
+        if (world.isClient) {
+            Particle particle = MinecraftClient.getInstance().particleManager.addParticle(new BlockStateParticleEffect(ParticleTypes.BLOCK, blockState), fx, fy, fz, mx, my, mz);
             assert particle != null;
             particle.setColor(r, g, b);
         }
     }
 
-    public static void spawnParticles(Level world, SimpleParticleType particleType, BlockPos pos, int numParticles, RandomSource random) {
+    public static void spawnParticles(World world, DefaultParticleType particleType, BlockPos pos, int numParticles, Random random) {
         spawnParticles(world, particleType, pos.getX(), pos.getY(), pos.getZ(), numParticles, random);
     }
 
-    public static void spawnParticles(LevelAccessor world, SimpleParticleType particleType, int x, int y, int z, int numParticles, RandomSource random) {
+    public static void spawnParticles(WorldAccess world, DefaultParticleType particleType, int x, int y, int z, int numParticles, Random random) {
         for (int i1 = 0; i1 < numParticles; ++i1) {
             double mx = random.nextGaussian() * 0.02D;
             double my = random.nextGaussian() * 0.02D;
@@ -218,15 +218,15 @@ public class DTClient {
     /**
      * Not strictly necessary. But adds a little more isolation to the server for particle effects
      */
-    public static void spawnParticle(LevelAccessor world, SimpleParticleType particleType, double x, double y, double z, double mx, double my, double mz) {
-        if (world.isClientSide()) {
+    public static void spawnParticle(WorldAccess world, DefaultParticleType particleType, double x, double y, double z, double mx, double my, double mz) {
+        if (world.isClient()) {
             world.addParticle(particleType, x, y, z, mx, my, mz);
         }
     }
 
-    public static void crushLeavesBlock(Level world, BlockPos pos, BlockState blockState, Entity entity) {
-        if (world.isClientSide) {
-            RandomSource random = world.random;
+    public static void crushLeavesBlock(World world, BlockPos pos, BlockState blockState, Entity entity) {
+        if (world.isClient) {
+            Random random = world.random;
             TreePart treePart = TreeHelper.getTreePart(blockState);
             if (treePart instanceof DynamicLeavesBlock) {
                 DynamicLeavesBlock leaves = (DynamicLeavesBlock) treePart;
@@ -242,7 +242,7 @@ public class DTClient {
                                 double fx = pos.getX() + dx / 8.0;
                                 double fy = pos.getY() + dy / 8.0;
                                 double fz = pos.getZ() + dz / 8.0;
-                                addDustParticle(world, fx, fy, fz, 0, random.nextFloat() * entity.getDeltaMovement().y, 0, blockState, r, g, b);
+                                addDustParticle(world, fx, fy, fz, 0, random.nextFloat() * entity.getVelocity().y, 0, blockState, r, g, b);
                             }
                         }
                     }

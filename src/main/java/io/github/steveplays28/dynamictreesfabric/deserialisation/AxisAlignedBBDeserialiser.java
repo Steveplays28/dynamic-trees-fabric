@@ -1,16 +1,16 @@
 package io.github.steveplays28.dynamictreesfabric.deserialisation;
 
 import io.github.steveplays28.dynamictreesfabric.deserialisation.result.Result;
+import net.minecraft.util.math.Box;
 import com.google.gson.JsonElement;
-import net.minecraft.world.phys.AABB;
 
 /**
  * @author Harley O'Connor
  */
-public final class AxisAlignedBBDeserialiser implements JsonDeserialiser<AABB> {
+public final class AxisAlignedBBDeserialiser implements JsonDeserialiser<Box> {
 
     @Override
-    public Result<AABB, JsonElement> deserialise(JsonElement jsonElement) {
+    public Result<Box, JsonElement> deserialise(JsonElement jsonElement) {
         return JsonDeserialisers.JSON_ARRAY.deserialise(jsonElement).map((jsonArray, warningConsumer) -> {
             if (jsonArray.size() != 6) {
                 throw DeserialisationException.error("Array was not of correct size (6).");
@@ -22,7 +22,7 @@ public final class AxisAlignedBBDeserialiser implements JsonDeserialiser<AABB> {
                 params[i] = JsonDeserialisers.DOUBLE.deserialise(jsonArray.get(i)).orElseThrow();
             }
 
-            return new AABB(params[0], params[1], params[2], params[3], params[4], params[5]);
+            return new Box(params[0], params[1], params[2], params[3], params[4], params[5]);
         });
     }
 

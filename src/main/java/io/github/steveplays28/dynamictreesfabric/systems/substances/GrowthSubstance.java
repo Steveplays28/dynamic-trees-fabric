@@ -3,10 +3,10 @@ package io.github.steveplays28.dynamictreesfabric.systems.substances;
 import io.github.steveplays28.dynamictreesfabric.api.TreeHelper;
 import io.github.steveplays28.dynamictreesfabric.api.substances.SubstanceEffect;
 import io.github.steveplays28.dynamictreesfabric.entities.LingeringEffectorEntity;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.world.level.Level;
+import net.minecraft.particle.ParticleTypes;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
+import net.minecraft.world.World;
 
 public class GrowthSubstance implements SubstanceEffect {
 
@@ -30,7 +30,7 @@ public class GrowthSubstance implements SubstanceEffect {
     }
 
     @Override
-    public boolean apply(Level world, BlockPos rootPos) {
+    public boolean apply(World world, BlockPos rootPos) {
         // Don't apply if there is already a growth substance.
         if (LingeringEffectorEntity.treeHasEffectorForEffect(world, rootPos, this)) {
             return false;
@@ -46,13 +46,13 @@ public class GrowthSubstance implements SubstanceEffect {
     private int pulseCount;
 
     @Override
-    public boolean update(Level world, BlockPos rootPos, int deltaTicks, int fertility) {
+    public boolean update(World world, BlockPos rootPos, int deltaTicks, int fertility) {
         // Stop when fertility has depleted.
         if (fertility <= 0 || this.pulseCount >= this.pulses) {
             return false;
         }
 
-        if (world.isClientSide) {
+        if (world.isClient) {
             if (deltaTicks % this.ticksPerParticlePulse == 0) {
                 TreeHelper.rootParticles(world, rootPos, Direction.UP, ParticleTypes.EFFECT, 1);
             }

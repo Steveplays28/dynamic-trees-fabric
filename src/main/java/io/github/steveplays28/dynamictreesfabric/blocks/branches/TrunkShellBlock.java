@@ -4,61 +4,61 @@ import io.github.steveplays28.dynamictreesfabric.blocks.BlockWithDynamicHardness
 import io.github.steveplays28.dynamictreesfabric.util.CoordUtils;
 import io.github.steveplays28.dynamictreesfabric.util.CoordUtils.Surround;
 import io.github.steveplays28.dynamictreesfabric.util.Null;
-import net.minecraft.client.particle.ParticleEngine;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.core.Vec3i;
-import net.minecraft.core.particles.BlockParticleOption;
-import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.RandomSource;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.context.BlockPlaceContext;
-import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.Explosion;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.RenderShape;
-import net.minecraft.world.level.block.SimpleWaterloggedBlock;
-import net.minecraft.world.level.block.SoundType;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.StateDefinition;
-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.minecraft.world.level.block.state.properties.EnumProperty;
-import net.minecraft.world.level.material.Fluid;
-import net.minecraft.world.level.material.FluidState;
-import net.minecraft.world.level.material.Fluids;
-import net.minecraft.world.level.material.Material;
-import net.minecraft.world.level.material.PushReaction;
-import net.minecraft.world.level.pathfinder.PathComputationType;
-import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.HitResult;
-import net.minecraft.world.phys.Vec3;
-import net.minecraft.world.phys.shapes.CollisionContext;
-import net.minecraft.world.phys.shapes.Shapes;
-import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraft.world.ticks.ScheduledTick;
-import net.minecraft.world.ticks.TickPriority;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockRenderType;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.Material;
+import net.minecraft.block.ShapeContext;
+import net.minecraft.block.Waterloggable;
+import net.minecraft.block.piston.PistonBehavior;
+import net.minecraft.client.particle.ParticleManager;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.ai.pathing.NavigationType;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.fluid.Fluid;
+import net.minecraft.fluid.FluidState;
+import net.minecraft.fluid.Fluids;
+import net.minecraft.item.ItemPlacementContext;
+import net.minecraft.item.ItemStack;
+import net.minecraft.particle.BlockStateParticleEffect;
+import net.minecraft.particle.ParticleTypes;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.sound.BlockSoundGroup;
+import net.minecraft.state.StateManager;
+import net.minecraft.state.property.BooleanProperty;
+import net.minecraft.state.property.EnumProperty;
+import net.minecraft.state.property.Properties;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.Hand;
+import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.Vec3i;
+import net.minecraft.util.math.random.Random;
+import net.minecraft.util.shape.VoxelShape;
+import net.minecraft.util.shape.VoxelShapes;
+import net.minecraft.world.BlockView;
+import net.minecraft.world.World;
+import net.minecraft.world.WorldAccess;
+import net.minecraft.world.WorldView;
+import net.minecraft.world.explosion.Explosion;
+import net.minecraft.world.tick.OrderedTick;
+import net.minecraft.world.tick.TickPriority;
 import net.minecraftforge.client.extensions.common.IClientBlockExtensions;
 
 import javax.annotation.Nullable;
 import java.util.function.Consumer;
 
 @SuppressWarnings("deprecation")
-public class TrunkShellBlock extends BlockWithDynamicHardness implements SimpleWaterloggedBlock {
+public class TrunkShellBlock extends BlockWithDynamicHardness implements Waterloggable {
 
-    public static final EnumProperty<Surround> CORE_DIR = EnumProperty.create("coredir", Surround.class);
-    public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
+    public static final EnumProperty<Surround> CORE_DIR = EnumProperty.of("coredir", Surround.class);
+    public static final BooleanProperty WATERLOGGED = Properties.WATERLOGGED;
 
     public static class ShellMuse {
         public final BlockState state;
@@ -81,23 +81,23 @@ public class TrunkShellBlock extends BlockWithDynamicHardness implements SimpleW
 
     public TrunkShellBlock() {
         super(Block.Properties.of(Material.WOOD));
-        registerDefaultState(defaultBlockState().setValue(WATERLOGGED, false));
+        setDefaultState(getDefaultState().with(WATERLOGGED, false));
     }
 
     ///////////////////////////////////////////
     // BLOCKSTATE
     ///////////////////////////////////////////
 
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+    protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
         builder.add(CORE_DIR).add(WATERLOGGED);
     }
 
     @Override
-    public void tick(BlockState state, ServerLevel worldIn, BlockPos pos, RandomSource random) {
+    public void scheduledTick(BlockState state, ServerWorld worldIn, BlockPos pos, Random random) {
         ShellMuse muse = this.getMuseUnchecked(worldIn, state, pos);
         if (!isValid(muse)) {
-            if (state.getValue(WATERLOGGED)) {
-                worldIn.setBlockAndUpdate(pos, Blocks.WATER.defaultBlockState());
+            if (state.get(WATERLOGGED)) {
+                worldIn.setBlockState(pos, Blocks.WATER.getDefaultState());
             } else {
                 worldIn.removeBlock(pos, false);
             }
@@ -109,34 +109,34 @@ public class TrunkShellBlock extends BlockWithDynamicHardness implements SimpleW
     ///////////////////////////////////////////
 
     @Override
-    public boolean onDestroyedByPlayer(BlockState state, Level world, BlockPos pos, Player player, boolean willHarvest, FluidState fluid) {
+    public boolean onDestroyedByPlayer(BlockState state, World world, BlockPos pos, PlayerEntity player, boolean willHarvest, FluidState fluid) {
         return Null.applyIfNonnull(this.getMuse(world, state, pos), muse -> muse.state.getBlock().onDestroyedByPlayer(muse.state, world, muse.pos, player, willHarvest, world.getFluidState(pos)), false);
     }
 
     @Override
-    public float getDestroyProgress(BlockState state, Player player, BlockGetter worldIn, BlockPos pos) {
-        return Null.applyIfNonnull(this.getMuse(worldIn, state, pos), muse -> muse.state.getBlock().getDestroyProgress(muse.state, player, worldIn, muse.pos), 0f);
+    public float calcBlockBreakingDelta(BlockState state, PlayerEntity player, BlockView worldIn, BlockPos pos) {
+        return Null.applyIfNonnull(this.getMuse(worldIn, state, pos), muse -> muse.state.getBlock().calcBlockBreakingDelta(muse.state, player, worldIn, muse.pos), 0f);
     }
 
     @Override
-    public float getHardness(BlockState state, BlockGetter world, BlockPos pos) {
+    public float getHardness(BlockState state, BlockView world, BlockPos pos) {
         return Null.applyIfNonnull(this.getMuse(world, pos), muse -> ((BlockWithDynamicHardness) muse.state.getBlock()).getHardness(state, world, muse.pos), super.getHardness(state, world, pos));
     }
 
     @Override
-    public SoundType getSoundType(BlockState state, LevelReader world, BlockPos pos, @Nullable Entity entity) {
-        return Null.applyIfNonnull(this.getMuse(world, state, pos), muse -> muse.state.getBlock().getSoundType(muse.state, world, muse.pos, entity), SoundType.WOOD);
+    public BlockSoundGroup getSoundType(BlockState state, WorldView world, BlockPos pos, @Nullable Entity entity) {
+        return Null.applyIfNonnull(this.getMuse(world, state, pos), muse -> muse.state.getBlock().getSoundGroup(muse.state, world, muse.pos, entity), BlockSoundGroup.WOOD);
     }
 
     @Override
-    public float getExplosionResistance(BlockState state, BlockGetter world, BlockPos pos, Explosion explosion) {
-        return Null.applyIfNonnull(this.getMuse(world, pos), muse -> muse.state.getBlock().getExplosionResistance(world.getBlockState(pos), world, muse.pos, explosion), 0f);
+    public float getExplosionResistance(BlockState state, BlockView world, BlockPos pos, Explosion explosion) {
+        return Null.applyIfNonnull(this.getMuse(world, pos), muse -> muse.state.getBlock().getBlastResistance(world.getBlockState(pos), world, muse.pos, explosion), 0f);
     }
 
     @Override
-    public boolean canBeReplaced(BlockState state, BlockPlaceContext useContext) {
-        final Level world = useContext.getLevel();
-        final BlockPos clickedPos = useContext.getClickedPos();
+    public boolean canReplace(BlockState state, ItemPlacementContext useContext) {
+        final World world = useContext.getWorld();
+        final BlockPos clickedPos = useContext.getBlockPos();
         if (this.museDoesNotExist(world, state, clickedPos)) {
             this.scheduleUpdateTick(world, clickedPos);
             return false;
@@ -145,28 +145,28 @@ public class TrunkShellBlock extends BlockWithDynamicHardness implements SimpleW
     }
 
     public Surround getMuseDir(BlockState state, BlockPos pos) {
-        return state.getValue(CORE_DIR);
+        return state.get(CORE_DIR);
     }
 
-    public boolean museDoesNotExist(BlockGetter world, BlockState state, BlockPos pos) {
-        final BlockPos musePos = pos.offset(this.getMuseDir(state, pos).getOffset());
+    public boolean museDoesNotExist(BlockView world, BlockState state, BlockPos pos) {
+        final BlockPos musePos = pos.add(this.getMuseDir(state, pos).getOffset());
         return CoordUtils.getStateSafe(world, musePos) == null;
     }
 
     @Nullable
-    public ShellMuse getMuseUnchecked(BlockGetter access, BlockPos pos) {
+    public ShellMuse getMuseUnchecked(BlockView access, BlockPos pos) {
         return this.getMuseUnchecked(access, access.getBlockState(pos), pos);
     }
 
     @Nullable
-    public ShellMuse getMuseUnchecked(BlockGetter access, BlockState state, BlockPos pos) {
+    public ShellMuse getMuseUnchecked(BlockView access, BlockState state, BlockPos pos) {
         return this.getMuseUnchecked(access, state, pos, pos);
     }
 
     @Nullable
-    public ShellMuse getMuseUnchecked(BlockGetter access, BlockState state, BlockPos pos, BlockPos originalPos) {
+    public ShellMuse getMuseUnchecked(BlockView access, BlockState state, BlockPos pos, BlockPos originalPos) {
         final Surround museDir = getMuseDir(state, pos);
-        final BlockPos musePos = pos.offset(museDir.getOffset());
+        final BlockPos musePos = pos.add(museDir.getOffset());
         final BlockState museState = CoordUtils.getStateSafe(access, musePos);
 
         if (museState == null) {
@@ -178,7 +178,7 @@ public class TrunkShellBlock extends BlockWithDynamicHardness implements SimpleW
             return new ShellMuse(museState, musePos, museDir, musePos.subtract(originalPos));
         } else if (block instanceof TrunkShellBlock) { // If its another trunkshell, then this trunkshell is on another layer. IF they share a common direction, we return that shell's muse.
             final Vec3i offset = ((TrunkShellBlock) block).getMuseDir(museState, musePos).getOffset();
-            if (new Vec3(offset.getX(), offset.getY(), offset.getZ()).add(new Vec3(museDir.getOffset().getX(), museDir.getOffset().getY(), museDir.getOffset().getZ())).lengthSqr() > 2.25) {
+            if (new Vec3d(offset.getX(), offset.getY(), offset.getZ()).add(new Vec3d(museDir.getOffset().getX(), museDir.getOffset().getY(), museDir.getOffset().getZ())).lengthSquared() > 2.25) {
                 return (((TrunkShellBlock) block).getMuseUnchecked(access, museState, musePos, originalPos));
             }
         }
@@ -186,12 +186,12 @@ public class TrunkShellBlock extends BlockWithDynamicHardness implements SimpleW
     }
 
     @Nullable
-    public ShellMuse getMuse(BlockGetter access, BlockPos pos) {
+    public ShellMuse getMuse(BlockView access, BlockPos pos) {
         return this.getMuse(access, access.getBlockState(pos), pos);
     }
 
     @Nullable
-    public ShellMuse getMuse(BlockGetter access, BlockState state, BlockPos pos) {
+    public ShellMuse getMuse(BlockView access, BlockState state, BlockPos pos) {
         final ShellMuse muse = this.getMuseUnchecked(access, state, pos);
 
         // Check the muse for validity.
@@ -206,27 +206,27 @@ public class TrunkShellBlock extends BlockWithDynamicHardness implements SimpleW
         return muse != null && muse.getRadius() > 8;
     }
 
-    public void scheduleUpdateTick(BlockGetter access, BlockPos pos) {
-        if (!(access instanceof LevelAccessor)) {
+    public void scheduleUpdateTick(BlockView access, BlockPos pos) {
+        if (!(access instanceof WorldAccess)) {
             return;
         }
 
-        ((LevelAccessor) access).getBlockTicks().schedule(new ScheduledTick<Block>(this,pos.immutable(), 0, TickPriority.HIGH,0));
+        ((WorldAccess) access).getBlockTickScheduler().scheduleTick(new OrderedTick<Block>(this,pos.toImmutable(), 0, TickPriority.HIGH,0));
     }
 
     @Override
-    public void neighborChanged(BlockState state, Level world, BlockPos pos, Block neighborBlock, BlockPos neighborPos, boolean p_220069_6_) {
+    public void neighborUpdate(BlockState state, World world, BlockPos pos, Block neighborBlock, BlockPos neighborPos, boolean p_220069_6_) {
         this.scheduleUpdateTick(world, pos);
     }
 
     @Override
-    public VoxelShape getShape(BlockState state, BlockGetter reader, BlockPos pos, CollisionContext context) {
-        return Null.applyIfNonnull(this.getMuse(reader, state, pos), muse -> Shapes.create(muse.state.getShape(reader, muse.pos).bounds().move(muse.museOffset)), Shapes.empty());
+    public VoxelShape getOutlineShape(BlockState state, BlockView reader, BlockPos pos, ShapeContext context) {
+        return Null.applyIfNonnull(this.getMuse(reader, state, pos), muse -> VoxelShapes.cuboid(muse.state.getOutlineShape(reader, muse.pos).getBoundingBox().offset(muse.museOffset)), VoxelShapes.empty());
     }
 
     @Override
-    public ItemStack getCloneItemStack(BlockState state, HitResult target, BlockGetter world, BlockPos pos, Player player) {
-        return Null.applyIfNonnull(this.getMuse(world, state, pos), muse -> muse.state.getBlock().getCloneItemStack(muse.state, target, world, muse.pos, player), ItemStack.EMPTY);
+    public ItemStack getCloneItemStack(BlockState state, HitResult target, BlockView world, BlockPos pos, PlayerEntity player) {
+        return Null.applyIfNonnull(this.getMuse(world, state, pos), muse -> muse.state.getBlock().getPickStack(muse.state, target, world, muse.pos, player), ItemStack.EMPTY);
     }
 
 //    @Override
@@ -239,15 +239,15 @@ public class TrunkShellBlock extends BlockWithDynamicHardness implements SimpleW
 //    }
 
     @Override
-    public void onBlockExploded(BlockState state, Level world, BlockPos pos, Explosion explosion) {
+    public void onBlockExploded(BlockState state, World world, BlockPos pos, Explosion explosion) {
         Null.consumeIfNonnull(this.getMuse(world, state, pos), muse -> muse.state.getBlock().onBlockExploded(muse.state, world, muse.pos, explosion));
     }
 
     //TODO: This may not even be necessary
     @Nullable
-    protected Surround findDetachedMuse(Level world, BlockPos pos) {
+    protected Surround findDetachedMuse(World world, BlockPos pos) {
         for (Surround s : Surround.values()) {
-            final BlockState state = world.getBlockState(pos.offset(s.getOffset()));
+            final BlockState state = world.getBlockState(pos.add(s.getOffset()));
 
             if (state.getBlock() instanceof Musable) {
                 return s;
@@ -258,33 +258,33 @@ public class TrunkShellBlock extends BlockWithDynamicHardness implements SimpleW
 
     //TODO: This may not even be necessary
     @Override
-    public void destroy(LevelAccessor world, BlockPos pos, BlockState state) {
+    public void onBroken(WorldAccess world, BlockPos pos, BlockState state) {
         final BlockState newState = world.getBlockState(pos);
 
         if (newState.getBlock() != Blocks.AIR) {
             return;
         }
 
-        Null.consumeIfNonnull(this.findDetachedMuse((Level) world, pos),
-                surround -> world.setBlock(pos, defaultBlockState().setValue(CORE_DIR, surround), 1));
+        Null.consumeIfNonnull(this.findDetachedMuse((World) world, pos),
+                surround -> world.setBlockState(pos, getDefaultState().with(CORE_DIR, surround), 1));
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level world, BlockPos pos, Player playerIn, InteractionHand hand, BlockHitResult hit) {
-        return Null.applyIfNonnull(this.getMuse(world, state, pos), muse -> muse.state.getBlock().use(muse.state, world, muse.pos, playerIn, hand, hit), InteractionResult.FAIL);
+    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity playerIn, Hand hand, BlockHitResult hit) {
+        return Null.applyIfNonnull(this.getMuse(world, state, pos), muse -> muse.state.getBlock().onUse(muse.state, world, muse.pos, playerIn, hand, hit), ActionResult.FAIL);
     }
 
     @Override
-    public boolean isFlammable(BlockState state, BlockGetter world, BlockPos pos, Direction face) {
+    public boolean isFlammable(BlockState state, BlockView world, BlockPos pos, Direction face) {
         return false; // This is the simple solution to the problem.  Maybe I'll work it out later.
     }
 
     @Override
-    public int getFlammability(BlockState state, BlockGetter world, BlockPos pos, Direction face) {
+    public int getFlammability(BlockState state, BlockView world, BlockPos pos, Direction face) {
         return 0; // This is the simple solution to the problem.  Maybe I'll work it out later.
     }
 
-    public boolean isFullBlockShell(BlockGetter world, BlockPos pos) {
+    public boolean isFullBlockShell(BlockView world, BlockPos pos) {
         return isFullBlockShell(getMuse(world, pos));
     }
 
@@ -297,7 +297,7 @@ public class TrunkShellBlock extends BlockWithDynamicHardness implements SimpleW
     }
 
     @Override
-    public boolean isPathfindable(BlockState state, BlockGetter world, BlockPos pos, PathComputationType pathType) {
+    public boolean canPathfindThrough(BlockState state, BlockView world, BlockPos pos, NavigationType pathType) {
         return false;
     }
 
@@ -307,27 +307,27 @@ public class TrunkShellBlock extends BlockWithDynamicHardness implements SimpleW
 
     @Override
     public FluidState getFluidState(BlockState state) {
-        return state.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(state);
+        return state.get(WATERLOGGED) ? Fluids.WATER.getStill(false) : super.getFluidState(state);
     }
 
     @Override
-    public BlockState updateShape(BlockState stateIn, Direction facing, BlockState facingState, LevelAccessor worldIn, BlockPos currentPos, BlockPos facingPos) {
-        if (stateIn.getValue(WATERLOGGED)) {
-            worldIn.getFluidTicks().schedule(new ScheduledTick<>(Fluids.WATER,currentPos, Fluids.WATER.getTickDelay(worldIn),0));
+    public BlockState getStateForNeighborUpdate(BlockState stateIn, Direction facing, BlockState facingState, WorldAccess worldIn, BlockPos currentPos, BlockPos facingPos) {
+        if (stateIn.get(WATERLOGGED)) {
+            worldIn.getFluidTickScheduler().scheduleTick(new OrderedTick<>(Fluids.WATER,currentPos, Fluids.WATER.getTickRate(worldIn),0));
         }
-        return super.updateShape(stateIn, facing, facingState, worldIn, currentPos, facingPos);
+        return super.getStateForNeighborUpdate(stateIn, facing, facingState, worldIn, currentPos, facingPos);
     }
 
     @Override
-    public boolean canPlaceLiquid(BlockGetter world, BlockPos pos, BlockState state, Fluid fluid) {
+    public boolean canFillWithFluid(BlockView world, BlockPos pos, BlockState state, Fluid fluid) {
         if (isFullBlockShell(world, pos)) {
             return false;
         }
-        return SimpleWaterloggedBlock.super.canPlaceLiquid(world, pos, state, fluid);
+        return Waterloggable.super.canFillWithFluid(world, pos, state, fluid);
     }
 
     protected boolean isWaterLogged(BlockState state) {
-        return state.hasProperty(WATERLOGGED) && state.getValue(WATERLOGGED);
+        return state.contains(WATERLOGGED) && state.get(WATERLOGGED);
     }
 
     ///////////////////////////////////////////
@@ -335,17 +335,17 @@ public class TrunkShellBlock extends BlockWithDynamicHardness implements SimpleW
     ///////////////////////////////////////////
 
     @Override
-    public RenderShape getRenderShape(BlockState state) {
-        return RenderShape.INVISIBLE;
+    public BlockRenderType getRenderType(BlockState state) {
+        return BlockRenderType.INVISIBLE;
     }
 
     @Override
-    public PushReaction getPistonPushReaction(BlockState state) {
-        return PushReaction.BLOCK;
+    public PistonBehavior getPistonBehavior(BlockState state) {
+        return PistonBehavior.BLOCK;
     }
 
     @Override
-    public boolean addLandingEffects(BlockState state1, ServerLevel worldserver, BlockPos pos, BlockState state2, LivingEntity entity, int numberOfParticles) {
+    public boolean addLandingEffects(BlockState state1, ServerWorld worldserver, BlockPos pos, BlockState state2, LivingEntity entity, int numberOfParticles) {
         return false;
     }
 
@@ -354,7 +354,7 @@ public class TrunkShellBlock extends BlockWithDynamicHardness implements SimpleW
     public void initializeClient(Consumer<IClientBlockExtensions> consumer) {
         consumer.accept(new IClientBlockExtensions() {
             @Override
-            public boolean addHitEffects(BlockState state, Level world, HitResult target, ParticleEngine manager) {
+            public boolean addHitEffects(BlockState state, World world, HitResult target, ParticleManager manager) {
                 BlockPos shellPos;
                 if (target instanceof BlockHitResult) {
                     shellPos = ((BlockHitResult) target).getBlockPos();
@@ -371,17 +371,17 @@ public class TrunkShellBlock extends BlockWithDynamicHardness implements SimpleW
 
                     final BlockState museState = muse.state;
                     final BlockPos musePos = muse.pos;
-                    final RandomSource rand = world.random;
+                    final Random rand = world.random;
 
                     int x = musePos.getX();
                     int y = musePos.getY();
                     int z = musePos.getZ();
-                    AABB axisalignedbb = museState.getBlockSupportShape(world, musePos).bounds();
+                    Box axisalignedbb = museState.getSidesShape(world, musePos).getBoundingBox();
                     double d0 = x + rand.nextDouble() * (axisalignedbb.maxX - axisalignedbb.minX - 0.2D) + 0.1D + axisalignedbb.minX;
                     double d1 = y + rand.nextDouble() * (axisalignedbb.maxY - axisalignedbb.minY - 0.2D) + 0.1D + axisalignedbb.minY;
                     double d2 = z + rand.nextDouble() * (axisalignedbb.maxZ - axisalignedbb.minZ - 0.2D) + 0.1D + axisalignedbb.minZ;
 
-                    switch (((BlockHitResult) target).getDirection()) {
+                    switch (((BlockHitResult) target).getSide()) {
                         case DOWN:
                             d1 = y + axisalignedbb.minY - 0.1D;
                             break;
@@ -403,14 +403,14 @@ public class TrunkShellBlock extends BlockWithDynamicHardness implements SimpleW
                     }
 
                     // Safe to spawn particles here since this is a client side only member function.
-                    world.addParticle(new BlockParticleOption(ParticleTypes.BLOCK, museState), d0, d1, d2, 0, 0, 0);
+                    world.addParticle(new BlockStateParticleEffect(ParticleTypes.BLOCK, museState), d0, d1, d2, 0, 0, 0);
                 }
 
                 return true;
             }
 
             @Override
-            public boolean addDestroyEffects(BlockState state, Level level, BlockPos pos, ParticleEngine manager) {
+            public boolean addDestroyEffects(BlockState state, World level, BlockPos pos, ParticleManager manager) {
                 if (state.getBlock() instanceof TrunkShellBlock) {
                     final ShellMuse muse = ((TrunkShellBlock)state.getBlock()).getMuseUnchecked(level, state, pos);
 
@@ -421,7 +421,7 @@ public class TrunkShellBlock extends BlockWithDynamicHardness implements SimpleW
                     final BlockState museState = muse.state;
                     final BlockPos musePos = muse.pos;
 
-                    manager.destroy(musePos, museState);
+                    manager.addBlockBreakParticles(musePos, museState);
                 }
                 return true;
             }

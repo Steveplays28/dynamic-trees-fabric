@@ -6,23 +6,23 @@ import io.github.steveplays28.dynamictreesfabric.client.ModelUtils;
 import io.github.steveplays28.dynamictreesfabric.models.modeldata.ModelConnections;
 import com.google.common.collect.Maps;
 import com.mojang.math.Vector3f;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.renderer.block.model.BlockElement;
-import net.minecraft.client.renderer.block.model.BlockElementFace;
-import net.minecraft.client.renderer.block.model.BlockFaceUV;
-import net.minecraft.client.renderer.block.model.ItemOverrides;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.client.resources.model.BlockModelRotation;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.core.Direction.Axis;
-import net.minecraft.core.Direction.AxisDirection;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.RandomSource;
-import net.minecraft.world.level.BlockAndTintGetter;
-import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.block.BlockState;
+import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.render.model.BakedModel;
+import net.minecraft.client.render.model.BakedQuad;
+import net.minecraft.client.render.model.ModelRotation;
+import net.minecraft.client.render.model.json.ModelElement;
+import net.minecraft.client.render.model.json.ModelElementFace;
+import net.minecraft.client.render.model.json.ModelElementTexture;
+import net.minecraft.client.render.model.json.ModelOverrideList;
+import net.minecraft.client.texture.Sprite;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Direction.Axis;
+import net.minecraft.util.math.Direction.AxisDirection;
+import net.minecraft.util.math.random.Random;
+import net.minecraft.world.BlockRenderView;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.model.IModelBuilder;
@@ -39,15 +39,15 @@ import java.util.concurrent.atomic.AtomicInteger;
 @OnlyIn(Dist.CLIENT)
 public class BasicBranchBlockBakedModel extends BranchBlockBakedModel {
 
-    protected TextureAtlasSprite barkTexture;
-    protected TextureAtlasSprite ringsTexture;
+    protected Sprite barkTexture;
+    protected Sprite ringsTexture;
 
     // 74 Baked models per tree family to achieve this. I guess it's not my problem.  Wasn't my idea anyway.
     private final BakedModel[][] sleeves = new BakedModel[6][7];
     private final BakedModel[][] cores = new BakedModel[3][8]; // 8 Cores for 3 axis with the bark texture all all 6 sides rotated appropriately.
     private final BakedModel[] rings = new BakedModel[8]; // 8 Cores with the ring textures on all 6 sides.
 
-    public BasicBranchBlockBakedModel(ResourceLocation modelResLoc, ResourceLocation barkResLoc, ResourceLocation ringsResLoc) {
+    public BasicBranchBlockBakedModel(Identifier modelResLoc, Identifier barkResLoc, Identifier ringsResLoc) {
         super(modelResLoc, barkResLoc, ringsResLoc);
     }
 
@@ -60,7 +60,7 @@ public class BasicBranchBlockBakedModel extends BranchBlockBakedModel {
             int radius = i + 1;
             if (radius < 8) {
                 for (Direction dir : Direction.values()) {
-                    sleeves[dir.get3DDataValue()][i] = bakeSleeve(radius, dir, barkTexture);
+                    sleeves[dir.getId()][i] = bakeSleeve(radius, dir, barkTexture);
                 }
             }
             cores[0][i] = bakeCore(radius, Axis.Y, barkTexture); //DOWN<->UP
@@ -71,73 +71,73 @@ public class BasicBranchBlockBakedModel extends BranchBlockBakedModel {
         }
     }
 
-    public BakedModel bakeSleeve(int radius, Direction dir, TextureAtlasSprite bark) {
+    public BakedModel bakeSleeve(int radius, Direction dir, Sprite bark) {
         //Work in double units(*2)
         int dradius = radius * 2;
         int halfSize = (16 - dradius) / 2;
-        int halfSizeX = dir.getStepX() != 0 ? halfSize : dradius;
-        int halfSizeY = dir.getStepY() != 0 ? halfSize : dradius;
-        int halfSizeZ = dir.getStepZ() != 0 ? halfSize : dradius;
+        int halfSizeX = dir.getOffsetX() != 0 ? halfSize : dradius;
+        int halfSizeY = dir.getOffsetY() != 0 ? halfSize : dradius;
+        int halfSizeZ = dir.getOffsetZ() != 0 ? halfSize : dradius;
         int move = 16 - halfSize;
-        int centerX = 16 + (dir.getStepX() * move);
-        int centerY = 16 + (dir.getStepY() * move);
-        int centerZ = 16 + (dir.getStepZ() * move);
+        int centerX = 16 + (dir.getOffsetX() * move);
+        int centerY = 16 + (dir.getOffsetY() * move);
+        int centerZ = 16 + (dir.getOffsetZ() * move);
 
         Vector3f posFrom = new Vector3f((centerX - halfSizeX) / 2f, (centerY - halfSizeY) / 2f, (centerZ - halfSizeZ) / 2f);
         Vector3f posTo = new Vector3f((centerX + halfSizeX) / 2f, (centerY + halfSizeY) / 2f, (centerZ + halfSizeZ) / 2f);
 
-        boolean negative = dir.getAxisDirection() == AxisDirection.NEGATIVE;
+        boolean negative = dir.getDirection() == AxisDirection.NEGATIVE;
         if (dir.getAxis() == Axis.Z) {//North/South
             negative = !negative;
         }
 
-        Map<Direction, BlockElementFace> mapFacesIn = Maps.newEnumMap(Direction.class);
+        Map<Direction, ModelElementFace> mapFacesIn = Maps.newEnumMap(Direction.class);
 
         for (Direction face : Direction.values()) {
             if (dir.getOpposite() != face) { //Discard side of sleeve that faces core
-                BlockFaceUV uvface = null;
+                ModelElementTexture uvface = null;
                 if (dir == face) {//Side of sleeve that faces away from core
                     if (radius == 1) { //We're only interested in end faces for radius == 1
-                        uvface = new BlockFaceUV(new float[]{8 - radius, 8 - radius, 8 + radius, 8 + radius}, 0);
+                        uvface = new ModelElementTexture(new float[]{8 - radius, 8 - radius, 8 + radius, 8 + radius}, 0);
                     }
                 } else { //UV for Bark texture
-                    uvface = new BlockFaceUV(new float[]{8 - radius, negative ? 16 - halfSize : 0, 8 + radius, negative ? 16 : halfSize}, getFaceAngle(dir.getAxis(), face));
+                    uvface = new ModelElementTexture(new float[]{8 - radius, negative ? 16 - halfSize : 0, 8 + radius, negative ? 16 : halfSize}, getFaceAngle(dir.getAxis(), face));
                 }
                 if (uvface != null) {
-                    mapFacesIn.put(face, new BlockElementFace(null, -1, null, uvface));
+                    mapFacesIn.put(face, new ModelElementFace(null, -1, null, uvface));
                 }
             }
         }
 
-        BlockElement part = new BlockElement(posFrom, posTo, mapFacesIn, null, true);
+        ModelElement part = new ModelElement(posFrom, posTo, mapFacesIn, null, true);
         IModelBuilder<?> builder = ModelUtils.getModelBuilder(this.blockModel.customData, bark);
 
-        for (Map.Entry<Direction, BlockElementFace> e : part.faces.entrySet()) {
+        for (Map.Entry<Direction, ModelElementFace> e : part.faces.entrySet()) {
             Direction face = e.getKey();
-            builder.addCulledFace(face, ModelUtils.makeBakedQuad(part, e.getValue(), bark, face, BlockModelRotation.X0_Y0, this.modelResLoc));
+            builder.addCulledFace(face, ModelUtils.makeBakedQuad(part, e.getValue(), bark, face, ModelRotation.X0_Y0, this.modelResLoc));
         }
 
         return builder.build();
     }
 
-    public BakedModel bakeCore(int radius, Axis axis, TextureAtlasSprite icon) {
+    public BakedModel bakeCore(int radius, Axis axis, Sprite icon) {
 
         Vector3f posFrom = new Vector3f(8 - radius, 8 - radius, 8 - radius);
         Vector3f posTo = new Vector3f(8 + radius, 8 + radius, 8 + radius);
 
-        Map<Direction, BlockElementFace> mapFacesIn = Maps.newEnumMap(Direction.class);
+        Map<Direction, ModelElementFace> mapFacesIn = Maps.newEnumMap(Direction.class);
 
         for (Direction face : Direction.values()) {
-            BlockFaceUV uvface = new BlockFaceUV(new float[]{8 - radius, 8 - radius, 8 + radius, 8 + radius}, getFaceAngle(axis, face));
-            mapFacesIn.put(face, new BlockElementFace(null, -1, null, uvface));
+            ModelElementTexture uvface = new ModelElementTexture(new float[]{8 - radius, 8 - radius, 8 + radius, 8 + radius}, getFaceAngle(axis, face));
+            mapFacesIn.put(face, new ModelElementFace(null, -1, null, uvface));
         }
 
-        BlockElement part = new BlockElement(posFrom, posTo, mapFacesIn, null, true);
+        ModelElement part = new ModelElement(posFrom, posTo, mapFacesIn, null, true);
         IModelBuilder<?> builder = ModelUtils.getModelBuilder(this.blockModel.customData, icon);
 
-        for (Map.Entry<Direction, BlockElementFace> e : part.faces.entrySet()) {
+        for (Map.Entry<Direction, ModelElementFace> e : part.faces.entrySet()) {
             Direction face = e.getKey();
-            builder.addCulledFace(face, ModelUtils.makeBakedQuad(part, e.getValue(), icon, face, BlockModelRotation.X0_Y0, this.modelResLoc));
+            builder.addCulledFace(face, ModelUtils.makeBakedQuad(part, e.getValue(), icon, face, ModelRotation.X0_Y0, this.modelResLoc));
         }
 
         return builder.build();
@@ -167,7 +167,7 @@ public class BasicBranchBlockBakedModel extends BranchBlockBakedModel {
 
     @Nonnull
     @Override
-    public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @Nonnull RandomSource rand, @Nonnull ModelData extraData, @Nullable RenderType renderType) {
+    public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @Nonnull Random rand, @Nonnull ModelData extraData, @Nullable RenderLayer renderType) {
         if (state == null || side != null) {
             return Collections.emptyList();
         }
@@ -211,7 +211,7 @@ public class BasicBranchBlockBakedModel extends BranchBlockBakedModel {
 
             for (Direction face : Direction.values()) {
                 // Get quads for core model.
-                if (coreRadius != connections[face.get3DDataValue()]) {
+                if (coreRadius != connections[face.getId()]) {
                     if ((coreRingDir == null || coreRingDir != face)) {
                         quadsList.addAll(cores[coreDir][coreRadius - 1].getQuads(state, face, rand, extraData, renderType));
                     } else {
@@ -221,7 +221,7 @@ public class BasicBranchBlockBakedModel extends BranchBlockBakedModel {
                 // Get quads for sleeves models.
                 if (coreRadius != 8) { // Special case for r!=8.. If it's a solid block so it has no sleeves.
                     for (Direction connDir : Direction.values()) {
-                        final int idx = connDir.get3DDataValue();
+                        final int idx = connDir.getId();
                         final int connRadius = connections[idx];
                         // If the connection side matches the quadpull side then cull the sleeve face.  Don't cull radius 1 connections for leaves (which are partly transparent).
                         if (connRadius > 0 && (connRadius == twigRadius.get() || face != connDir)) {
@@ -242,7 +242,7 @@ public class BasicBranchBlockBakedModel extends BranchBlockBakedModel {
      */
     @Nonnull
     @Override
-    public ModelData getModelData(@Nonnull BlockAndTintGetter world, @Nonnull BlockPos pos, @Nonnull BlockState state, @Nonnull ModelData tileData) {
+    public ModelData getModelData(@Nonnull BlockRenderView world, @Nonnull BlockPos pos, @Nonnull BlockState state, @Nonnull ModelData tileData) {
         ModelConnections modelConnections;
         if (state.getBlock() instanceof BranchBlock branchBlock) {
             modelConnections = new ModelConnections(branchBlock.getConnectionData(world, pos, state)).setFamily(branchBlock.getFamily());
@@ -266,7 +266,7 @@ public class BasicBranchBlockBakedModel extends BranchBlockBakedModel {
         Direction sourceDir = null;
 
         for (Direction dir : Direction.values()) {
-            int connRadius = connections[dir.get3DDataValue()];
+            int connRadius = connections[dir.getId()];
             if (connRadius > largestConnection) {
                 largestConnection = connRadius;
                 sourceDir = dir;
@@ -289,7 +289,7 @@ public class BasicBranchBlockBakedModel extends BranchBlockBakedModel {
         if (dir == null) {
             return 0;
         }
-        return dir.get3DDataValue() >> 1;
+        return dir.getId() >> 1;
     }
 
     protected int getRadius(BlockState blockState) {
@@ -303,7 +303,7 @@ public class BasicBranchBlockBakedModel extends BranchBlockBakedModel {
     }
 
     @Override
-    public TextureAtlasSprite getParticleIcon() {
+    public Sprite getParticleIcon() {
         return barkTexture;
     }
 
@@ -319,8 +319,8 @@ public class BasicBranchBlockBakedModel extends BranchBlockBakedModel {
 
     @Nonnull
     @Override
-    public ItemOverrides getOverrides() {
-        return ItemOverrides.EMPTY;
+    public ModelOverrideList getOverrides() {
+        return ModelOverrideList.EMPTY;
     }
 
     @Override

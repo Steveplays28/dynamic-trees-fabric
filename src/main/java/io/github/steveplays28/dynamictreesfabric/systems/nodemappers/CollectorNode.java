@@ -1,12 +1,11 @@
 package io.github.steveplays28.dynamictreesfabric.systems.nodemappers;
 
 import io.github.steveplays28.dynamictreesfabric.api.network.NodeInspector;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.block.state.BlockState;
-
 import java.util.Set;
+import net.minecraft.block.BlockState;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
+import net.minecraft.world.WorldAccess;
 
 /**
  * @author ferreusveritas
@@ -20,13 +19,13 @@ public class CollectorNode implements NodeInspector {
     }
 
     @Override
-    public boolean run(BlockState blockState, LevelAccessor world, BlockPos pos, Direction fromDir) {
+    public boolean run(BlockState blockState, WorldAccess world, BlockPos pos, Direction fromDir) {
         nodeSet.add(pos);
         return false;
     }
 
     @Override
-    public boolean returnRun(BlockState blockState, LevelAccessor world, BlockPos pos, Direction fromDir) {
+    public boolean returnRun(BlockState blockState, WorldAccess world, BlockPos pos, Direction fromDir) {
         return false;
     }
 

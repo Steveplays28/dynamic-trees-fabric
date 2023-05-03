@@ -3,10 +3,9 @@ package io.github.steveplays28.dynamictreesfabric.command;
 import io.github.steveplays28.dynamictreesfabric.api.registry.Registries;
 import com.google.common.collect.Lists;
 import com.mojang.brigadier.builder.ArgumentBuilder;
-import net.minecraft.commands.CommandSourceStack;
-
 import java.util.List;
 import java.util.stream.Collectors;
+import net.minecraft.server.command.ServerCommandSource;
 
 /**
  * @author Harley O'Connor
@@ -30,13 +29,13 @@ public final class RegistryCommand extends SubCommand {
     }
 
     @Override
-    protected List<ArgumentBuilder<CommandSourceStack, ?>> registerArguments() {
+    protected List<ArgumentBuilder<ServerCommandSource, ?>> registerArguments() {
         return this.subCommands.stream().map(SubCommand::register)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public ArgumentBuilder<CommandSourceStack, ?> registerArgument() {
+    public ArgumentBuilder<ServerCommandSource, ?> registerArgument() {
         return stringArgument("null");
     }
 

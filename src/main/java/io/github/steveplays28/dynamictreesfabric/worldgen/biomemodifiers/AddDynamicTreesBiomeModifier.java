@@ -3,19 +3,19 @@ package io.github.steveplays28.dynamictreesfabric.worldgen.biomemodifiers;
 import io.github.steveplays28.dynamictreesfabric.init.DTConfigs;
 import io.github.steveplays28.dynamictreesfabric.init.DTRegistries;
 import com.mojang.serialization.Codec;
-import net.minecraft.core.Holder;
-import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.levelgen.GenerationStep;
+import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.world.biome.Biome;
+import net.minecraft.world.gen.GenerationStep;
 import net.minecraftforge.common.world.BiomeGenerationSettingsBuilder;
 import net.minecraftforge.common.world.BiomeModifier;
 import net.minecraftforge.common.world.ModifiableBiomeInfo;
 
 public class AddDynamicTreesBiomeModifier implements BiomeModifier {
     @Override
-    public void modify(Holder<Biome> biome, Phase phase, ModifiableBiomeInfo.BiomeInfo.Builder builder) {
+    public void modify(RegistryEntry<Biome> biome, Phase phase, ModifiableBiomeInfo.BiomeInfo.Builder builder) {
         if (phase == Phase.ADD && DTConfigs.WORLD_GEN.get()) {
             BiomeGenerationSettingsBuilder generationSettings = builder.getGenerationSettings();
-            generationSettings.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, DTRegistries.DYNAMIC_TREE_PLACED_FEATURE.getHolder().orElseThrow());
+            generationSettings.addFeature(GenerationStep.Feature.VEGETAL_DECORATION, DTRegistries.DYNAMIC_TREE_PLACED_FEATURE.getHolder().orElseThrow());
         }
     }
 

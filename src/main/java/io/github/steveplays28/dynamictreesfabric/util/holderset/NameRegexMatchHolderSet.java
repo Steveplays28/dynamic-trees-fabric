@@ -2,9 +2,9 @@ package io.github.steveplays28.dynamictreesfabric.util.holderset;
 
 import io.github.steveplays28.dynamictreesfabric.init.DTRegistries;
 import com.mojang.serialization.Codec;
-import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceKey;
+import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraftforge.registries.holdersets.HolderSetType;
 import net.minecraftforge.registries.holdersets.ICustomHolderSet;
 
@@ -12,7 +12,7 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 public class NameRegexMatchHolderSet<T> extends RegexMatchHolderSet<T> {
-    public static <T> Codec<? extends ICustomHolderSet<T>> codec(ResourceKey<? extends Registry<T>> registryKey, Codec<Holder<T>> holderCodec, boolean forceList) {
+    public static <T> Codec<? extends ICustomHolderSet<T>> codec(RegistryKey<? extends Registry<T>> registryKey, Codec<RegistryEntry<T>> holderCodec, boolean forceList) {
         return RegexMatchHolderSet.codec(registryKey, NameRegexMatchHolderSet::new);
     }
 
@@ -25,8 +25,8 @@ public class NameRegexMatchHolderSet<T> extends RegexMatchHolderSet<T> {
     }
 
     @Override
-    protected Stream<String> getInput(Holder<T> holder) {
-        return holder.unwrapKey().stream().map(key -> key.location().toString());
+    protected Stream<String> getInput(RegistryEntry<T> holder) {
+        return holder.getKey().stream().map(key -> key.getValue().toString());
     }
 
     @Override

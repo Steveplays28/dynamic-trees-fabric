@@ -1,49 +1,48 @@
 package io.github.steveplays28.dynamictreesfabric.data;
 
-import net.minecraft.world.level.storage.loot.parameters.LootContextParamSet;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
-
 import java.util.function.Consumer;
+import net.minecraft.loot.context.LootContextParameters;
+import net.minecraft.loot.context.LootContextType;
+import net.minecraft.loot.context.LootContextTypes;
 
 /**
  * @author Harley O'Connor
  */
 public final class DTLootParameterSets {
 
-    public static final LootContextParamSet HARVEST = register("harvest", builder ->
-            builder.required(LootContextParams.BLOCK_STATE)
-                    .required(DTLootParameters.SPECIES)
-                    .required(DTLootParameters.FERTILITY)
-                    .required(DTLootParameters.FORTUNE)
+    public static final LootContextType HARVEST = register("harvest", builder ->
+            builder.require(LootContextParameters.BLOCK_STATE)
+                    .require(DTLootParameters.SPECIES)
+                    .require(DTLootParameters.FERTILITY)
+                    .require(DTLootParameters.FORTUNE)
     );
 
-    public static final LootContextParamSet VOLUNTARY = register("voluntary", builder ->
-            builder.required(LootContextParams.BLOCK_STATE)
-                    .required(DTLootParameters.SPECIES)
-                    .required(DTLootParameters.FERTILITY)
+    public static final LootContextType VOLUNTARY = register("voluntary", builder ->
+            builder.require(LootContextParameters.BLOCK_STATE)
+                    .require(DTLootParameters.SPECIES)
+                    .require(DTLootParameters.FERTILITY)
     );
 
-    public static final LootContextParamSet LEAVES = register("leaves", builder ->
-            builder.required(LootContextParams.BLOCK_STATE)
-                    .required(LootContextParams.TOOL)
-                    .required(DTLootParameters.SPECIES)
-                    .required(DTLootParameters.FORTUNE)
+    public static final LootContextType LEAVES = register("leaves", builder ->
+            builder.require(LootContextParameters.BLOCK_STATE)
+                    .require(LootContextParameters.TOOL)
+                    .require(DTLootParameters.SPECIES)
+                    .require(DTLootParameters.FORTUNE)
     );
 
-    public static final LootContextParamSet LOGS = register("logs", builder ->
-            builder.required(LootContextParams.BLOCK_STATE)
-                    .required(LootContextParams.TOOL)
-                    .required(DTLootParameters.SPECIES)
-                    .required(DTLootParameters.LOGS_AND_STICKS)
+    public static final LootContextType LOGS = register("logs", builder ->
+            builder.require(LootContextParameters.BLOCK_STATE)
+                    .require(LootContextParameters.TOOL)
+                    .require(DTLootParameters.SPECIES)
+                    .require(DTLootParameters.LOGS_AND_STICKS)
     );
 
-    private static LootContextParamSet register(String path, Consumer<LootContextParamSet.Builder> builderConsumer) {
-        final LootContextParamSet.Builder builder = new LootContextParamSet.Builder();
+    private static LootContextType register(String path, Consumer<LootContextType.Builder> builderConsumer) {
+        final LootContextType.Builder builder = new LootContextType.Builder();
         builderConsumer.accept(builder);
 
-        final LootContextParamSet paramSet = builder.build();
-        LootContextParamSets.REGISTRY.put(io.github.steveplays28.dynamictreesfabric.DynamicTreesFabric.resLoc(path), paramSet);
+        final LootContextType paramSet = builder.build();
+        LootContextTypes.MAP.put(io.github.steveplays28.dynamictreesfabric.DynamicTreesFabric.resLoc(path), paramSet);
 
         return paramSet;
     }

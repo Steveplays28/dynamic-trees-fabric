@@ -4,16 +4,15 @@ import io.github.steveplays28.dynamictreesfabric.api.TreeHelper;
 import io.github.steveplays28.dynamictreesfabric.util.CommandHelper;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
-import net.minecraft.ChatFormatting;
-import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.Commands;
-import net.minecraft.commands.SharedSuggestionProvider;
-import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Component;
-
 import java.util.Collection;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import net.minecraft.command.CommandSource;
+import net.minecraft.server.command.CommandManager;
+import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
+import net.minecraft.util.math.BlockPos;
 
 public final class GrowPulseCommand extends SubCommand {
 
@@ -31,20 +30,20 @@ public final class GrowPulseCommand extends SubCommand {
     private static final Collection<String> NUMBER_SUGGESTIONS = Stream.of(1, 4, 8, 16, 32, 64).map(String::valueOf).collect(Collectors.toList());
 
     @Override
-    public ArgumentBuilder<CommandSourceStack, ?> registerArgument() {
+    public ArgumentBuilder<ServerCommandSource, ?> registerArgument() {
         return blockPosArgument().executes(context -> executesSuccess(() -> this.sendGrowPulse(context.getSource(), rootPosArgument(context), 1)))
-                .then(Commands.argument(NUMBER, IntegerArgumentType.integer(1)).suggests(((context, builder) -> SharedSuggestionProvider.suggest(NUMBER_SUGGESTIONS, builder)))
+                .then(CommandManager.argument(NUMBER, IntegerArgumentType.integer(1)).suggests(((context, builder) -> CommandSource.suggestMatching(NUMBER_SUGGESTIONS, builder)))
                         .executes(context -> executesSuccess(() -> this.sendGrowPulse(context.getSource(), rootPosArgument(context), intArgument(context, NUMBER)))));
     }
 
-    private void sendGrowPulse(final CommandSourceStack source, final BlockPos rootPos, final int number) {
+    private void sendGrowPulse(final ServerCommandSource source, final BlockPos rootPos, final int number) {
         for (int i = 0; i < number; i++) {
-            TreeHelper.growPulse(source.getLevel(), rootPos);
+            TreeHelper.growPulse(source.getWorld(), rootPos);
         }
 
-        sendSuccessAndLog(source, Component.translatable("commands.dynamictrees.success.grow_pulse",
-                CommandHelper.colour(String.valueOf(number), ChatFormatting.AQUA),
-                CommandHelper.posComponent(rootPos, ChatFormatting.AQUA)));
+        sendSuccessAndLog(source, Text.translatable("commands.dynamictrees.success.grow_pulse",
+                CommandHelper.colour(String.valueOf(number), Formatting.AQUA),
+                CommandHelper.posComponent(rootPos, Formatting.AQUA)));
     }
 
 }

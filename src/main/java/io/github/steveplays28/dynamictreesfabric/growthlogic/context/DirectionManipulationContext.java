@@ -3,8 +3,8 @@ package io.github.steveplays28.dynamictreesfabric.growthlogic.context;
 import io.github.steveplays28.dynamictreesfabric.blocks.branches.BranchBlock;
 import io.github.steveplays28.dynamictreesfabric.systems.GrowSignal;
 import io.github.steveplays28.dynamictreesfabric.trees.Species;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.Level;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 
 /**
  * @author Harley O'Connor
@@ -13,7 +13,7 @@ public class DirectionManipulationContext extends DirectionSelectionContext {
     private final int radius;
     private int[] probMap;
 
-    public DirectionManipulationContext(Level world, BlockPos pos, Species species,
+    public DirectionManipulationContext(World world, BlockPos pos, Species species,
                                         BranchBlock branch,
                                         GrowSignal signal, int radius, int[] probMap) {
         super(world, pos, species, branch, signal);

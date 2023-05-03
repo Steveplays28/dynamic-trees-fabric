@@ -1,28 +1,28 @@
 package io.github.steveplays28.dynamictreesfabric.worldgen;
 
 import io.github.steveplays28.dynamictreesfabric.util.SafeChunkBounds;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
-import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.math.ChunkPos;
+import net.minecraft.world.gen.feature.DefaultFeatureConfig;
+import net.minecraft.world.gen.feature.Feature;
+import net.minecraft.world.gen.feature.util.FeatureContext;
 
 /**
  * @author Harley O'Connor
  */
-public final class DynamicTreeFeature extends Feature<NoneFeatureConfiguration> {
+public final class DynamicTreeFeature extends Feature<DefaultFeatureConfig> {
 
     public DynamicTreeFeature() {
-        super(NoneFeatureConfiguration.CODEC);
+        super(DefaultFeatureConfig.CODEC);
     }
 
     @Override
-    public boolean place(FeaturePlaceContext<NoneFeatureConfiguration> pContext) {
+    public boolean generate(FeatureContext<DefaultFeatureConfig> pContext) {
         // final long startTime = System.nanoTime();
         final TreeGenerator treeGenerator = TreeGenerator.getTreeGenerator();
-        final ServerLevel serverWorld = pContext.level().getLevel();
-        final ResourceLocation dimensionLocation = serverWorld.dimension().location();
+        final ServerWorld serverWorld = pContext.getWorld().toServerWorld();
+        final Identifier dimensionLocation = serverWorld.getRegistryKey().getValue();
 
         // Do not generate if the current dimension is blacklisted.
         if (BiomeDatabases.isBlacklisted(dimensionLocation)) {
@@ -33,12 +33,12 @@ public final class DynamicTreeFeature extends Feature<NoneFeatureConfiguration> 
         final BiomeDatabase biomeDatabase = BiomeDatabases.getDimensionalOrDefault(dimensionLocation);
 
         // Get chunk pos and create safe bounds, which ensure we do not try to generate in an unloaded chunk.
-        final ChunkPos chunkPos = pContext.level().getChunk(pContext.origin()).getPos();
-        final SafeChunkBounds chunkBounds = new SafeChunkBounds(pContext.level(), chunkPos);
+        final ChunkPos chunkPos = pContext.getWorld().getChunk(pContext.getOrigin()).getPos();
+        final SafeChunkBounds chunkBounds = new SafeChunkBounds(pContext.getWorld(), chunkPos);
 
         // Generate trees.
-        treeGenerator.getCircleProvider().getPoissonDiscs(serverWorld, pContext.level(), chunkPos)
-                .forEach(c -> treeGenerator.makeTrees(pContext.level(), biomeDatabase, c, chunkBounds));
+        treeGenerator.getCircleProvider().getPoissonDiscs(serverWorld, pContext.getWorld(), chunkPos)
+                .forEach(c -> treeGenerator.makeTrees(pContext.getWorld(), biomeDatabase, c, chunkBounds));
 
         // final long endTime = System.nanoTime();
         // final long duration = (endTime - startTime) / 1000000;

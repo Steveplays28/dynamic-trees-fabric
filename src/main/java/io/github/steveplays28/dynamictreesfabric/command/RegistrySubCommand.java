@@ -2,12 +2,12 @@ package io.github.steveplays28.dynamictreesfabric.command;
 
 import io.github.steveplays28.dynamictreesfabric.api.registry.Registry;
 import io.github.steveplays28.dynamictreesfabric.api.registry.RegistryEntry;
+import net.minecraft.server.command.CommandManager;
+import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
-import net.minecraft.ChatFormatting;
-import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.Commands;
-import net.minecraft.network.chat.Component;
 
 import static io.github.steveplays28.dynamictreesfabric.command.CommandConstants.RAW;
 
@@ -33,22 +33,22 @@ public final class RegistrySubCommand<V extends RegistryEntry<V>> extends SubCom
     }
 
     @Override
-    public ArgumentBuilder<CommandSourceStack, ?> registerArgument() {
-        return Commands.literal("list")
+    public ArgumentBuilder<ServerCommandSource, ?> registerArgument() {
+        return CommandManager.literal("list")
                 .executes(context -> executesSuccess(() -> this.listEntries(context.getSource(), false)))
                 .then(booleanArgument(RAW)
                         .executes(context -> executesSuccess(() -> this.listEntries(context.getSource(), BoolArgumentType.getBool(context, RAW))))
                 );
     }
 
-    private void listEntries(final CommandSourceStack source, final boolean raw) {
+    private void listEntries(final ServerCommandSource source, final boolean raw) {
         if (raw) {
-            this.registry.getAll().forEach(entry -> source.sendSuccess(Component.literal(entry.getRegistryName().toString()), false));
+            this.registry.getAll().forEach(entry -> source.sendFeedback(Text.literal(entry.getRegistryName().toString()), false));
             return;
         }
 
-        this.registry.getAll().forEach(entry -> source.sendSuccess(Component.literal("- ")
-                .append(entry.getTextComponent()).withStyle(ChatFormatting.GREEN), false));
+        this.registry.getAll().forEach(entry -> source.sendFeedback(Text.literal("- ")
+                .append(entry.getTextComponent()).formatted(Formatting.GREEN), false));
     }
 
 }

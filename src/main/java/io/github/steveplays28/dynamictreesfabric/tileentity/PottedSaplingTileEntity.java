@@ -3,16 +3,16 @@ package io.github.steveplays28.dynamictreesfabric.tileentity;
 import io.github.steveplays28.dynamictreesfabric.api.TreeRegistry;
 import io.github.steveplays28.dynamictreesfabric.init.DTRegistries;
 import io.github.steveplays28.dynamictreesfabric.trees.Species;
-import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.Connection;
-import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.FlowerPotBlock;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.FlowerPotBlock;
+import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.network.ClientConnection;
+import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.client.model.data.ModelData;
 import net.minecraftforge.client.model.data.ModelProperty;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -33,7 +33,7 @@ public class PottedSaplingTileEntity extends BlockEntity {
     public static final ModelProperty<BlockState> POT_MIMIC = new ModelProperty<>();
     public static final ModelProperty<Species> SPECIES = new ModelProperty<>();
 
-    private BlockState potState = Blocks.FLOWER_POT.defaultBlockState();
+    private BlockState potState = Blocks.FLOWER_POT.getDefaultState();
     private Species species = Species.NULL_SPECIES;
 
     public PottedSaplingTileEntity(BlockPos pos, BlockState state) {
@@ -46,8 +46,8 @@ public class PottedSaplingTileEntity extends BlockEntity {
 
     public void setSpecies(Species species) {
         this.species = species;
-        this.setChanged();
-        level.sendBlockUpdated(worldPosition, this.getBlockState(), this.getBlockState(), Block.UPDATE_ALL);
+        this.markDirty();
+        world.updateListeners(pos, this.getCachedState(), this.getCachedState(), Block.NOTIFY_ALL);
     }
 
     public BlockState getPot() {
@@ -56,52 +56,52 @@ public class PottedSaplingTileEntity extends BlockEntity {
 
     public void setPot(BlockState newPotState) {
         if (newPotState.getBlock() instanceof FlowerPotBlock) {
-            this.potState = newPotState.getBlock().defaultBlockState();
+            this.potState = newPotState.getBlock().getDefaultState();
         } else {
-            this.potState = Blocks.FLOWER_POT.defaultBlockState();
+            this.potState = Blocks.FLOWER_POT.getDefaultState();
         }
-        this.setChanged();
-        level.sendBlockUpdated(worldPosition, this.getBlockState(), this.getBlockState(), Block.UPDATE_ALL);
+        this.markDirty();
+        world.updateListeners(pos, this.getCachedState(), this.getCachedState(), Block.NOTIFY_ALL);
     }
 
     @Override
-    public CompoundTag getUpdateTag() {
-        CompoundTag tag = super.getUpdateTag();
-        this.saveAdditional(tag);
+    public NbtCompound toInitialChunkDataNbt() {
+        NbtCompound tag = super.toInitialChunkDataNbt();
+        this.writeNbt(tag);
         return tag;
     }
 
     @Nullable
     @Override
-    public ClientboundBlockEntityDataPacket getUpdatePacket() {
-        return ClientboundBlockEntityDataPacket.create(this);
+    public BlockEntityUpdateS2CPacket toUpdatePacket() {
+        return BlockEntityUpdateS2CPacket.create(this);
     }
 
     @Override
-    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt) {
+    public void onDataPacket(ClientConnection net, BlockEntityUpdateS2CPacket pkt) {
         BlockState oldPotState = potState;
-        this.handleUpdateTag(pkt.getTag());
+        this.handleUpdateTag(pkt.getNbt());
 
         if (!oldPotState.equals(potState)) {
-            level.getModelDataManager().requestRefresh(this);
-            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), Block.UPDATE_ALL);
+            world.getModelDataManager().requestRefresh(this);
+            world.updateListeners(pos, getCachedState(), getCachedState(), Block.NOTIFY_ALL);
         }
     }
 
     @Override
-    public void load(CompoundTag tag) {
+    public void readNbt(NbtCompound tag) {
         if (tag.contains(POT_MIMIC_TAG)) {
-            Block block = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(tag.getString(POT_MIMIC_TAG)));
-            potState = block != Blocks.AIR ? block.defaultBlockState() : Blocks.FLOWER_POT.defaultBlockState();
+            Block block = ForgeRegistries.BLOCKS.getValue(new Identifier(tag.getString(POT_MIMIC_TAG)));
+            potState = block != Blocks.AIR ? block.getDefaultState() : Blocks.FLOWER_POT.getDefaultState();
         }
         if (tag.contains(SPECIES_TAG)) {
             this.species = TreeRegistry.findSpecies(tag.getString(SPECIES_TAG));
         }
-        super.load(tag);
+        super.readNbt(tag);
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag) {
+    protected void writeNbt(NbtCompound tag) {
         tag.putString(POT_MIMIC_TAG, ForgeRegistries.BLOCKS.getKey(potState.getBlock()).toString());
         tag.putString(SPECIES_TAG, this.species.getRegistryName().toString());
     }

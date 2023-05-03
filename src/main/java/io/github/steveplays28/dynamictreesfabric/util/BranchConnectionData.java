@@ -1,6 +1,6 @@
 package io.github.steveplays28.dynamictreesfabric.util;
 
-import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.block.BlockState;
 
 public class BranchConnectionData {
 

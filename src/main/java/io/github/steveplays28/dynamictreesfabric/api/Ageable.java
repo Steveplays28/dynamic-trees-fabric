@@ -1,10 +1,10 @@
 package io.github.steveplays28.dynamictreesfabric.api;
 
 import io.github.steveplays28.dynamictreesfabric.util.SafeChunkBounds;
-import net.minecraft.core.BlockPos;
-import net.minecraft.util.RandomSource;
-import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.block.BlockState;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.random.Random;
+import net.minecraft.world.WorldAccess;
 
 @FunctionalInterface
 public interface Ageable {
@@ -16,6 +16,6 @@ public interface Ageable {
      * @param rand  random number generator
      * @return -1 if block was destroyed after the ageing, otherwise the hydro value of the block
      */
-    int age(LevelAccessor world, BlockPos pos, BlockState state, RandomSource rand, SafeChunkBounds safeBounds);
+    int age(WorldAccess world, BlockPos pos, BlockState state, Random rand, SafeChunkBounds safeBounds);
 
 }

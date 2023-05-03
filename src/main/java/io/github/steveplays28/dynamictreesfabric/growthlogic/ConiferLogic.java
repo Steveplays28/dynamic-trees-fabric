@@ -5,8 +5,8 @@ import io.github.steveplays28.dynamictreesfabric.growthlogic.context.DirectionMa
 import io.github.steveplays28.dynamictreesfabric.growthlogic.context.DirectionSelectionContext;
 import io.github.steveplays28.dynamictreesfabric.growthlogic.context.PositionalSpeciesContext;
 import io.github.steveplays28.dynamictreesfabric.util.CoordUtils;
-import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.math.Direction;
 
 public class ConiferLogic extends GrowthLogicKit {
 
@@ -20,7 +20,7 @@ public class ConiferLogic extends GrowthLogicKit {
      */
     public static final ConfigurationProperty<Float> HORIZONTAL_LIMITER = ConfigurationProperty.floatProperty("horizontal_limiter");
 
-    public ConiferLogic(final ResourceLocation registryName) {
+    public ConiferLogic(final Identifier registryName) {
         super(registryName);
     }
 
@@ -71,11 +71,11 @@ public class ConiferLogic extends GrowthLogicKit {
     //so we feed the hash function the in-game month
     @Override
     public float getEnergy(GrowthLogicKitConfiguration configuration, PositionalSpeciesContext context) {
-        long day = context.world().getGameTime() / 24000L;
+        long day = context.world().getTime() / 24000L;
         int month = (int) day / 30;//Change the hashs every in-game month
 
         return super.getEnergy(configuration, context) * context.species().biomeSuitability(context.world(), context.pos()) +
-                (CoordUtils.coordHashCode(context.pos().above(month), 2) % configuration.get(HEIGHT_VARIATION)); // Vary the height energy by a psuedorandom hash function
+                (CoordUtils.coordHashCode(context.pos().up(month), 2) % configuration.get(HEIGHT_VARIATION)); // Vary the height energy by a psuedorandom hash function
     }
 
 }

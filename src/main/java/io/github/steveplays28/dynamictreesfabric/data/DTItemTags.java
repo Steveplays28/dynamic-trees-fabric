@@ -1,9 +1,9 @@
 package io.github.steveplays28.dynamictreesfabric.data;
 
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.ItemTags;
-import net.minecraft.tags.TagKey;
-import net.minecraft.world.item.Item;
+import net.minecraft.item.Item;
+import net.minecraft.registry.tag.ItemTags;
+import net.minecraft.registry.tag.TagKey;
+import net.minecraft.util.Identifier;
 
 /**
  * @author Harley O'Connor
@@ -28,7 +28,7 @@ public final class DTItemTags {
     public static final TagKey<Item> ENHANCED_FERTILIZER = bind("enhanced_fertilizer");
 
     private static TagKey<Item> bind(String identifier) {
-        return ItemTags.create(new ResourceLocation(io.github.steveplays28.dynamictreesfabric.DynamicTreesFabric.MOD_ID, identifier));
+        return ItemTags.create(new Identifier(io.github.steveplays28.dynamictreesfabric.DynamicTreesFabric.MOD_ID, identifier));
     }
 
 }

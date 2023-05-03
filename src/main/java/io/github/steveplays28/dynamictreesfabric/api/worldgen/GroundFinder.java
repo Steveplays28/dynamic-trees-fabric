@@ -2,10 +2,9 @@ package io.github.steveplays28.dynamictreesfabric.api.worldgen;
 
 import io.github.steveplays28.dynamictreesfabric.worldgen.OverworldGroundFinder;
 import io.github.steveplays28.dynamictreesfabric.worldgen.SubterraneanGroundFinder;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.WorldGenLevel;
-
 import java.util.List;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.StructureWorldAccess;
 
 /**
  * Implementations will find a suitable area to generate a tree on the ground.
@@ -23,6 +22,6 @@ public interface GroundFinder {
      * @param start The {@link BlockPos} to start from.
      * @return The {@link BlockPos} of the first ground block.
      */
-    List<BlockPos> findGround(WorldGenLevel world, BlockPos start);
+    List<BlockPos> findGround(StructureWorldAccess world, BlockPos start);
 
 }

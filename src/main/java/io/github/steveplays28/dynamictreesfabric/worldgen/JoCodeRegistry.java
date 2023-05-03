@@ -1,10 +1,9 @@
 package io.github.steveplays28.dynamictreesfabric.worldgen;
 
 import io.github.steveplays28.dynamictreesfabric.trees.Species;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.RandomSource;
-
 import javax.annotation.Nullable;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.math.random.Random;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -19,13 +18,13 @@ public final class JoCodeRegistry {
     private JoCodeRegistry() {
     }
 
-    private static final Map<ResourceLocation, Map<Integer, List<JoCode>>> CODES = new HashMap<>();
+    private static final Map<Identifier, Map<Integer, List<JoCode>>> CODES = new HashMap<>();
 
     public static void clear() {
         CODES.clear();
     }
 
-    public static void register(ResourceLocation speciesName, int radius, JoCode code) {
+    public static void register(Identifier speciesName, int radius, JoCode code) {
         CODES.computeIfAbsent(speciesName, s -> new HashMap<>())
                 .computeIfAbsent(radius, r -> new ArrayList<>()).add(code);
     }
@@ -38,7 +37,7 @@ public final class JoCodeRegistry {
      * @return an unmodifiable map of radii to the list of {@link JoCode} objects for that radius, or an empty map if
      * none were found for the specified {@code speciesName}
      */
-    public static Map<Integer, List<JoCode>> getCodes(ResourceLocation speciesName) {
+    public static Map<Integer, List<JoCode>> getCodes(Identifier speciesName) {
         return Collections.unmodifiableMap(CODES.getOrDefault(speciesName, new HashMap<>()));
     }
 
@@ -50,7 +49,7 @@ public final class JoCodeRegistry {
      * @return an unmodifiable list of {@link JoCode} objects, or an empty list none were found with the specified
      * {@code radius} under the specified {@code speciesName}
      */
-    public static List<JoCode> getCodes(ResourceLocation speciesName, int radius) {
+    public static List<JoCode> getCodes(Identifier speciesName, int radius) {
         return Collections.unmodifiableList(getCodes(speciesName).getOrDefault(radius, new ArrayList<>()));
     }
 
@@ -63,7 +62,7 @@ public final class JoCodeRegistry {
      * @return the randomly selected {@linkplain JoCode}; otherwise {@code null} if there were none to choose from
      */
     @Nullable
-    public static JoCode getRandomCode(ResourceLocation speciesName, int radius, RandomSource random) {
+    public static JoCode getRandomCode(Identifier speciesName, int radius, Random random) {
         final List<JoCode> list = getCodes(speciesName, radius);
 
         if (list.isEmpty()) {

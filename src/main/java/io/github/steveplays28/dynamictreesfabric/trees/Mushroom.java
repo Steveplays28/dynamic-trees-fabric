@@ -2,7 +2,7 @@ package io.github.steveplays28.dynamictreesfabric.trees;
 
 import io.github.steveplays28.dynamictreesfabric.systems.genfeatures.GenFeatures;
 import io.github.steveplays28.dynamictreesfabric.systems.genfeatures.HugeMushroomGenFeature;
-import net.minecraft.world.level.block.Blocks;
+import net.minecraft.block.Blocks;
 
 public class Mushroom extends Species {
 

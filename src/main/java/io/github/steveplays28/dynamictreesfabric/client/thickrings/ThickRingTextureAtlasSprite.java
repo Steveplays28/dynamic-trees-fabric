@@ -3,19 +3,19 @@ package io.github.steveplays28.dynamictreesfabric.client.thickrings;
 import io.github.steveplays28.dynamictreesfabric.client.TextureUtils;
 import io.github.steveplays28.dynamictreesfabric.client.TextureUtils.PixelBuffer;
 import io.github.steveplays28.dynamictreesfabric.util.CoordUtils;
-import com.mojang.blaze3d.platform.NativeImage;
-import net.minecraft.client.renderer.texture.TextureAtlas;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.core.Direction;
-import net.minecraft.core.Direction.Axis;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.texture.NativeImage;
+import net.minecraft.client.texture.Sprite;
+import net.minecraft.client.texture.SpriteAtlasTexture;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Direction.Axis;
 
-public class ThickRingTextureAtlasSprite extends TextureAtlasSprite {
+public class ThickRingTextureAtlasSprite extends Sprite {
 
-    private final TextureAtlasSprite baseTexture;
-    private final ResourceLocation baseRingResloc;
+    private final Sprite baseTexture;
+    private final Identifier baseRingResloc;
 
-    public ThickRingTextureAtlasSprite(TextureAtlas atlasTextureIn, TextureAtlasSprite.Info spriteInfoIn, int mipmapLevelsIn, int atlasWidth, int atlasHeight, int xIn, int yIn, TextureAtlasSprite baseRing, ResourceLocation baseRingResLoc) {
+    public ThickRingTextureAtlasSprite(SpriteAtlasTexture atlasTextureIn, Sprite.Info spriteInfoIn, int mipmapLevelsIn, int atlasWidth, int atlasHeight, int xIn, int yIn, Sprite baseRing, Identifier baseRingResLoc) {
         super(atlasTextureIn, spriteInfoIn, mipmapLevelsIn, atlasWidth, atlasHeight, xIn, yIn, new NativeImage(atlasWidth, atlasHeight, false));
 
         this.baseTexture = baseRing;
@@ -45,7 +45,7 @@ public class ThickRingTextureAtlasSprite extends TextureAtlasSprite {
      * @param sprite The sprite to generate the delta
      * @return RGB delta squared
      */
-    private int getDeltaBorderVsCenterColor(TextureAtlasSprite sprite) {
+    private int getDeltaBorderVsCenterColor(Sprite sprite) {
         PixelBuffer pixbuf = new PixelBuffer(sprite);
         int u = pixbuf.w / 16;
         PixelBuffer wide = new PixelBuffer(u * 14, u * 1);
@@ -96,7 +96,7 @@ public class ThickRingTextureAtlasSprite extends TextureAtlasSprite {
         NativeImage frame = majPixbuf.toNativeImage();
 
         this.mainImage[0] = frame;
-        this.uploadFirstFrame();
+        this.upload();
     }
 
     private PixelBuffer createMajorTexture(PixelBuffer baseBuffer) {
@@ -125,17 +125,17 @@ public class ThickRingTextureAtlasSprite extends TextureAtlasSprite {
             int edge = 2;
             int pixbufSel = 0;
             for (Direction dir : CoordUtils.HORIZONTALS) { //SWNE
-                Direction ovr = dir.getClockWise();
-                int offX = dir.getStepX();
-                int offY = dir.getStepZ();
+                Direction ovr = dir.rotateYClockwise();
+                int offX = dir.getOffsetX();
+                int offY = dir.getOffsetZ();
                 int compX = (offX == 1 ? -6 : 0) + (dir.getAxis() == Axis.Z ? -2 : 0);
                 int compY = (offY == 1 ? -6 : 0) + (dir.getAxis() == Axis.X ? -2 : 0);
                 int startX = offX * (14 + nesting * 6);
                 int startY = offY * (14 + nesting * 6);
                 for (int way = -1; way <= 1; way += 2) {
                     for (int i = 0; i < 4 + nesting; i++) {
-                        int rowX = ovr.getStepX() * i * way * 4;
-                        int rowY = ovr.getStepZ() * i * way * 4;
+                        int rowX = ovr.getOffsetX() * i * way * 4;
+                        int rowY = ovr.getOffsetZ() * i * way * 4;
                         int realX = centerX + startX + compX + rowX;
                         int realY = centerY + startY + compY + rowY;
                         edges[((pixbufSel++ * 13402141) >> 1) & 3].blit(majPixbuf, realX * scale, realY * scale, edge);

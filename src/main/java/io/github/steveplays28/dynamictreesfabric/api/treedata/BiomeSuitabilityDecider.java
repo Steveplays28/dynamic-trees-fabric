@@ -2,10 +2,10 @@ package io.github.steveplays28.dynamictreesfabric.api.treedata;
 
 import io.github.steveplays28.dynamictreesfabric.api.TreeRegistry;
 import io.github.steveplays28.dynamictreesfabric.trees.Species;
-import net.minecraft.core.BlockPos;
-import net.minecraft.util.Mth;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.biome.Biome;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.World;
+import net.minecraft.world.biome.Biome;
 
 /**
  * Provides the suitability factor for a tree at a given biome or position. Mods should implement this interface and
@@ -16,7 +16,7 @@ import net.minecraft.world.level.biome.Biome;
 @FunctionalInterface
 public interface BiomeSuitabilityDecider {
 
-    Decision getSuitability(Level world, Biome biome, Species tree, BlockPos pos);
+    Decision getSuitability(World world, Biome biome, Species tree, BlockPos pos);
 
     /**
      * Decision interface for handling the event
@@ -39,7 +39,7 @@ public interface BiomeSuitabilityDecider {
          *                    perfectly suited)
          */
         public Decision(float suitability) {
-            this.suitability = Mth.clamp(suitability, 0f, 1f);
+            this.suitability = MathHelper.clamp(suitability, 0f, 1f);
             handled = true;
         }
 

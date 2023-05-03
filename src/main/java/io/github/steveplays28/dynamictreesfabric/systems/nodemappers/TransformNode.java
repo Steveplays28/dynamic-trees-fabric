@@ -6,10 +6,10 @@ import io.github.steveplays28.dynamictreesfabric.blocks.branches.BranchBlock;
 import io.github.steveplays28.dynamictreesfabric.blocks.leaves.DynamicLeavesBlock;
 import io.github.steveplays28.dynamictreesfabric.trees.Species;
 import io.github.steveplays28.dynamictreesfabric.util.SimpleVoxmap;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.block.BlockState;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
+import net.minecraft.world.WorldAccess;
 
 public class TransformNode implements NodeInspector {
 
@@ -22,7 +22,7 @@ public class TransformNode implements NodeInspector {
     }
 
     @Override
-    public boolean run(BlockState blockState, LevelAccessor world, BlockPos pos, Direction fromDir) {
+    public boolean run(BlockState blockState, WorldAccess world, BlockPos pos, Direction fromDir) {
         BranchBlock branch = TreeHelper.getBranch(blockState);
 
         if (branch != null && fromSpecies.getFamily() == branch.getFamily()) {
@@ -46,14 +46,14 @@ public class TransformNode implements NodeInspector {
     }
 
     @Override
-    public boolean returnRun(BlockState blockState, LevelAccessor world, BlockPos pos, Direction fromDir) {
+    public boolean returnRun(BlockState blockState, WorldAccess world, BlockPos pos, Direction fromDir) {
         return false;
     }
 
     private static final int TEST_LEAVES_RADIUS = 3;
 
-    public void transformSurroundingLeaves(LevelAccessor world, BlockPos twigPos) {
-        if (world.isClientSide()) {
+    public void transformSurroundingLeaves(WorldAccess world, BlockPos twigPos) {
+        if (world.isClient()) {
             return;
         }
 
@@ -62,7 +62,7 @@ public class TransformNode implements NodeInspector {
         final int yBound = leafCluster.getLenY();
         final int zBound = leafCluster.getLenZ();
 
-        BlockPos.betweenClosedStream(twigPos.offset(-xBound, -yBound, -zBound), twigPos.offset(xBound, yBound, zBound)).forEach(testPos -> {
+        BlockPos.stream(twigPos.add(-xBound, -yBound, -zBound), twigPos.add(xBound, yBound, zBound)).forEach(testPos -> {
             // We're only interested in where leaves could possibly be.
             if (this.fromSpecies.getLeavesProperties().getCellKit().getLeafCluster().getVoxel(twigPos, testPos) == 0) {
                 return;
@@ -70,8 +70,8 @@ public class TransformNode implements NodeInspector {
 
             final BlockState state = world.getBlockState(testPos);
             if (fromSpecies.getFamily().isCompatibleGenericLeaves(this.fromSpecies, state, world, testPos)) {
-                final int hydro = state.getBlock() instanceof DynamicLeavesBlock ? state.getValue(DynamicLeavesBlock.DISTANCE) : 2;
-                world.setBlock(testPos, toSpecies.getLeavesProperties().getDynamicLeavesState(hydro), 3);
+                final int hydro = state.getBlock() instanceof DynamicLeavesBlock ? state.get(DynamicLeavesBlock.DISTANCE) : 2;
+                world.setBlockState(testPos, toSpecies.getLeavesProperties().getDynamicLeavesState(hydro), 3);
             }
         });
     }

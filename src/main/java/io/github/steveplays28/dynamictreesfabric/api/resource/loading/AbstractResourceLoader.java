@@ -2,10 +2,9 @@ package io.github.steveplays28.dynamictreesfabric.api.resource.loading;
 
 import io.github.steveplays28.dynamictreesfabric.api.resource.ResourceAccessor;
 import io.github.steveplays28.dynamictreesfabric.api.resource.loading.preparation.ResourcePreparer;
-import net.minecraft.Util;
-import net.minecraft.server.packs.resources.ResourceManager;
-
 import java.util.concurrent.CompletableFuture;
+import net.minecraft.resource.ResourceManager;
+import net.minecraft.util.Util;
 
 /**
  * @author Harley O'Connor
@@ -22,7 +21,7 @@ public abstract class AbstractResourceLoader<R> implements ResourceLoader<R> {
     public final CompletableFuture<Void> gatherData(ResourceManager resourceManager) {
         return CompletableFuture.supplyAsync(
                         () -> this.resourcePreparer.prepare(resourceManager),
-                        Util.backgroundExecutor()
+                        Util.getMainWorkerExecutor()
         ).thenAccept(preparedObject ->
                 this.applyOnGatherData(preparedObject, resourceManager)
         );
@@ -32,7 +31,7 @@ public abstract class AbstractResourceLoader<R> implements ResourceLoader<R> {
     public final CompletableFuture<Void> load(ResourceManager resourceManager) {
         return CompletableFuture.supplyAsync(
                 () -> this.resourcePreparer.prepare(resourceManager),
-                Util.backgroundExecutor()
+                Util.getMainWorkerExecutor()
         ).thenAccept(preparedObject ->
                 this.applyOnLoad(preparedObject, resourceManager)
         );
@@ -42,7 +41,7 @@ public abstract class AbstractResourceLoader<R> implements ResourceLoader<R> {
     public final CompletableFuture<Void> setup(ResourceManager resourceManager) {
         return CompletableFuture.supplyAsync(
                 () -> this.resourcePreparer.prepare(resourceManager),
-                Util.backgroundExecutor()
+                Util.getMainWorkerExecutor()
         ).thenAccept(preparedObject ->
                 this.applyOnSetup(preparedObject, resourceManager)
         );
@@ -52,7 +51,7 @@ public abstract class AbstractResourceLoader<R> implements ResourceLoader<R> {
     public CompletableFuture<ResourceAccessor<R>> prepareReload(ResourceManager resourceManager) {
         return CompletableFuture.supplyAsync(
                 () -> this.resourcePreparer.prepare(resourceManager),
-                Util.backgroundExecutor()
+                Util.getMainWorkerExecutor()
         );
     }
 

@@ -3,24 +3,24 @@ package io.github.steveplays28.dynamictreesfabric.growthlogic;
 import io.github.steveplays28.dynamictreesfabric.growthlogic.context.DirectionManipulationContext;
 import io.github.steveplays28.dynamictreesfabric.growthlogic.context.PositionalSpeciesContext;
 import io.github.steveplays28.dynamictreesfabric.util.CoordUtils;
-import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.math.Direction;
 
 public class DarkOakLogic extends GrowthLogicKit {
 
-    public DarkOakLogic(final ResourceLocation registryName) {
+    public DarkOakLogic(final Identifier registryName) {
         super(registryName);
     }
 
     @Override
     public int[] populateDirectionProbabilityMap(GrowthLogicKitConfiguration configuration, DirectionManipulationContext context) {
         final int[] probMap = super.populateDirectionProbabilityMap(configuration, context);
-        probMap[Direction.UP.get3DDataValue()] = 4;
+        probMap[Direction.UP.getId()] = 4;
 
         //Disallow up/down turns after having turned out of the trunk once.
         if (!context.signal().isInTrunk()) {
-            probMap[Direction.UP.get3DDataValue()] = 0;
-            probMap[Direction.DOWN.get3DDataValue()] = 0;
+            probMap[Direction.UP.getId()] = 0;
+            probMap[Direction.DOWN.getId()] = 0;
             probMap[context.signal().dir.ordinal()] *= 0.35;//Promotes the zag of the horizontal branches
         }
 
@@ -33,7 +33,7 @@ public class DarkOakLogic extends GrowthLogicKit {
         }
 
         //Ensure that the branch gets out of the trunk at least two blocks so it won't interfere with new side branches at the same level
-        if (context.signal().numTurns == 1 && context.signal().delta.distToCenterSqr(0, context.signal().delta.getY(), 0) == 1.0) {
+        if (context.signal().numTurns == 1 && context.signal().delta.getSquaredDistanceFromCenter(0, context.signal().delta.getY(), 0) == 1.0) {
             for (Direction dir : CoordUtils.HORIZONTALS) {
                 if (context.signal().dir != dir) {
                     probMap[dir.ordinal()] = 0;

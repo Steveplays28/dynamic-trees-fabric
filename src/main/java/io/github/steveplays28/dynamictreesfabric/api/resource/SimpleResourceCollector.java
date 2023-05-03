@@ -1,9 +1,8 @@
 package io.github.steveplays28.dynamictreesfabric.api.resource;
 
-import net.minecraft.resources.ResourceLocation;
-
 import java.util.Map;
 import java.util.function.Supplier;
+import net.minecraft.util.Identifier;
 
 /**
  * @author Harley O'Connor
@@ -12,12 +11,12 @@ final class SimpleResourceCollector<R> implements ResourceCollector<R> {
 
     @SuppressWarnings("rawtypes")
     private final Supplier<Map> mapSupplier;
-    public Map<ResourceLocation, DTResource<R>> resources;
+    public Map<Identifier, DTResource<R>> resources;
 
     @SuppressWarnings("unchecked")
     public SimpleResourceCollector(@SuppressWarnings("rawtypes") Supplier<Map> mapSupplier) {
         this.mapSupplier = mapSupplier;
-        this.resources = (Map<ResourceLocation, DTResource<R>>) mapSupplier.get();
+        this.resources = (Map<Identifier, DTResource<R>>) mapSupplier.get();
     }
 
     @Override
@@ -26,7 +25,7 @@ final class SimpleResourceCollector<R> implements ResourceCollector<R> {
     }
 
     @Override
-    public DTResource<R> computeIfAbsent(ResourceLocation key, Supplier<DTResource<R>> resourceSupplier) {
+    public DTResource<R> computeIfAbsent(Identifier key, Supplier<DTResource<R>> resourceSupplier) {
         return this.resources.computeIfAbsent(key, k -> resourceSupplier.get());
     }
 
@@ -38,12 +37,12 @@ final class SimpleResourceCollector<R> implements ResourceCollector<R> {
     @SuppressWarnings("unchecked")
     @Override
     public void clear() {
-        this.resources = (Map<ResourceLocation, DTResource<R>>) mapSupplier.get();
+        this.resources = (Map<Identifier, DTResource<R>>) mapSupplier.get();
     }
 
     @SuppressWarnings("unchecked")
-    private <N> Map<ResourceLocation, DTResource<N>> newMap() {
-        return (Map<ResourceLocation, DTResource<N>>) this.mapSupplier.get();
+    private <N> Map<Identifier, DTResource<N>> newMap() {
+        return (Map<Identifier, DTResource<N>>) this.mapSupplier.get();
     }
 
 }

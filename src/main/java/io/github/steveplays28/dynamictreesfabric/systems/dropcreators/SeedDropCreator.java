@@ -5,8 +5,8 @@ import io.github.steveplays28.dynamictreesfabric.event.VoluntarySeedDropEvent;
 import io.github.steveplays28.dynamictreesfabric.init.DTConfigs;
 import io.github.steveplays28.dynamictreesfabric.systems.dropcreators.context.DropContext;
 import io.github.steveplays28.dynamictreesfabric.trees.Species;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.Identifier;
 import net.minecraftforge.common.MinecraftForge;
 
 public class SeedDropCreator extends DropCreator {
@@ -19,7 +19,7 @@ public class SeedDropCreator extends DropCreator {
      */
     public static final ConfigurationProperty<ItemStack> SEED = ConfigurationProperty.property("seed", ItemStack.class);
 
-    public SeedDropCreator(ResourceLocation registryName) {
+    public SeedDropCreator(Identifier registryName) {
         super(registryName);
     }
 
@@ -87,7 +87,7 @@ public class SeedDropCreator extends DropCreator {
 
         float seasonFactor = 1.0f;
 
-        if (!context.world().isClientSide) {
+        if (!context.world().isClient) {
             seasonFactor = context.species().seasonalSeedDropFactor(context.world(), context.pos());
         }
 

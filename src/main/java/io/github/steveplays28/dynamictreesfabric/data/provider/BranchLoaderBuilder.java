@@ -3,7 +3,7 @@ package io.github.steveplays28.dynamictreesfabric.data.provider;
 import io.github.steveplays28.dynamictreesfabric.event.handlers.BakedModelEventHandler;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Identifier;
 import net.minecraftforge.client.model.generators.BlockModelBuilder;
 import net.minecraftforge.client.model.generators.CustomLoaderBuilder;
 import net.minecraftforge.common.data.ExistingFileHelper;
@@ -18,11 +18,11 @@ public final class BranchLoaderBuilder extends CustomLoaderBuilder<BlockModelBui
 
     private final Map<String, String> textures = new LinkedHashMap<>();
 
-    public BranchLoaderBuilder(ResourceLocation loaderId, BlockModelBuilder parent, ExistingFileHelper existingFileHelper) {
+    public BranchLoaderBuilder(Identifier loaderId, BlockModelBuilder parent, ExistingFileHelper existingFileHelper) {
         super(loaderId, parent, existingFileHelper);
     }
 
-    public BranchLoaderBuilder texture(String key, ResourceLocation location) {
+    public BranchLoaderBuilder texture(String key, Identifier location) {
         this.textures.put(key, location.toString());
         return this;
     }

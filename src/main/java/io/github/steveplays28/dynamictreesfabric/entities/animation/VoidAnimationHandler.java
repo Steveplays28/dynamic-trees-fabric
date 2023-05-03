@@ -1,7 +1,7 @@
 package io.github.steveplays28.dynamictreesfabric.entities.animation;
 
 import io.github.steveplays28.dynamictreesfabric.entities.FallingTreeEntity;
-import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -18,7 +18,7 @@ public class VoidAnimationHandler implements AnimationHandler {
     }
 
     @Override
-    public void renderTransform(FallingTreeEntity entity, float entityYaw, float partialTicks, PoseStack matrixStack) {
+    public void renderTransform(FallingTreeEntity entity, float entityYaw, float partialTicks, MatrixStack matrixStack) {
     }
 
     @Override

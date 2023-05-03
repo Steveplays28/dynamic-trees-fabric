@@ -1,9 +1,5 @@
 package io.github.steveplays28.dynamictreesfabric.blocks.rootyblocks;
 
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.BlockState;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -12,6 +8,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.util.Identifier;
 
 /**
  * @author Max Hyper
@@ -71,7 +71,7 @@ public class SoilHelper {
         registerSoil(properties.getRegistryName(), properties.getPrimitiveSoilBlock(), adjNames);
     }
 
-    public static SoilProperties registerSoil(ResourceLocation name, Block soilBlock, String... adjNames) {
+    public static SoilProperties registerSoil(Identifier name, Block soilBlock, String... adjNames) {
         if (soilBlock == Blocks.AIR) {
             return SoilProperties.NULL_SOIL_PROPERTIES;
         }
@@ -89,7 +89,7 @@ public class SoilHelper {
         return registerSoil(name, soilBlock, flag);
     }
 
-    public static SoilProperties registerSoil(ResourceLocation name, Block soilBlock, int adjFlag) {
+    public static SoilProperties registerSoil(Identifier name, Block soilBlock, int adjFlag) {
         return dirtMap.compute(soilBlock, (bl, prop) -> (prop == null) ? new SoilProperties(soilBlock, name, adjFlag, true) : prop.addSoilFlags(adjFlag));
     }
 

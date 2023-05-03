@@ -5,13 +5,12 @@ import io.github.steveplays28.dynamictreesfabric.api.network.NodeInspector;
 import io.github.steveplays28.dynamictreesfabric.blocks.branches.BranchBlock;
 import io.github.steveplays28.dynamictreesfabric.util.BranchConnectionData;
 import io.github.steveplays28.dynamictreesfabric.util.Connections;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.block.state.BlockState;
-
 import java.util.HashMap;
 import java.util.Map;
+import net.minecraft.block.BlockState;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
+import net.minecraft.world.WorldAccess;
 
 /**
  * Makes a BlockPos -> BlockState map for all of the branches
@@ -32,7 +31,7 @@ public class StateNode implements NodeInspector {
     }
 
     @Override
-    public boolean run(BlockState blockState, LevelAccessor world, BlockPos pos, Direction fromDir) {
+    public boolean run(BlockState blockState, WorldAccess world, BlockPos pos, Direction fromDir) {
         BranchBlock branch = TreeHelper.getBranch(blockState);
 
         if (branch != null) {
@@ -44,7 +43,7 @@ public class StateNode implements NodeInspector {
     }
 
     @Override
-    public boolean returnRun(BlockState blockState, LevelAccessor world, BlockPos pos, Direction fromDir) {
+    public boolean returnRun(BlockState blockState, WorldAccess world, BlockPos pos, Direction fromDir) {
         return false;
     }
 

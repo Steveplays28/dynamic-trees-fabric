@@ -1,12 +1,12 @@
 package io.github.steveplays28.dynamictreesfabric.api.registry;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Identifier;
 import net.minecraftforge.eventbus.api.GenericEvent;
 import net.minecraftforge.fml.event.IModBusEvent;
 
 /**
  * Allows for registering {@link TypedRegistry.EntryType} objects to {@link SimpleRegistry} objects. Subscribers should use
- * {@link #registerType(ResourceLocation, TypedRegistry.EntryType)} to register their {@link TypedRegistry.EntryType}
+ * {@link #registerType(Identifier, TypedRegistry.EntryType)} to register their {@link TypedRegistry.EntryType}
  * objects, as full access to the {@link SimpleRegistry} is not given to prevent misuse of this event, for full access to
  * register {@link RegistryEntry} objects, use {@link RegistryEvent}.
  *
@@ -26,12 +26,12 @@ public final class TypeRegistryEvent<V extends RegistryEntry<V>> extends Generic
 
     /**
      * Registers a custom {@link TypedRegistry.EntryType}, allowing custom sub-classes of the registry entry to be
-     * created and then referenced from Json via the registry name {@link ResourceLocation}.
+     * created and then referenced from Json via the registry name {@link Identifier}.
      *
-     * @param registryName The registry name {@link ResourceLocation}.
+     * @param registryName The registry name {@link Identifier}.
      * @param type         The {@link TypedRegistry.EntryType} to register.
      */
-    public final void registerType(final ResourceLocation registryName, final TypedRegistry.EntryType<V> type) {
+    public final void registerType(final Identifier registryName, final TypedRegistry.EntryType<V> type) {
         this.registry.registerType(registryName, type);
     }
 

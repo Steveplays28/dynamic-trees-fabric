@@ -1,9 +1,9 @@
 package io.github.steveplays28.dynamictreesfabric.systems.dropcreators.drops;
 
 import com.mojang.serialization.Codec;
-import net.minecraft.util.RandomSource;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.math.random.Random;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.List;
@@ -19,7 +19,7 @@ public interface Drops {
     Drops NONE = (drops, random, fortune) -> {
     };
 
-    void appendDrops(List<ItemStack> drops, RandomSource random, int fortune);
+    void appendDrops(List<ItemStack> drops, Random random, int fortune);
 
     static int getChance(int fortune, int baseChance) {
         if (baseChance <= 1) {

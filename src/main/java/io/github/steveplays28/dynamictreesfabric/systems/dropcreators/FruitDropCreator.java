@@ -2,11 +2,10 @@ package io.github.steveplays28.dynamictreesfabric.systems.dropcreators;
 
 import io.github.steveplays28.dynamictreesfabric.api.configurations.ConfigurationProperty;
 import io.github.steveplays28.dynamictreesfabric.systems.dropcreators.context.DropContext;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-
 import java.util.List;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.util.Identifier;
 
 /**
  * A drop creator that drops fruit just like Vanilla apples.
@@ -17,7 +16,7 @@ public class FruitDropCreator extends DropCreator {
 
     public static final ConfigurationProperty<ItemStack> FRUIT = ConfigurationProperty.property("fruit_item", ItemStack.class);
 
-    public FruitDropCreator(ResourceLocation registryName) {
+    public FruitDropCreator(Identifier registryName) {
         super(registryName);
     }
 

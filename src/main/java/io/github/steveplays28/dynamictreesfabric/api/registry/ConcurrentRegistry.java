@@ -1,12 +1,11 @@
 package io.github.steveplays28.dynamictreesfabric.api.registry;
 
-import net.minecraft.resources.ResourceLocation;
-
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import net.minecraft.util.Identifier;
 
 /**
  * An implementation for {@link AbstractRegistry} using a {@link ConcurrentHashMap} to store its entries.
@@ -16,7 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public final class ConcurrentRegistry<V extends RegistryEntry<V>> extends AbstractRegistry<V> {
 
-    private final Map<ResourceLocation, V> entries = new ConcurrentHashMap<>();
+    private final Map<Identifier, V> entries = new ConcurrentHashMap<>();
 
     /**
      * Constructs a new {@link ConcurrentRegistry} with the name being set to {@link Class#getSimpleName()} of the given
@@ -70,8 +69,8 @@ public final class ConcurrentRegistry<V extends RegistryEntry<V>> extends Abstra
      * Registers the given {@link RegistryEntry} to this {@link ConcurrentRegistry}.
      *
      * <p>Note that this will throw a runtime exception if this {@link SimpleRegistry} is locked, or if
-     * the {@link ResourceLocation} already has a value registered, therefore {@link #isLocked()} or/and {@link
-     * #has(ResourceLocation)} should be checked before calling if either conditions are uncertain.</p>
+     * the {@link Identifier} already has a value registered, therefore {@link #isLocked()} or/and {@link
+     * #has(Identifier)} should be checked before calling if either conditions are uncertain.</p>
      *
      * <p>If you're thinking of using this you should probably be doing it from a
      * {@link RegistryEvent}, in which case you don't have to worry about locking.</p>

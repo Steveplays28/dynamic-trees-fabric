@@ -2,39 +2,39 @@ package io.github.steveplays28.dynamictreesfabric.blocks;
 
 import io.github.steveplays28.dynamictreesfabric.api.TreeHelper;
 import io.github.steveplays28.dynamictreesfabric.blocks.branches.BranchBlock;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.CocoaBlock;
-import net.minecraft.world.level.block.SoundType;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.Material;
-import net.minecraft.world.phys.HitResult;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.CocoaBlock;
+import net.minecraft.block.Material;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.sound.BlockSoundGroup;
+import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.BlockView;
+import net.minecraft.world.WorldView;
 
 public class DynamicCocoaBlock extends CocoaBlock {
 
     public DynamicCocoaBlock() {
         super(Block.Properties.of(Material.PLANT)
-                .randomTicks()
+                .ticksRandomly()
                 .strength(0.2F, 3.0F)
-                .sound(SoundType.WOOD));
+                .sounds(BlockSoundGroup.WOOD));
     }
 
     /**
      * Can this block stay at this position.  Similar to canPlaceBlockAt except gets checked often with plants.
      */
-    public boolean canSurvive(BlockState state, LevelReader worldIn, BlockPos pos) {
-        final BlockState logState = worldIn.getBlockState(pos.relative(state.getValue(FACING)));
+    public boolean canPlaceAt(BlockState state, WorldView worldIn, BlockPos pos) {
+        final BlockState logState = worldIn.getBlockState(pos.offset(state.get(FACING)));
         final BranchBlock branch = TreeHelper.getBranch(logState);
         return branch != null && branch.getRadius(logState) == 8 && branch.getFamily().canSupportCocoa;
     }
 
     @Override
-    public ItemStack getCloneItemStack(BlockState state, HitResult target, BlockGetter world, BlockPos pos, Player player) {
+    public ItemStack getCloneItemStack(BlockState state, HitResult target, BlockView world, BlockPos pos, PlayerEntity player) {
         return new ItemStack(Items.COCOA_BEANS);
     }
 

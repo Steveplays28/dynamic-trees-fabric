@@ -3,16 +3,16 @@ package io.github.steveplays28.dynamictreesfabric.systems.substances;
 import io.github.steveplays28.dynamictreesfabric.api.TreeHelper;
 import io.github.steveplays28.dynamictreesfabric.api.substances.SubstanceEffect;
 import io.github.steveplays28.dynamictreesfabric.blocks.rootyblocks.RootyBlock;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.world.level.Level;
+import net.minecraft.particle.ParticleTypes;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 
 public class DepleteSubstance implements SubstanceEffect {
 
     int amount;
 
     @Override
-    public boolean apply(Level world, BlockPos rootPos) {
+    public boolean apply(World world, BlockPos rootPos) {
         final RootyBlock dirt = TreeHelper.getRooty(world.getBlockState(rootPos));
 
         if (dirt.fertilize(world, rootPos, -amount)) {

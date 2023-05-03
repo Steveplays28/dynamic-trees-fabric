@@ -6,12 +6,6 @@
 package io.github.steveplays28.dynamictreesfabric.util.holderset;
 
 import com.mojang.datafixers.util.Either;
-import net.minecraft.core.Holder;
-import net.minecraft.core.HolderSet;
-import net.minecraft.core.Registry;
-import net.minecraft.tags.TagKey;
-import net.minecraft.util.RandomSource;
-
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -20,20 +14,25 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
+import net.minecraft.registry.Registry;
+import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.registry.entry.RegistryEntryList;
+import net.minecraft.registry.tag.TagKey;
+import net.minecraft.util.math.random.Random;
 
-public record DelayedAnyHolderSet<T>(Supplier<Registry<T>> registrySupplier) implements HolderSet<T> {
+public record DelayedAnyHolderSet<T>(Supplier<Registry<T>> registrySupplier) implements RegistryEntryList<T> {
     public Registry<T> registry() {
         return Objects.requireNonNull(this.registrySupplier.get());
     }
 
     @Override
-    public Iterator<Holder<T>> iterator() {
+    public Iterator<RegistryEntry<T>> iterator() {
         return this.stream().iterator();
     }
 
     @Override
-    public Stream<Holder<T>> stream() {
-        return this.registry().holders().map(Function.identity());
+    public Stream<RegistryEntry<T>> stream() {
+        return this.registry().streamEntries().map(Function.identity());
     }
 
     @Override
@@ -42,23 +41,23 @@ public record DelayedAnyHolderSet<T>(Supplier<Registry<T>> registrySupplier) imp
     }
 
     @Override
-    public Either<TagKey<T>, List<Holder<T>>> unwrap() {
+    public Either<TagKey<T>, List<RegistryEntry<T>>> getStorage() {
         return Either.right(this.stream().toList());
     }
 
     @Override
-    public Optional<Holder<T>> getRandomElement(RandomSource random) {
+    public Optional<RegistryEntry<T>> getRandom(Random random) {
         return this.registry().getRandom(random);
     }
 
     @Override
-    public Holder<T> get(int i) {
-        return this.registry().getHolder(i).orElseThrow(() -> new NoSuchElementException("No element " + i + " in registry " + this.registry().key()));
+    public RegistryEntry<T> get(int i) {
+        return this.registry().getEntry(i).orElseThrow(() -> new NoSuchElementException("No element " + i + " in registry " + this.registry().getKey()));
     }
 
     @Override
-    public boolean contains(Holder<T> holder) {
-        return holder.unwrapKey().map(this.registry()::containsKey).orElseGet(() -> this.registry().getResourceKey(holder.value()).isPresent());
+    public boolean contains(RegistryEntry<T> holder) {
+        return holder.getKey().map(this.registry()::contains).orElseGet(() -> this.registry().getKey(holder.value()).isPresent());
     }
 
     @Override
@@ -68,6 +67,6 @@ public record DelayedAnyHolderSet<T>(Supplier<Registry<T>> registrySupplier) imp
 
     @Override
     public String toString() {
-        return "AnySet(" + this.registry().key() + ")";
+        return "AnySet(" + this.registry().getKey() + ")";
     }
 }

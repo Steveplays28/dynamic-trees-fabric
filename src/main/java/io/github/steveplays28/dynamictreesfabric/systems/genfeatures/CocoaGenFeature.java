@@ -6,15 +6,15 @@ import io.github.steveplays28.dynamictreesfabric.api.network.MapSignal;
 import io.github.steveplays28.dynamictreesfabric.systems.genfeatures.context.PostGenerationContext;
 import io.github.steveplays28.dynamictreesfabric.systems.genfeatures.context.PostGrowContext;
 import io.github.steveplays28.dynamictreesfabric.systems.nodemappers.CocoaFruitNode;
-import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
+import net.minecraft.world.WorldAccess;
 
 @GeneratesFruit
 public class CocoaGenFeature extends GenFeature {
 
-    public CocoaGenFeature(ResourceLocation registryName) {
+    public CocoaGenFeature(Identifier registryName) {
         super(registryName);
     }
 
@@ -25,7 +25,7 @@ public class CocoaGenFeature extends GenFeature {
     @Override
     protected boolean postGrow(GenFeatureConfiguration configuration, PostGrowContext context) {
         if (context.fertility() == 0 && context.random().nextInt() % 16 == 0) {
-            final Level world = context.world();
+            final World world = context.world();
             if (context.species().seasonalFruitProductionFactor(world, context.treePos()) > context.random().nextFloat()) {
                 this.addCocoa(world, context.pos(), false);
             }
@@ -42,7 +42,7 @@ public class CocoaGenFeature extends GenFeature {
         return false;
     }
 
-    private void addCocoa(LevelAccessor world, BlockPos rootPos, boolean worldGen) {
+    private void addCocoa(WorldAccess world, BlockPos rootPos, boolean worldGen) {
         TreeHelper.startAnalysisFromRoot(world, rootPos, new MapSignal(new CocoaFruitNode().setWorldGen(worldGen)));
     }
 

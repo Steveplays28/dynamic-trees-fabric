@@ -3,9 +3,9 @@ package io.github.steveplays28.dynamictreesfabric.deserialisation;
 import io.github.steveplays28.dynamictreesfabric.util.IgnoreThrowable;
 import io.github.steveplays28.dynamictreesfabric.util.JsonMapWrapper;
 import com.google.gson.*;
-import net.minecraft.world.level.block.state.BlockBehaviour;
-import net.minecraft.world.level.material.Material;
-import net.minecraft.world.level.material.MaterialColor;
+import net.minecraft.block.AbstractBlock;
+import net.minecraft.block.MapColor;
+import net.minecraft.block.Material;
 import net.minecraftforge.fml.ModList;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -123,10 +123,10 @@ public class JsonHelper {
                         .orElseThrow();
     }
 
-    public static BlockBehaviour.Properties getBlockProperties(final JsonObject jsonObject, final Material defaultMaterial, final MaterialColor defaultMaterialColor, final BiFunction<Material, MaterialColor, BlockBehaviour.Properties> defaultPropertiesGetter, final Consumer<String> errorConsumer, final Consumer<String> warningConsumer) {
+    public static AbstractBlock.Settings getBlockProperties(final JsonObject jsonObject, final Material defaultMaterial, final MapColor defaultMaterialColor, final BiFunction<Material, MapColor, AbstractBlock.Settings> defaultPropertiesGetter, final Consumer<String> errorConsumer, final Consumer<String> warningConsumer) {
         final Material material = JsonHelper.getOrDefault(jsonObject, "material", Material.class, defaultMaterial);
-        final BlockBehaviour.Properties properties = defaultPropertiesGetter.apply(material,
-                JsonHelper.getOrDefault(jsonObject, "material_color", MaterialColor.class, defaultMaterialColor));
+        final AbstractBlock.Settings properties = defaultPropertiesGetter.apply(material,
+                JsonHelper.getOrDefault(jsonObject, "material_color", MapColor.class, defaultMaterialColor));
 
         JsonPropertyApplierLists.PROPERTIES.applyAll(new JsonMapWrapper(jsonObject), properties)
                 .forEachErrorWarning(errorConsumer, warningConsumer);

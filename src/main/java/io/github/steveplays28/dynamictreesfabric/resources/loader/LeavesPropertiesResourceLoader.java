@@ -10,11 +10,11 @@ import io.github.steveplays28.dynamictreesfabric.deserialisation.JsonHelper;
 import io.github.steveplays28.dynamictreesfabric.deserialisation.ResourceLocationDeserialiser;
 import io.github.steveplays28.dynamictreesfabric.deserialisation.result.JsonResult;
 import io.github.steveplays28.dynamictreesfabric.trees.Family;
+import net.minecraft.block.AbstractBlock;
+import net.minecraft.block.Block;
+import net.minecraft.util.Identifier;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.BlockBehaviour;
 import org.apache.logging.log4j.LogManager;
 
 /**
@@ -36,8 +36,8 @@ public final class LeavesPropertiesResourceLoader extends JsonRegistryResourceLo
 
         // Primitive leaves are needed both client and server (so cannot be done on load).
         this.setupAppliers.register("primitive_leaves", Block.class, LeavesProperties::setPrimitiveLeaves)
-                .register("family", ResourceLocation.class, (leavesProperties, registryName) -> {
-                    final ResourceLocation processedRegName = TreeRegistry.processResLoc(registryName);
+                .register("family", Identifier.class, (leavesProperties, registryName) -> {
+                    final Identifier processedRegName = TreeRegistry.processResLoc(registryName);
                     Family.REGISTRY.runOnNextLock(Family.REGISTRY.generateIfValidRunnable(
                             processedRegName,
                             leavesProperties::setFamily,
@@ -110,7 +110,7 @@ public final class LeavesPropertiesResourceLoader extends JsonRegistryResourceLo
     }
 
     private void generateBlocks(LeavesProperties leavesProperties, JsonObject json) {
-        final BlockBehaviour.Properties blockProperties = JsonHelper.getBlockProperties(
+        final AbstractBlock.Settings blockProperties = JsonHelper.getBlockProperties(
                 json,
                 leavesProperties.getDefaultMaterial(),
                 leavesProperties.getDefaultMaterial().getColor(),

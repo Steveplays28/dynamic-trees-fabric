@@ -1,12 +1,11 @@
 package io.github.steveplays28.dynamictreesfabric.api.network;
 
 import io.github.steveplays28.dynamictreesfabric.systems.nodemappers.CollectorNode;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.block.state.BlockState;
-
 import javax.annotation.Nullable;
+import net.minecraft.block.BlockState;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
+import net.minecraft.world.WorldAccess;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -37,14 +36,14 @@ public class MapSignal {
         nodeInspectors.addAll(Arrays.asList(nis));
     }
 
-    public boolean run(BlockState blockState, LevelAccessor world, BlockPos pos, @Nullable Direction fromDir) {
+    public boolean run(BlockState blockState, WorldAccess world, BlockPos pos, @Nullable Direction fromDir) {
         for (NodeInspector inspector : nodeInspectors) {
             inspector.run(blockState, world, pos, fromDir);
         }
         return false;
     }
 
-    public boolean returnRun(BlockState blockState, LevelAccessor world, BlockPos pos, Direction fromDir) {
+    public boolean returnRun(BlockState blockState, WorldAccess world, BlockPos pos, Direction fromDir) {
         for (NodeInspector inspector : nodeInspectors) {
             inspector.returnRun(blockState, world, pos, fromDir);
         }

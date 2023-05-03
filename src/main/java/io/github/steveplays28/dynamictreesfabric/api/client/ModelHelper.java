@@ -1,22 +1,22 @@
 package io.github.steveplays28.dynamictreesfabric.api.client;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.color.block.BlockColor;
-import net.minecraft.client.color.item.ItemColor;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.level.block.Block;
+import net.minecraft.block.Block;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.color.block.BlockColorProvider;
+import net.minecraft.client.color.item.ItemColorProvider;
+import net.minecraft.item.Item;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.common.Mod;
 
 @Mod.EventBusSubscriber(value = Dist.CLIENT)
 public class ModelHelper {
 
-    public static void regColorHandler(Block block, BlockColor blockColor) {
-        Minecraft.getInstance().getBlockColors().register(blockColor, block);
+    public static void regColorHandler(Block block, BlockColorProvider blockColor) {
+        MinecraftClient.getInstance().getBlockColors().registerColorProvider(blockColor, block);
     }
 
-    public static void regColorHandler(Item item, ItemColor itemColor) {
-        Minecraft.getInstance().getItemColors().register(itemColor, new Item[]{item});
+    public static void regColorHandler(Item item, ItemColorProvider itemColor) {
+        MinecraftClient.getInstance().getItemColors().register(itemColor, new Item[]{item});
     }
 
 }

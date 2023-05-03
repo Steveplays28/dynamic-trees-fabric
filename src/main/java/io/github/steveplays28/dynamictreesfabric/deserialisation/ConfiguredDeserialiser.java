@@ -6,9 +6,8 @@ import io.github.steveplays28.dynamictreesfabric.deserialisation.result.Result;
 import io.github.steveplays28.dynamictreesfabric.util.ResourceLocationUtils;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.minecraft.resources.ResourceLocation;
-
 import javax.annotation.Nullable;
+import net.minecraft.util.Identifier;
 import java.util.function.Consumer;
 import java.util.stream.StreamSupport;
 
@@ -62,12 +61,12 @@ public final class ConfiguredDeserialiser<T extends Configuration<T, C>, C exten
                 ((ConfigurableRegistryEntry<?, ?>) config.getConfigurable()).isValid());
     }
 
-    private ConfigurationTemplate<T> getTemplate(ResourceLocation templateName) throws DeserialisationException {
+    private ConfigurationTemplate<T> getTemplate(Identifier templateName) throws DeserialisationException {
         return this.templates.get(templateName)
                 .orElseThrow(() -> new DeserialisationException("No such template \"" + templateName + "\" for \"" + configurableName + "\"."));
     }
 
-    private ResourceLocation getTemplateName(JsonObject json) throws DeserialisationException {
+    private Identifier getTemplateName(JsonObject json) throws DeserialisationException {
         return JsonHelper.getAsOptional(json, "name", JsonDeserialisers.DT_RESOURCE_LOCATION)
                 .orElseThrow(() -> new DeserialisationException("Configurable must state name of template to use."));
     }

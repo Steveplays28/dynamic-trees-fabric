@@ -7,22 +7,22 @@ import io.github.steveplays28.dynamictreesfabric.init.DTRegistries;
 import io.github.steveplays28.dynamictreesfabric.worldgen.BiomeDatabase;
 import io.github.steveplays28.dynamictreesfabric.worldgen.FeatureCancellationRegistry;
 import com.mojang.serialization.Codec;
-import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagKey;
-import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.levelgen.placement.PlacedFeature;
+import net.minecraft.registry.Registry;
+import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.registry.tag.TagKey;
+import net.minecraft.util.Identifier;
+import net.minecraft.world.biome.Biome;
+import net.minecraft.world.gen.feature.PlacedFeature;
 import net.minecraftforge.common.world.BiomeGenerationSettingsBuilder;
 import net.minecraftforge.common.world.BiomeModifier;
 import net.minecraftforge.common.world.ModifiableBiomeInfo;
 
 public class RunFeatureCancellersBiomeModifier implements BiomeModifier {
-    public static final TagKey<PlacedFeature> FEATURE_CANCELLER_EXCLUSIONS_KEY = TagKey.create(Registry.PLACED_FEATURE_REGISTRY,
-            new ResourceLocation(io.github.steveplays28.dynamictreesfabric.DynamicTreesFabric.MOD_ID, "feature_canceller_exclusions"));
+    public static final TagKey<PlacedFeature> FEATURE_CANCELLER_EXCLUSIONS_KEY = TagKey.of(Registry.PLACED_FEATURE_REGISTRY,
+            new Identifier(io.github.steveplays28.dynamictreesfabric.DynamicTreesFabric.MOD_ID, "feature_canceller_exclusions"));
 
     @Override
-    public void modify(Holder<Biome> biome, Phase phase, ModifiableBiomeInfo.BiomeInfo.Builder builder) {
+    public void modify(RegistryEntry<Biome> biome, Phase phase, ModifiableBiomeInfo.BiomeInfo.Builder builder) {
         if (phase == Phase.REMOVE && DTConfigs.WORLD_GEN.get()) {
             BiomeGenerationSettingsBuilder generationSettings = builder.getGenerationSettings();
 

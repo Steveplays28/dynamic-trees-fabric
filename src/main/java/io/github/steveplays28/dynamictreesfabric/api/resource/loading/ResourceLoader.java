@@ -1,9 +1,8 @@
 package io.github.steveplays28.dynamictreesfabric.api.resource.loading;
 
 import io.github.steveplays28.dynamictreesfabric.api.resource.ResourceAccessor;
-import net.minecraft.server.packs.resources.ResourceManager;
-
 import java.util.concurrent.CompletableFuture;
+import net.minecraft.resource.ResourceManager;
 
 /**
  * @author Harley O'Connor

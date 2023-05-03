@@ -1,9 +1,9 @@
 package io.github.steveplays28.dynamictreesfabric.event;
 
 import io.github.steveplays28.dynamictreesfabric.trees.Species;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import net.minecraftforge.eventbus.api.Cancelable;
 import net.minecraftforge.eventbus.api.Event;
 
@@ -12,19 +12,19 @@ import java.util.List;
 @Cancelable
 public class VoluntarySeedDropEvent extends Event {
 
-    private final Level world;
+    private final World world;
     private final BlockPos rootPos;
     private final Species species;
     private final List<ItemStack> dropList;
 
-    public VoluntarySeedDropEvent(Level world, BlockPos rootPos, Species species, List<ItemStack> dropList) {
+    public VoluntarySeedDropEvent(World world, BlockPos rootPos, Species species, List<ItemStack> dropList) {
         this.world = world;
         this.rootPos = rootPos;
         this.species = species;
         this.dropList = dropList;
     }
 
-    public Level getWorld() {
+    public World getWorld() {
         return world;
     }
 

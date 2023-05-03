@@ -3,12 +3,11 @@ package io.github.steveplays28.dynamictreesfabric.systems;
 import io.github.steveplays28.dynamictreesfabric.util.Optionals;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.core.Registry;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.level.block.Block;
-
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import net.minecraft.block.Block;
+import net.minecraft.item.Item;
+import net.minecraft.registry.Registry;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -18,8 +17,8 @@ public class SeedSaplingRecipe {
     @SuppressWarnings("deprecation")
     public static final Codec<SeedSaplingRecipe> CODEC = RecordCodecBuilder.create(instance ->
             instance.group(
-                    Registry.BLOCK.byNameCodec().optionalFieldOf("sapling_block").forGetter(SeedSaplingRecipe::getSaplingBlock),
-                    Registry.ITEM.byNameCodec().optionalFieldOf("sapling_item").forGetter(SeedSaplingRecipe::getSaplingItem)
+                    Registry.BLOCK.getCodec().optionalFieldOf("sapling_block").forGetter(SeedSaplingRecipe::getSaplingBlock),
+                    Registry.ITEM.getCodec().optionalFieldOf("sapling_item").forGetter(SeedSaplingRecipe::getSaplingItem)
             ).apply(instance, (saplingBlock, saplingItem) -> new SeedSaplingRecipe(
                     saplingBlock.orElse(null),
                     saplingItem.orElseGet(() ->

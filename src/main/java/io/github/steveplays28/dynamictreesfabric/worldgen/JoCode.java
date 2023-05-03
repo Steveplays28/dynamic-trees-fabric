@@ -20,22 +20,22 @@ import io.github.steveplays28.dynamictreesfabric.util.BlockStates;
 import io.github.steveplays28.dynamictreesfabric.util.SafeChunkBounds;
 import io.github.steveplays28.dynamictreesfabric.util.SimpleVoxmap;
 import io.github.steveplays28.dynamictreesfabric.util.SimpleVoxmap.Cell;
-import net.minecraft.ChatFormatting;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.core.Holder;
-import net.minecraft.network.chat.ClickEvent;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.HoverEvent;
-import net.minecraft.tags.BlockTags;
-import net.minecraft.util.Mth;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.feature.TreeFeature;
-import net.minecraft.world.level.material.Material;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.Material;
+import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.registry.tag.BlockTags;
+import net.minecraft.text.ClickEvent;
+import net.minecraft.text.HoverEvent;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.World;
+import net.minecraft.world.WorldAccess;
+import net.minecraft.world.biome.Biome;
+import net.minecraft.world.gen.feature.TreeFeature;
 import net.minecraftforge.common.MinecraftForge;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -65,8 +65,8 @@ public class JoCode {
      * @param rootPos Block position of rootyDirt block
      * @param facing  A final rotation applied to the code after creation
      */
-    public JoCode(Level world, BlockPos rootPos, Direction facing) {
-        Optional<BranchBlock> branch = TreeHelper.getBranchOpt(world.getBlockState(rootPos.above()));
+    public JoCode(World world, BlockPos rootPos, Direction facing) {
+        Optional<BranchBlock> branch = TreeHelper.getBranchOpt(world.getBlockState(rootPos.up()));
 
         if (branch.isPresent()) {
             CoderNode coder = new CoderNode();
@@ -83,7 +83,7 @@ public class JoCode {
      * @param world The world
      * @param pos   Position of the rooty dirt block
      */
-    public JoCode(Level world, BlockPos pos) {
+    public JoCode(World world, BlockPos pos) {
         this(world, pos, Direction.SOUTH);
     }
 
@@ -154,23 +154,23 @@ public class JoCode {
     /**
      * Generate a tree from this {@link JoCode} instruction list.
      *
-     * @param world             The {@link Level} instance.
+     * @param world             The {@link World} instance.
      * @param rootPosIn         The position of what will become the {@link io.github.steveplays28.dynamictreesfabric.blocks.rootyblocks.RootyBlock}.
      * @param biome             The {@link Biome} at {@code rootPosIn}.
      * @param facing            The {@link Direction} of the tree.
      * @param radius            The radius constraint.
      * @param secondChanceRegen Ensures second chance regen doesn't recurse too far.
      */
-    public void generate(Level worldObj, LevelAccessor world, Species species, BlockPos rootPosIn, Holder<Biome> biome, Direction facing, int radius, SafeChunkBounds safeBounds, boolean secondChanceRegen) {
+    public void generate(World worldObj, WorldAccess world, Species species, BlockPos rootPosIn, RegistryEntry<Biome> biome, Direction facing, int radius, SafeChunkBounds safeBounds, boolean secondChanceRegen) {
         final boolean worldGen = safeBounds != SafeChunkBounds.ANY;
 
         // A Tree generation boundary radius is at least 2 and at most 8.
-        radius = Mth.clamp(radius, 2, 8);
+        radius = MathHelper.clamp(radius, 2, 8);
 
         this.setFacing(facing);
         final BlockPos rootPos = species.preGeneration(world, rootPosIn, radius, facing, safeBounds, this);
 
-        if (rootPos == BlockPos.ZERO) {
+        if (rootPos == BlockPos.ORIGIN) {
             return;
         }
 
@@ -181,7 +181,7 @@ public class JoCode {
         this.generateFork(world, species, 0, rootPos, false);
 
         // Establish a position for the bottom block of the trunk.
-        final BlockPos treePos = rootPos.above();
+        final BlockPos treePos = rootPos.up();
 
         // Fix branch thicknesses and map out leaf locations.
         final BlockState treeState = world.getBlockState(treePos);
@@ -189,7 +189,7 @@ public class JoCode {
 
         // If a branch doesn't exist the growth failed.. turn the soil back to what it was.
         if (firstBranch == null) {
-            world.setBlock(rootPos, initialDirtState, this.careful ? 3 : 2);
+            world.setBlockState(rootPos, initialDirtState, this.careful ? 3 : 2);
             return;
         }
 
@@ -215,12 +215,12 @@ public class JoCode {
 
         // Place Growing Leaves Blocks from voxmap.
         for (final Cell cell : leafMap.getAllNonZeroCells((byte) 0x0F)) { // Iterate through all of the cells that are leaves (not air or branches).
-            final BlockPos.MutableBlockPos cellPos = cell.getPos();
+            final BlockPos.Mutable cellPos = cell.getPos();
 
             if (safeBounds.inBounds(cellPos, false)) {
                 final BlockState testBlockState = world.getBlockState(cellPos);
-                if (testBlockState.isAir() || testBlockState.is(BlockTags.LEAVES)) {
-                    world.setBlock(cellPos, leavesProperties.getDynamicLeavesState(cell.getValue()), worldGen ? 16 : 2); // Flag 16 to prevent observers from causing cascading lag.
+                if (testBlockState.isAir() || testBlockState.isIn(BlockTags.LEAVES)) {
+                    world.setBlockState(cellPos, leavesProperties.getDynamicLeavesState(cell.getValue()), worldGen ? 16 : 2); // Flag 16 to prevent observers from causing cascading lag.
                 }
             } else {
                 leafMap.setVoxel(cellPos, (byte) 0);
@@ -229,7 +229,7 @@ public class JoCode {
 
         // Shrink the leafMap down by the safeBounds object so that the aging process won't look for neighbors outside of the bounds.
         for (final Cell cell : leafMap.getAllNonZeroCells()) {
-            final BlockPos.MutableBlockPos cellPos = cell.getPos();
+            final BlockPos.Mutable cellPos = cell.getPos();
             if (!safeBounds.inBounds(cellPos, true)) {
                 leafMap.setVoxel(cellPos, (byte) 0);
             }
@@ -253,7 +253,7 @@ public class JoCode {
         this.addSnow(leafMap, world, rootPos, biome);
     }
 
-    private void tryGenerateAgain(Level worldObj, LevelAccessor world, Species species, BlockPos rootPosIn, Holder<Biome> biome, Direction facing, int radius, SafeChunkBounds safeBounds, boolean worldGen, BlockPos treePos, BlockState treeState, FindEndsNode endFinder, boolean secondChanceRegen) {
+    private void tryGenerateAgain(World worldObj, WorldAccess world, Species species, BlockPos rootPosIn, RegistryEntry<Biome> biome, Direction facing, int radius, SafeChunkBounds safeBounds, boolean worldGen, BlockPos treePos, BlockState treeState, FindEndsNode endFinder, boolean secondChanceRegen) {
         // Don't log the error if it didn't happen during world gen (so we don't fill the logs if players spam the staff in cramped positions).
         if (worldGen) {
             if (!secondChanceRegen) {
@@ -279,7 +279,7 @@ public class JoCode {
     /**
      * Attempt to clean up fused trees that have multiple root blocks by simply destroying them both messily
      */
-    protected void cleanupFrankentree(LevelAccessor world, BlockPos treePos, BlockState treeState, List<BlockPos> endPoints, SafeChunkBounds safeBounds) {
+    protected void cleanupFrankentree(WorldAccess world, BlockPos treePos, BlockState treeState, List<BlockPos> endPoints, SafeChunkBounds safeBounds) {
         final Set<BlockPos> blocksToDestroy = new HashSet<>();
         final BranchBlock branch = TreeHelper.getBranch(treeState);
         final MapSignal signal = new MapSignal(new CollectorNode(blocksToDestroy));
@@ -311,13 +311,13 @@ public class JoCode {
 
                         if (leafCluster != LeafClusters.NULL_MAP) {
                             for (Cell cell : leafCluster.getAllNonZeroCells()) {
-                                final BlockPos delPos = pos.offset(cell.getPos());
+                                final BlockPos delPos = pos.add(cell.getPos());
                                 if (safeBounds.inBounds(delPos, false)) {
                                     final BlockState leavesState = world.getBlockState(delPos);
                                     if (TreeHelper.isLeaves(leavesState)) {
                                         final DynamicLeavesBlock leavesBlock = (DynamicLeavesBlock) leavesState.getBlock();
                                         if (leavesProperties.getFamily() == leavesBlock.getProperties(leavesState).getFamily()) {
-                                            world.setBlock(delPos, BlockStates.AIR, 2);
+                                            world.setBlockState(delPos, BlockStates.AIR, 2);
                                         }
                                     }
                                 }
@@ -326,7 +326,7 @@ public class JoCode {
                     });
                 }
 
-                world.setBlock(pos, BlockStates.AIR, 2);
+                world.setBlockState(pos, BlockStates.AIR, 2);
             }
         }
 
@@ -354,7 +354,7 @@ public class JoCode {
      * @param disabled
      * @return
      */
-    protected int generateFork(LevelAccessor world, Species species, int codePos, BlockPos pos, boolean disabled) {
+    protected int generateFork(WorldAccess world, Species species, int codePos, BlockPos pos, boolean disabled) {
         while (codePos < instructions.length) {
             final int code = this.getCode(codePos);
 
@@ -365,8 +365,8 @@ public class JoCode {
                 case RETURN_CODE:
                     return codePos + 1;
                 default:
-                    final Direction dir = Direction.from3DDataValue(code);
-                    pos = pos.relative(dir);
+                    final Direction dir = Direction.byId(code);
+                    pos = pos.offset(dir);
                     if (!disabled) {
                         disabled = this.setBlockForGeneration(world, species, pos, dir, careful, codePos + 1 == instructions.length);
                     }
@@ -378,7 +378,7 @@ public class JoCode {
         return codePos;
     }
 
-    protected boolean setBlockForGeneration(LevelAccessor world, Species species, BlockPos pos, Direction dir, boolean careful, @SuppressWarnings("unused") boolean isLast) {
+    protected boolean setBlockForGeneration(WorldAccess world, Species species, BlockPos pos, Direction dir, boolean careful, @SuppressWarnings("unused") boolean isLast) {
         if (isFreeToSetBlock(world, pos) && (!careful || this.isClearOfNearbyBranches(world, pos, dir.getOpposite()))) {
             species.getFamily().getBranchForPlacement(world,species,pos).ifPresent(branch ->
                     branch.setRadius(world, pos, species.getFamily().getPrimaryThickness(), null, careful ? 3 : 2)
@@ -388,12 +388,12 @@ public class JoCode {
         return true;
     }
 
-    protected boolean isFreeToSetBlock(LevelAccessor level, BlockPos pos) {
-        if (TreeFeature.validTreePos(level, pos) || level.isStateAtPosition(pos, state -> state.is(BlockTags.LOGS)))
+    protected boolean isFreeToSetBlock(WorldAccess level, BlockPos pos) {
+        if (TreeFeature.canReplace(level, pos) || level.testBlockState(pos, state -> state.isIn(BlockTags.LOGS)))
             return true;
 
         BlockState blockState = level.getBlockState(pos);
-        return blockState.getMaterial().isReplaceable() && blockState.getMaterial().isLiquid() || blockState.is(DTBlockTags.FOLIAGE) || blockState.is(BlockTags.FLOWERS);
+        return blockState.getMaterial().isReplaceable() && blockState.getMaterial().isLiquid() || blockState.isIn(DTBlockTags.FOLIAGE) || blockState.isIn(BlockTags.FLOWERS);
     }
 
     /**
@@ -446,9 +446,9 @@ public class JoCode {
         leafMap.setCenter(saveCenter);
     }
 
-    protected boolean isClearOfNearbyBranches(LevelAccessor world, BlockPos pos, Direction except) {
+    protected boolean isClearOfNearbyBranches(WorldAccess world, BlockPos pos, Direction except) {
         for (Direction dir : Direction.values()) {
-            if (dir != except && TreeHelper.getBranch(world.getBlockState(pos.relative(dir))) != null) {
+            if (dir != except && TreeHelper.getBranch(world.getBlockState(pos.offset(dir))) != null) {
                 return false;
             }
         }
@@ -456,20 +456,20 @@ public class JoCode {
         return true;
     }
 
-    protected void addSnow(SimpleVoxmap leafMap, LevelAccessor world, BlockPos rootPos, Holder<Biome> biome) {
-        if (biome.value().getBaseTemperature() >= 0.4f) {
+    protected void addSnow(SimpleVoxmap leafMap, WorldAccess world, BlockPos rootPos, RegistryEntry<Biome> biome) {
+        if (biome.value().getTemperature() >= 0.4f) {
             return;
         }
 
-        for (BlockPos.MutableBlockPos top : leafMap.getTops()) {
-            if (world.getUncachedNoiseBiome(rootPos.getX() >> 2, rootPos.getY() >> 2, rootPos.getZ() >> 2).value().shouldSnow(world, rootPos)) {
-                final BlockPos.MutableBlockPos iPos = new BlockPos.MutableBlockPos(top.getX(), top.getY(), top.getZ());
+        for (BlockPos.Mutable top : leafMap.getTops()) {
+            if (world.getGeneratorStoredBiome(rootPos.getX() >> 2, rootPos.getY() >> 2, rootPos.getZ() >> 2).value().canSetSnow(world, rootPos)) {
+                final BlockPos.Mutable iPos = new BlockPos.Mutable(top.getX(), top.getY(), top.getZ());
                 int yOffset = 0;
 
                 do {
                     final BlockState state = world.getBlockState(iPos);
                     if (state.getMaterial() == Material.AIR) {
-                        world.setBlock(iPos, Blocks.SNOW.defaultBlockState(), 2);
+                        world.setBlockState(iPos, Blocks.SNOW.getDefaultState(), 2);
                         break;
                     } else if (state.getBlock() == Blocks.SNOW) {
                         break;
@@ -510,10 +510,10 @@ public class JoCode {
         return encode(instructions);
     }
 
-    public Component getTextComponent() {
-        return Component.literal(this.toString()).withStyle(style ->
-                style.withColor(ChatFormatting.AQUA).withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, this.toString()))
-                        .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("chat.copy.click")))
+    public Text getTextComponent() {
+        return Text.literal(this.toString()).styled(style ->
+                style.withColor(Formatting.AQUA).withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, this.toString()))
+                        .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable("chat.copy.click")))
         );
     }
 

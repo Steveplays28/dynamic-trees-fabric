@@ -5,16 +5,15 @@ import io.github.steveplays28.dynamictreesfabric.data.DTBlockTags;
 import io.github.steveplays28.dynamictreesfabric.data.DTItemTags;
 import io.github.steveplays28.dynamictreesfabric.trees.Family;
 import io.github.steveplays28.dynamictreesfabric.util.BlockBounds;
-import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagKey;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.SoundType;
-import net.minecraft.world.level.material.Material;
-
 import java.util.Collections;
 import java.util.List;
+import net.minecraft.block.Block;
+import net.minecraft.block.Material;
+import net.minecraft.item.Item;
+import net.minecraft.registry.tag.TagKey;
+import net.minecraft.sound.BlockSoundGroup;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.math.Direction;
 
 /**
  * @author Harley O'Connor
@@ -23,7 +22,7 @@ public class NetherFungusFamily extends Family {
 
     public static final TypedRegistry.EntryType<Family> TYPE = TypedRegistry.newType(NetherFungusFamily::new);
 
-    public NetherFungusFamily(ResourceLocation name) {
+    public NetherFungusFamily(Identifier name) {
         super(name);
     }
 
@@ -43,8 +42,8 @@ public class NetherFungusFamily extends Family {
     }
 
     @Override
-    public SoundType getDefaultBranchSoundType() {
-        return SoundType.STEM;
+    public BlockSoundGroup getDefaultBranchSoundType() {
+        return BlockSoundGroup.NETHER_STEM;
     }
 
     @Override

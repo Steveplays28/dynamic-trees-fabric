@@ -3,16 +3,15 @@ package io.github.steveplays28.dynamictreesfabric.tileentity;
 import io.github.steveplays28.dynamictreesfabric.api.TreeRegistry;
 import io.github.steveplays28.dynamictreesfabric.init.DTRegistries;
 import io.github.steveplays28.dynamictreesfabric.trees.Species;
-import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.Connection;
-import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.state.BlockState;
-
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.network.ClientConnection;
+import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockPos;
 
 /**
  * A TileEntity that holds a species value.
@@ -33,38 +32,38 @@ public class SpeciesTileEntity extends BlockEntity {
 
     public void setSpecies(Species species) {
         this.species = species;
-        this.setChanged();
+        this.markDirty();
     }
 
     @Override
-    public void load(CompoundTag tag) {
+    public void readNbt(NbtCompound tag) {
         if (tag.contains("species")) {
-            ResourceLocation speciesName = new ResourceLocation(tag.getString("species"));
+            Identifier speciesName = new Identifier(tag.getString("species"));
             species = TreeRegistry.findSpecies(speciesName);
         }
-        super.load( tag);
+        super.readNbt( tag);
     }
 
     @Nonnull
     @Override
-    public void saveAdditional(CompoundTag tag) {
+    public void writeNbt(NbtCompound tag) {
         tag.putString("species", species.getRegistryName().toString());
     }
 
     @Nullable
-    public ClientboundBlockEntityDataPacket getUpdatePacket() {
-        return ClientboundBlockEntityDataPacket.create(this);
+    public BlockEntityUpdateS2CPacket toUpdatePacket() {
+        return BlockEntityUpdateS2CPacket.create(this);
     }
 
     @Override
-    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt) {
-        load(pkt.getTag());
+    public void onDataPacket(ClientConnection net, BlockEntityUpdateS2CPacket pkt) {
+        readNbt(pkt.getNbt());
     }
 
     @Override
-    public CompoundTag getUpdateTag() {
-        CompoundTag tag = super.getUpdateTag();
-        this.saveAdditional(tag);
+    public NbtCompound toInitialChunkDataNbt() {
+        NbtCompound tag = super.toInitialChunkDataNbt();
+        this.writeNbt(tag);
         return tag;
     }
 

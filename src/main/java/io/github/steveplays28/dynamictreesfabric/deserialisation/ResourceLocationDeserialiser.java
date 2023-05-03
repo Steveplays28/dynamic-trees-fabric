@@ -2,13 +2,13 @@ package io.github.steveplays28.dynamictreesfabric.deserialisation;
 
 import io.github.steveplays28.dynamictreesfabric.deserialisation.result.Result;
 import com.google.gson.JsonElement;
-import net.minecraft.resources.ResourceLocation;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Locale;
+import net.minecraft.util.Identifier;
 
 /**
- * An {@link JsonDeserialiser} for {@link ResourceLocation}s, but if no namespace is defined it defaults to the
+ * An {@link JsonDeserialiser} for {@link Identifier}s, but if no namespace is defined it defaults to the
  * specified {@link #defaultNamespace} given in {@link #ResourceLocationDeserialiser(String)}.
  * <p>
  * Main instance stored in {@link JsonDeserialisers#RESOURCE_LOCATION} for fetching resource locations with default
@@ -16,7 +16,7 @@ import java.util.Locale;
  *
  * @author Harley O'Connor
  */
-public final class ResourceLocationDeserialiser implements JsonDeserialiser<ResourceLocation> {
+public final class ResourceLocationDeserialiser implements JsonDeserialiser<Identifier> {
 
     private final String defaultNamespace;
 
@@ -25,7 +25,7 @@ public final class ResourceLocationDeserialiser implements JsonDeserialiser<Reso
     }
 
     @Override
-    public Result<ResourceLocation, JsonElement> deserialise(JsonElement jsonElement) {
+    public Result<Identifier, JsonElement> deserialise(JsonElement jsonElement) {
         return JsonDeserialisers.STRING.deserialise(jsonElement)
                 .map(string -> string.toLowerCase(Locale.ROOT))
                 .mapIfValid(ResourceLocationDeserialiser::isValidResourceLocation,
@@ -34,12 +34,12 @@ public final class ResourceLocationDeserialiser implements JsonDeserialiser<Reso
     }
 
     public static boolean isValidResourceLocation(String p_217855_0_) {
-        final String[] namespaceAndPath = ResourceLocation.decompose(p_217855_0_, ':');
-        return ResourceLocation.isValidNamespace(StringUtils.isEmpty(namespaceAndPath[0]) ? "minecraft" : namespaceAndPath[0])
-                && ResourceLocation.isValidPath(namespaceAndPath[1]);
+        final String[] namespaceAndPath = Identifier.split(p_217855_0_, ':');
+        return Identifier.isNamespaceValid(StringUtils.isEmpty(namespaceAndPath[0]) ? "minecraft" : namespaceAndPath[0])
+                && Identifier.isPathValid(namespaceAndPath[1]);
     }
 
-    private ResourceLocation decode(final String resLocStr) {
+    private Identifier decode(final String resLocStr) {
         final String[] namespaceAndPath = new String[]{this.defaultNamespace, resLocStr};
         final int colonIndex = resLocStr.indexOf(':');
         if (colonIndex >= 0) {
@@ -49,7 +49,7 @@ public final class ResourceLocationDeserialiser implements JsonDeserialiser<Reso
             }
         }
 
-        return new ResourceLocation(namespaceAndPath[0], namespaceAndPath[1]);
+        return new Identifier(namespaceAndPath[0], namespaceAndPath[1]);
     }
 
     public static ResourceLocationDeserialiser create() {

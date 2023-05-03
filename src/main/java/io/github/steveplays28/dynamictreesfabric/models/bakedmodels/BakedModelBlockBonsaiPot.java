@@ -3,17 +3,17 @@ package io.github.steveplays28.dynamictreesfabric.models.bakedmodels;
 import io.github.steveplays28.dynamictreesfabric.client.QuadManipulator;
 import io.github.steveplays28.dynamictreesfabric.tileentity.PottedSaplingTileEntity;
 import io.github.steveplays28.dynamictreesfabric.trees.Species;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.block.BlockRenderDispatcher;
-import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.renderer.block.model.ItemOverrides;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.core.Direction;
-import net.minecraft.util.RandomSource;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.Vec3;
+import net.minecraft.block.BlockState;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.render.block.BlockRenderManager;
+import net.minecraft.client.render.model.BakedModel;
+import net.minecraft.client.render.model.BakedQuad;
+import net.minecraft.client.render.model.json.ModelOverrideList;
+import net.minecraft.client.texture.Sprite;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.random.Random;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.model.IDynamicBakedModel;
@@ -38,7 +38,7 @@ public class BakedModelBlockBonsaiPot implements IDynamicBakedModel {
 
     @NotNull
     @Override
-    public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @NotNull RandomSource rand, @NotNull ModelData extraData, @Nullable RenderType renderType) {
+    public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @NotNull Random rand, @NotNull ModelData extraData, @Nullable RenderLayer renderType) {
         List<BakedQuad> quads = new ArrayList<>();
 
         if (side != null || state == null || !extraData.has(PottedSaplingTileEntity.SPECIES) || !extraData.has(PottedSaplingTileEntity.POT_MIMIC)) {
@@ -52,14 +52,14 @@ public class BakedModelBlockBonsaiPot implements IDynamicBakedModel {
             return quads;
         }
 
-        final BlockState saplingState = species.getSapling().get().defaultBlockState();
+        final BlockState saplingState = species.getSapling().get().getDefaultState();
 
-        BlockRenderDispatcher dispatcher = Minecraft.getInstance().getBlockRenderer();
-        BakedModel potModel = dispatcher.getBlockModel(potState);
-        BakedModel saplingModel = dispatcher.getBlockModel(saplingState);
+        BlockRenderManager dispatcher = MinecraftClient.getInstance().getBlockRenderManager();
+        BakedModel potModel = dispatcher.getModel(potState);
+        BakedModel saplingModel = dispatcher.getModel(saplingState);
 
         quads.addAll(potModel.getQuads(potState, side, rand, extraData, renderType));
-        quads.addAll(cachedSaplingQuads.computeIfAbsent(species, s -> QuadManipulator.getQuads(saplingModel, saplingState, new Vec3(0, 0.25, 0), rand, extraData)));
+        quads.addAll(cachedSaplingQuads.computeIfAbsent(species, s -> QuadManipulator.getQuads(saplingModel, saplingState, new Vec3d(0, 0.25, 0), rand, extraData)));
 
         return quads;
     }
@@ -85,13 +85,13 @@ public class BakedModelBlockBonsaiPot implements IDynamicBakedModel {
     }
 
     @Override
-    public TextureAtlasSprite getParticleIcon() {
-        return this.basePotModel.getParticleIcon();
+    public Sprite getParticleIcon() {
+        return this.basePotModel.getParticleSprite();
     }
 
     @Override
-    public ItemOverrides getOverrides() {
-        return ItemOverrides.EMPTY;
+    public ModelOverrideList getOverrides() {
+        return ModelOverrideList.EMPTY;
     }
 
 }

@@ -7,10 +7,10 @@ import io.github.steveplays28.dynamictreesfabric.blocks.leaves.LeavesProperties;
 import io.github.steveplays28.dynamictreesfabric.deserialisation.JsonHelper;
 import io.github.steveplays28.dynamictreesfabric.trees.Family;
 import io.github.steveplays28.dynamictreesfabric.trees.Species;
+import net.minecraft.block.Block;
+import net.minecraft.item.Item;
+import net.minecraft.util.Identifier;
 import com.google.gson.JsonObject;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.level.block.Block;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -28,7 +28,7 @@ public final class FamilyResourceLoader extends JsonRegistryResourceLoader<Famil
     @Override
     public void registerAppliers() {
         this.commonAppliers
-                .register("common_species", ResourceLocation.class, (family, registryName) -> {
+                .register("common_species", Identifier.class, (family, registryName) -> {
                     registryName = TreeRegistry.processResLoc(registryName);
                     Species.REGISTRY.runOnNextLock(Species.REGISTRY.generateIfValidRunnable(registryName,
                             family::setupCommonSpecies, setCommonWarn(family, registryName)));
@@ -70,7 +70,7 @@ public final class FamilyResourceLoader extends JsonRegistryResourceLoader<Famil
      * @param registryName the registry name of the requested family
      * @return a {@link Runnable} that logs the warning
      */
-    private static Runnable setCommonWarn(final Family family, final ResourceLocation registryName) {
+    private static Runnable setCommonWarn(final Family family, final Identifier registryName) {
         return () -> LOGGER.warn("Could not set common species for \"" + family + "\" as species with name  \"" +
                 registryName + "\" was not found.");
     }

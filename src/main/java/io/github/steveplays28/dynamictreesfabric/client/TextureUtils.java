@@ -1,9 +1,8 @@
 package io.github.steveplays28.dynamictreesfabric.client;
 
-import com.mojang.blaze3d.platform.NativeImage;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-
 import java.util.Arrays;
+import net.minecraft.client.texture.NativeImage;
+import net.minecraft.client.texture.Sprite;
 
 public class TextureUtils {
 
@@ -18,7 +17,7 @@ public class TextureUtils {
             pixels = new int[w * h];
         }
 
-        public PixelBuffer(TextureAtlasSprite sprite) {
+        public PixelBuffer(Sprite sprite) {
             this.w = sprite.getWidth();
             this.h = sprite.getHeight();
             pixels = new int[w * h];
@@ -30,7 +29,7 @@ public class TextureUtils {
 
         }
 
-        public PixelBuffer(TextureAtlasSprite sprite, boolean copy) {
+        public PixelBuffer(Sprite sprite, boolean copy) {
             this(sprite);
         }
 
@@ -44,7 +43,7 @@ public class TextureUtils {
             NativeImage image = new NativeImage(w, h, true);
             for (int x = 0; x < w; x++) {
                 for (int y = 0; y < h; y++) {
-                    image.setPixelRGBA(x, y, getPixel(x, y));
+                    image.setColor(x, y, getPixel(x, y));
                 }
             }
             return image;

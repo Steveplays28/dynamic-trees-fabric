@@ -5,12 +5,10 @@ import io.github.steveplays28.dynamictreesfabric.api.resource.ResourceCollector;
 import io.github.steveplays28.dynamictreesfabric.deserialisation.JsonHelper;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.Resource;
-import net.minecraft.util.GsonHelper;
-
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import net.minecraft.resource.Resource;
+import net.minecraft.util.Identifier;
 import java.io.IOException;
 import java.io.Reader;
 
@@ -32,14 +30,14 @@ public final class JsonResourcePreparer extends AbstractResourcePreparer<JsonEle
 
 
     @Override
-    protected void readAndPutResource(Resource resource, ResourceLocation resourceName) throws PreparationException, IOException {
+    protected void readAndPutResource(Resource resource, Identifier resourceName) throws PreparationException, IOException {
         final JsonElement jsonElement = readResource(resource);
         this.resourceCollector.put(new DTResource<>(resourceName, jsonElement));
     }
 
     @Nonnull
     static JsonElement readResource(Resource resource) throws PreparationException, IOException {
-        final Reader reader = resource.openAsReader();
+        final Reader reader = resource.getReader();
         final JsonElement json = tryParseJson(reader);
 
         if (json == null) {
@@ -51,7 +49,7 @@ public final class JsonResourcePreparer extends AbstractResourcePreparer<JsonEle
     @Nullable
     private static JsonElement tryParseJson(Reader reader) throws PreparationException {
         try {
-            return GsonHelper.fromJson(JsonHelper.getGson(), reader, JsonElement.class);
+            return net.minecraft.util.JsonHelper.deserialize(JsonHelper.getGson(), reader, JsonElement.class);
         } catch (JsonParseException e) {
             throw new PreparationException(e);
         }

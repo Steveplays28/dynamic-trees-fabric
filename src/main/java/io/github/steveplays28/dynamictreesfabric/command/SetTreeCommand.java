@@ -7,14 +7,13 @@ import io.github.steveplays28.dynamictreesfabric.util.Null;
 import io.github.steveplays28.dynamictreesfabric.util.SafeChunkBounds;
 import io.github.steveplays28.dynamictreesfabric.worldgen.JoCode;
 import com.mojang.brigadier.builder.ArgumentBuilder;
-import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.SharedSuggestionProvider;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerLevel;
-
 import java.util.stream.Collectors;
+import net.minecraft.command.CommandSource;
+import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.text.Text;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 
 import static io.github.steveplays28.dynamictreesfabric.command.CommandConstants.*;
 
@@ -33,10 +32,10 @@ public final class SetTreeCommand extends SubCommand {
     private static final int DEFAULT_FERTILITY = 0;
 
     @Override
-    public ArgumentBuilder<CommandSourceStack, ?> registerArgument() {
+    public ArgumentBuilder<ServerCommandSource, ?> registerArgument() {
         return blockPosArgument().then(speciesArgument().executes(context -> this.setTree(context.getSource(), blockPosArgument(context),
                         speciesArgument(context), JO_CODE, DEFAULT_TURNS, DEFAULT_FERTILITY))
-                .then(stringArgument(JO_CODE).suggests(((context, builder) -> SharedSuggestionProvider.suggest(speciesArgument(context).getJoCodes()
+                .then(stringArgument(JO_CODE).suggests(((context, builder) -> CommandSource.suggestMatching(speciesArgument(context).getJoCodes()
                                 .stream().map(JoCode::toString).collect(Collectors.toList()), builder)))
                         .executes(context -> this.setTree(context.getSource(), blockPosArgument(context), speciesArgument(context),
                                 stringArgument(context, JO_CODE), DEFAULT_TURNS, DEFAULT_FERTILITY))
@@ -48,13 +47,13 @@ public final class SetTreeCommand extends SubCommand {
                                                 stringArgument(context, JO_CODE), intArgument(context, TURNS), intArgument(context, FERTILITY)))))));
     }
 
-    private int setTree(final CommandSourceStack source, final BlockPos rootPos, final Species species, final String codeString, final int turns, final int fertility) {
-        final ServerLevel world = source.getLevel();
-        final JoCode joCode = species.getJoCode(codeString).rotate(Direction.from2DDataValue((3 - (turns % 4)) + 3)).setCareful(true);
+    private int setTree(final ServerCommandSource source, final BlockPos rootPos, final Species species, final String codeString, final int turns, final int fertility) {
+        final ServerWorld world = source.getWorld();
+        final JoCode joCode = species.getJoCode(codeString).rotate(Direction.fromHorizontal((3 - (turns % 4)) + 3)).setCareful(true);
 
-        sendSuccessAndLog(source, Component.translatable("commands.dynamictrees.success.set_tree", CommandHelper.posComponent(rootPos),
+        sendSuccessAndLog(source, Text.translatable("commands.dynamictrees.success.set_tree", CommandHelper.posComponent(rootPos),
                 species.getTextComponent(), joCode.getTextComponent()));
-        joCode.generate(world, world, species, rootPos, source.getLevel().getBiome(rootPos),
+        joCode.generate(world, world, species, rootPos, source.getWorld().getBiome(rootPos),
                 Direction.SOUTH, 8, SafeChunkBounds.ANY, false);
 
         // Try to set the fertility.

@@ -9,19 +9,18 @@ import io.github.steveplays28.dynamictreesfabric.blocks.branches.SurfaceRootBloc
 import io.github.steveplays28.dynamictreesfabric.blocks.rootyblocks.RootyBlock;
 import io.github.steveplays28.dynamictreesfabric.entities.FallingTreeEntity;
 import io.github.steveplays28.dynamictreesfabric.systems.nodemappers.CollectorNode;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.SnowLayerBlock;
-import net.minecraft.world.level.block.VineBlock;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.LevelChunk;
-import net.minecraft.world.level.chunk.LevelChunkSection;
-
 import javax.annotation.Nullable;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.SnowBlock;
+import net.minecraft.block.VineBlock;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.math.Direction;
+import net.minecraft.world.World;
+import net.minecraft.world.chunk.ChunkSection;
+import net.minecraft.world.chunk.WorldChunk;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Optional;
@@ -41,7 +40,7 @@ public class ChunkTreeHelper {
      * @param chunkPos the chunk position where the effect is intended
      * @param radius   radius of effect in chunk width units
      */
-    public static int removeOrphanedBranchNodes(Level level, @Nullable ChunkPos chunkPos, int radius) {
+    public static int removeOrphanedBranchNodes(World level, @Nullable ChunkPos chunkPos, int radius) {
         if (chunkPos == null) {
             throw new NullPointerException("Null chunk position");
         }
@@ -60,7 +59,7 @@ public class ChunkTreeHelper {
 
             // Test if the branch has a root node attached to it
             BlockPos rootPos = TreeHelper.findRootNode(level, pos);
-            if (rootPos == BlockPos.ZERO) { // If the root position is the ORIGIN object it means that no root block was found
+            if (rootPos == BlockPos.ORIGIN) { // If the root position is the ORIGIN object it means that no root block was found
                 // If the root node isn't found then all nodes are orphan.  Destroy the entire network.
                 doTreeDestroy(level, branchBlock.get(), pos);
                 orphansCleared++;
@@ -76,7 +75,7 @@ public class ChunkTreeHelper {
 
             // Rooty block confirmed, build details about the trunk coming out of it
             Direction trunkDir = rootyBlock.get().getTrunkDirection(level, rootPos);
-            BlockPos trunkPos = rootPos.relative(trunkDir);
+            BlockPos trunkPos = rootPos.offset(trunkDir);
             BlockState trunkState = level.getBlockState(trunkPos);
             Optional<BranchBlock> trunk = TreeHelper.getBranchOpt(trunkState);
 
@@ -99,7 +98,7 @@ public class ChunkTreeHelper {
         return orphansCleared;
     }
 
-    public static int removeAllBranchesFromChunk(Level level, @Nullable ChunkPos chunkPos, int radius) {
+    public static int removeAllBranchesFromChunk(World level, @Nullable ChunkPos chunkPos, int radius) {
         if (chunkPos == null) {
             throw new NullPointerException("Null chunk position");
         }
@@ -118,29 +117,29 @@ public class ChunkTreeHelper {
         return treesCleared.get();
     }
 
-    public static BlockBounds getEffectiveBlockBounds(Level level, ChunkPos chunkPos, int radius) {
-        LevelChunk chunk = level.getChunk(chunkPos.x, chunkPos.z);
+    public static BlockBounds getEffectiveBlockBounds(World level, ChunkPos chunkPos, int radius) {
+        WorldChunk chunk = level.getChunk(chunkPos.x, chunkPos.z);
         BlockBounds bounds = new BlockBounds(level, chunkPos);
 
         bounds.shrink(Direction.UP, (level.getHeight() - 1) - (getTopFilledSegment(chunk) + 16));
-        for (Direction dir : Direction.Plane.HORIZONTAL.stream().toList()) {
+        for (Direction dir : Direction.Type.HORIZONTAL.stream().toList()) {
             bounds.expand(dir, radius * CHUNK_WIDTH);
         }
 
         return bounds;
     }
 
-    private static int getTopFilledSegment(final LevelChunk chunk) {
-        final LevelChunkSection lastChunkSection = getLastSection(chunk);
-        return lastChunkSection == null ? 0 : lastChunkSection.bottomBlockY();
+    private static int getTopFilledSegment(final WorldChunk chunk) {
+        final ChunkSection lastChunkSection = getLastSection(chunk);
+        return lastChunkSection == null ? 0 : lastChunkSection.getYOffset();
     }
 
     @Nullable
-    private static LevelChunkSection getLastSection(final LevelChunk chunk) {
-        final LevelChunkSection[] sections = chunk.getSections();
+    private static ChunkSection getLastSection(final WorldChunk chunk) {
+        final ChunkSection[] sections = chunk.getSectionArray();
 
         for (int i = sections.length - 1; i >= 0; i--) {
-            if (sections[i] != null && !sections[i].hasOnlyAir()) {
+            if (sections[i] != null && !sections[i].isEmpty()) {
                 return sections[i];
             }
         }
@@ -148,7 +147,7 @@ public class ChunkTreeHelper {
         return null;
     }
 
-    private static void doTreeDestroy(Level level, BranchBlock branchBlock, BlockPos pos) {
+    private static void doTreeDestroy(World level, BranchBlock branchBlock, BlockPos pos) {
         BranchDestructionData destroyData = branchBlock.destroyBranchFromNode(level, pos, Direction.DOWN, true, null);
         destroyData.leavesDrops.clear(); // Prevent dropped seeds from planting themselves again
         FallingTreeEntity.dropTree(level, destroyData, new ArrayList<>(0),
@@ -160,10 +159,10 @@ public class ChunkTreeHelper {
     private static final byte TREE = (byte) 1;
     private static final byte SURR = (byte) 2;
 
-    public static void cleanupNeighbors(Level level, BranchDestructionData destroyData) {
+    public static void cleanupNeighbors(World level, BranchDestructionData destroyData) {
 
         // Only run on the server since the block updates will come from the server anyway
-        if (level.isClientSide) {
+        if (level.isClient) {
             return;
         }
 
@@ -184,7 +183,7 @@ public class ChunkTreeHelper {
         SimpleVoxmap outlineVoxmap = new SimpleVoxmap(treeVoxmap);
         treeVoxmap.getAllNonZero(TREE).forEach(pos -> {
             for (Direction dir : Direction.values()) {
-                outlineVoxmap.setVoxel(pos.move(dir.getNormal()), SURR);
+                outlineVoxmap.setVoxel(pos.move(dir.getVector()), SURR);
             }
         });
 
@@ -198,7 +197,7 @@ public class ChunkTreeHelper {
     /**
      * Cleanup blocks that are attached(or setting on) various parts of the tree
      */
-    public static void cleanupBlock(Level level, BlockPos pos) {
+    public static void cleanupBlock(World level, BlockPos pos) {
         BlockState state = level.getBlockState(pos);
         if (state.getBlock() == Blocks.AIR) { // This is the most likely case so bail early
             return;
@@ -207,9 +206,9 @@ public class ChunkTreeHelper {
         Block block = state.getBlock();
 
         // Cleanup snow layers, hanging fruit(apples), trunk fruit(cocoa), and surface roots.
-        if (block instanceof SnowLayerBlock || block instanceof FruitBlock || block instanceof DynamicCocoaBlock ||
+        if (block instanceof SnowBlock || block instanceof FruitBlock || block instanceof DynamicCocoaBlock ||
                 block instanceof SurfaceRootBlock) {
-            level.setBlock(pos, BlockStates.AIR, Block.UPDATE_CLIENTS);
+            level.setBlockState(pos, BlockStates.AIR, Block.NOTIFY_LISTENERS);
         } else if (block instanceof VineBlock) {
             // Cleanup vines
             cleanupVines(level, pos);
@@ -219,11 +218,11 @@ public class ChunkTreeHelper {
     /**
      * Cleanup vines starting the the top and moving down until a vine block is no longer found
      */
-    public static void cleanupVines(Level level, BlockPos pos) {
-        BlockPos.MutableBlockPos mblock = pos.mutable(); // Mutable because ZOOM!
+    public static void cleanupVines(World level, BlockPos pos) {
+        BlockPos.Mutable mblock = pos.mutableCopy(); // Mutable because ZOOM!
         while (level.getBlockState(mblock)
                 .getBlock() instanceof VineBlock) {// BlockVine instance helps with modded vine types
-            level.setBlock(mblock, BlockStates.AIR, Block.UPDATE_CLIENTS);
+            level.setBlockState(mblock, BlockStates.AIR, Block.NOTIFY_LISTENERS);
             mblock.move(Direction.DOWN);
         }
     }

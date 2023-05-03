@@ -2,13 +2,13 @@ package io.github.steveplays28.dynamictreesfabric.systems.genfeatures.context;
 
 import io.github.steveplays28.dynamictreesfabric.blocks.rootyblocks.RootyBlock;
 import io.github.steveplays28.dynamictreesfabric.trees.Species;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.Level;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 
 /**
  * @author Harley O'Connor
  */
-public class PostGrowContext extends GenerationContext<Level> {
+public class PostGrowContext extends GenerationContext<World> {
 
     private final BlockPos treePos;
     private final int fertility;
@@ -27,7 +27,7 @@ public class PostGrowContext extends GenerationContext<Level> {
      *                  otherwise this member is being used to grow a tree with a growth accelerant like bonemeal or the
      *                  potion of burgeoning.
      */
-    public PostGrowContext(Level world, BlockPos rootPos, Species species, BlockPos treePos, int fertility, boolean natural) {
+    public PostGrowContext(World world, BlockPos rootPos, Species species, BlockPos treePos, int fertility, boolean natural) {
         super(world, rootPos, species);
         this.treePos = treePos;
         this.fertility = fertility;

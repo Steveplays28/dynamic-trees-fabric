@@ -1,17 +1,17 @@
 package io.github.steveplays28.dynamictreesfabric.client;
 
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.VertexFormatElement;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.client.resources.model.ModelManager;
-import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.RandomSource;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.Vec3;
+import net.minecraft.block.BlockState;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.render.VertexFormatElement;
+import net.minecraft.client.render.VertexFormats;
+import net.minecraft.client.render.model.BakedModel;
+import net.minecraft.client.render.model.BakedModelManager;
+import net.minecraft.client.render.model.BakedQuad;
+import net.minecraft.client.texture.Sprite;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.random.Random;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.model.data.ModelData;
@@ -27,30 +27,30 @@ public class QuadManipulator {
     public static final Direction[] everyFace = {Direction.DOWN, Direction.UP, Direction.NORTH, Direction.SOUTH, Direction.WEST, Direction.EAST, null};
 
     public static List<BakedQuad> getQuads(BakedModel modelIn, BlockState stateIn, ModelData modelData) {
-        return getQuads(modelIn, stateIn, Vec3.ZERO, everyFace, RandomSource.create(), modelData);
+        return getQuads(modelIn, stateIn, Vec3d.ZERO, everyFace, Random.create(), modelData);
     }
 
     public static List<BakedQuad> getQuads(BakedModel modelIn, BlockState stateIn, Direction[] sides, ModelData modelData) {
-        return getQuads(modelIn, stateIn, Vec3.ZERO, sides, RandomSource.create(), modelData);
+        return getQuads(modelIn, stateIn, Vec3d.ZERO, sides, Random.create(), modelData);
     }
 
-    public static List<BakedQuad> getQuads(BakedModel modelIn, BlockState stateIn, RandomSource rand, ModelData modelData) {
-        return getQuads(modelIn, stateIn, Vec3.ZERO, everyFace, rand, modelData);
+    public static List<BakedQuad> getQuads(BakedModel modelIn, BlockState stateIn, Random rand, ModelData modelData) {
+        return getQuads(modelIn, stateIn, Vec3d.ZERO, everyFace, rand, modelData);
     }
 
-    public static List<BakedQuad> getQuads(BakedModel modelIn, BlockState stateIn, Vec3 offset, RandomSource rand, ModelData modelData) {
+    public static List<BakedQuad> getQuads(BakedModel modelIn, BlockState stateIn, Vec3d offset, Random rand, ModelData modelData) {
         return getQuads(modelIn, stateIn, offset, everyFace, rand, modelData);
     }
 
-    public static List<BakedQuad> getQuads(BakedModel modelIn, BlockState stateIn, Vec3 offset, ModelData modelData) {
-        return getQuads(modelIn, stateIn, offset, everyFace, RandomSource.create(), modelData);
+    public static List<BakedQuad> getQuads(BakedModel modelIn, BlockState stateIn, Vec3d offset, ModelData modelData) {
+        return getQuads(modelIn, stateIn, offset, everyFace, Random.create(), modelData);
     }
 
-    public static List<BakedQuad> getQuads(BakedModel modelIn, BlockState stateIn, Vec3 offset, Direction[] sides, ModelData modelData) {
-        return getQuads(modelIn, stateIn, offset, sides, RandomSource.create(), modelData);
+    public static List<BakedQuad> getQuads(BakedModel modelIn, BlockState stateIn, Vec3d offset, Direction[] sides, ModelData modelData) {
+        return getQuads(modelIn, stateIn, offset, sides, Random.create(), modelData);
     }
 
-    public static List<BakedQuad> getQuads(BakedModel modelIn, BlockState stateIn, Vec3 offset, Direction[] sides, RandomSource rand, ModelData modelData) {
+    public static List<BakedQuad> getQuads(BakedModel modelIn, BlockState stateIn, Vec3d offset, Direction[] sides, Random rand, ModelData modelData) {
         ArrayList<BakedQuad> outQuads = new ArrayList<>();
 
         if (stateIn != null) {
@@ -59,19 +59,19 @@ public class QuadManipulator {
             }
         }
 
-        return offset.equals(Vec3.ZERO) ? outQuads : moveQuads(outQuads, offset);
+        return offset.equals(Vec3d.ZERO) ? outQuads : moveQuads(outQuads, offset);
     }
 
-    public static List<BakedQuad> moveQuads(List<BakedQuad> inQuads, Vec3 offset) {
+    public static List<BakedQuad> moveQuads(List<BakedQuad> inQuads, Vec3d offset) {
         ArrayList<BakedQuad> outQuads = new ArrayList<>();
 
         for (BakedQuad inQuad : inQuads) {
-            BakedQuad quadCopy = new BakedQuad(inQuad.getVertices().clone(), inQuad.getTintIndex(), inQuad.getDirection(), inQuad.getSprite(), inQuad.isShade());
-            int[] vertexData = quadCopy.getVertices();
-            for (int i = 0; i < vertexData.length; i += DefaultVertexFormat.BLOCK.getIntegerSize()) {
+            BakedQuad quadCopy = new BakedQuad(inQuad.getVertexData().clone(), inQuad.getColorIndex(), inQuad.getFace(), inQuad.getSprite(), inQuad.hasShade());
+            int[] vertexData = quadCopy.getVertexData();
+            for (int i = 0; i < vertexData.length; i += VertexFormats.POSITION_COLOR_TEXTURE_LIGHT_NORMAL.getVertexSizeInteger()) {
                 int pos = 0;
-                for (VertexFormatElement vfe : DefaultVertexFormat.BLOCK.getElements()) {
-                    if (vfe.getUsage() == VertexFormatElement.Usage.POSITION) {
+                for (VertexFormatElement vfe : VertexFormats.POSITION_COLOR_TEXTURE_LIGHT_NORMAL.getElements()) {
+                    if (vfe.getType() == VertexFormatElement.Type.POSITION) {
                         float x = Float.intBitsToFloat(vertexData[i + pos + 0]);
                         float y = Float.intBitsToFloat(vertexData[i + pos + 1]);
                         float z = Float.intBitsToFloat(vertexData[i + pos + 2]);
@@ -83,7 +83,7 @@ public class QuadManipulator {
                         vertexData[i + pos + 2] = Float.floatToIntBits(z);
                         break;
                     }
-                    pos += vfe.getByteSize() / 4;//Size is always in bytes but we are dealing with an array of int32s
+                    pos += vfe.getByteLength() / 4;//Size is always in bytes but we are dealing with an array of int32s
                 }
             }
 
@@ -106,28 +106,28 @@ public class QuadManipulator {
         return model;
     }
 
-    public static ModelManager getModelManager() {
-        return Minecraft.getInstance().getModelManager();
+    public static BakedModelManager getModelManager() {
+        return MinecraftClient.getInstance().getBakedModelManager();
     }
 
     public static BakedModel getModel(BlockState state) {
-        return Minecraft.getInstance().getBlockRenderer().getBlockModel(state);//This gives us earlier access
+        return MinecraftClient.getInstance().getBlockRenderManager().getModel(state);//This gives us earlier access
     }
 
-    public static ResourceLocation getModelTexture(BakedModel model, Function<ResourceLocation, TextureAtlasSprite> bakedTextureGetter, BlockState state, Direction dir) {
+    public static Identifier getModelTexture(BakedModel model, Function<Identifier, Sprite> bakedTextureGetter, BlockState state, Direction dir) {
 
         float[] uvs = getSpriteUVFromBlockState(state, dir);
 
         if (uvs != null) {
-            List<TextureAtlasSprite> sprites = new ArrayList<>();
+            List<Sprite> sprites = new ArrayList<>();
 
             float closest = Float.POSITIVE_INFINITY;
-            ResourceLocation closestTex = new ResourceLocation("missingno");
+            Identifier closestTex = new Identifier("missingno");
             if (model != null) {
-                ResourceLocation tex = model.getParticleIcon(ModelData.EMPTY).getName();
-                TextureAtlasSprite tas = bakedTextureGetter.apply(tex);
-                float u = tas.getU(8);
-                float v = tas.getV(8);
+                Identifier tex = model.getParticleSprite(ModelData.EMPTY).getName();
+                Sprite tas = bakedTextureGetter.apply(tex);
+                float u = tas.getFrameU(8);
+                float v = tas.getFrameV(8);
                 sprites.add(tas);
                 float du = u - uvs[0];
                 float dv = v - uvs[1];
@@ -145,29 +145,29 @@ public class QuadManipulator {
     }
 
     public static float[] getSpriteUVFromBlockState(BlockState state, Direction side) {
-        BakedModel bakedModel = getModelManager().getBlockModelShaper().getBlockModel(state);
+        BakedModel bakedModel = getModelManager().getBlockModels().getModel(state);
         List<BakedQuad> quads = new ArrayList<>();
-        RandomSource random = RandomSource.create();
+        Random random = Random.create();
         quads.addAll(bakedModel.getQuads(state, side, random, ModelData.EMPTY, null));
         quads.addAll(bakedModel.getQuads(state, null, random, ModelData.EMPTY, null));
 
-        Optional<BakedQuad> quad = quads.stream().filter(q -> q.getDirection() == side).findFirst();
+        Optional<BakedQuad> quad = quads.stream().filter(q -> q.getFace() == side).findFirst();
 
         if (quad.isPresent()) {
 
             float u = 0.0f;
             float v = 0.0f;
 
-            int[] vertexData = quad.get().getVertices();
+            int[] vertexData = quad.get().getVertexData();
             int numVertices = 0;
-            for (int i = 0; i < vertexData.length; i += DefaultVertexFormat.BLOCK.getIntegerSize()) {
+            for (int i = 0; i < vertexData.length; i += VertexFormats.POSITION_COLOR_TEXTURE_LIGHT_NORMAL.getVertexSizeInteger()) {
                 int pos = 0;
-                for (VertexFormatElement vfe : DefaultVertexFormat.BLOCK.getElements()) {
-                    if (vfe.getUsage() == VertexFormatElement.Usage.UV) {
+                for (VertexFormatElement vfe : VertexFormats.POSITION_COLOR_TEXTURE_LIGHT_NORMAL.getElements()) {
+                    if (vfe.getType() == VertexFormatElement.Type.UV) {
                         u += Float.intBitsToFloat(vertexData[i + pos + 0]);
                         v += Float.intBitsToFloat(vertexData[i + pos + 1]);
                     }
-                    pos += vfe.getByteSize() / 4;//Size is always in bytes but we are dealing with an array of int32s
+                    pos += vfe.getByteLength() / 4;//Size is always in bytes but we are dealing with an array of int32s
                 }
                 numVertices++;
             }

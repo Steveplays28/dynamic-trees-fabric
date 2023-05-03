@@ -2,9 +2,9 @@ package io.github.steveplays28.dynamictreesfabric.event;
 
 import io.github.steveplays28.dynamictreesfabric.trees.Species;
 import io.github.steveplays28.dynamictreesfabric.util.SafeChunkBounds;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.block.BlockState;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.WorldAccess;
 import net.minecraftforge.eventbus.api.Event;
 
 import java.util.List;
@@ -17,14 +17,14 @@ import java.util.List;
  */
 public class SpeciesPostGenerationEvent extends Event {
 
-    private final LevelAccessor world;
+    private final WorldAccess world;
     private final Species species;
     private final BlockPos rootPos;
     private final List<BlockPos> endPoints;
     private final SafeChunkBounds safeBounds;
     private final BlockState initialDirtState;
 
-    public SpeciesPostGenerationEvent(LevelAccessor world, Species species, BlockPos rootPos, List<BlockPos> endPoints, SafeChunkBounds safeBounds, BlockState initialDirtState) {
+    public SpeciesPostGenerationEvent(WorldAccess world, Species species, BlockPos rootPos, List<BlockPos> endPoints, SafeChunkBounds safeBounds, BlockState initialDirtState) {
         this.world = world;
         this.species = species;
         this.rootPos = rootPos;
@@ -33,7 +33,7 @@ public class SpeciesPostGenerationEvent extends Event {
         this.initialDirtState = initialDirtState;
     }
 
-    public LevelAccessor getWorld() {
+    public WorldAccess getWorld() {
         return world;
     }
 

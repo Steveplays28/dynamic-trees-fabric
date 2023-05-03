@@ -34,18 +34,18 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.SoundType;
-import net.minecraft.world.level.levelgen.GenerationStep;
-import net.minecraft.world.level.material.Material;
-import net.minecraft.world.level.material.MaterialColor;
-import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraft.block.Block;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.MapColor;
+import net.minecraft.block.Material;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.sound.BlockSoundGroup;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.math.Box;
+import net.minecraft.util.shape.VoxelShape;
+import net.minecraft.world.gen.GenerationStep;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.fml.ModLoader;
 import net.minecraftforge.fml.event.IModBusEvent;
@@ -192,13 +192,13 @@ public final class JsonDeserialisers {
             NUMBER.deserialise(input).map(Number::doubleValue)
     );
 
-    public static final JsonDeserialiser<ResourceLocation> RESOURCE_LOCATION =
-            register(ResourceLocation.class, ResourceLocationDeserialiser.create());
+    public static final JsonDeserialiser<Identifier> RESOURCE_LOCATION =
+            register(Identifier.class, ResourceLocationDeserialiser.create());
 
     /**
      * Alternative to {@link #RESOURCE_LOCATION}, defaulting the namespace to {@code dynamictrees}.
      */
-    public static final JsonDeserialiser<ResourceLocation> DT_RESOURCE_LOCATION =
+    public static final JsonDeserialiser<Identifier> DT_RESOURCE_LOCATION =
             ResourceLocationDeserialiser.create(io.github.steveplays28.dynamictreesfabric.DynamicTreesFabric.MOD_ID);
 
     public static JsonDeserialiser<Block> BLOCK;
@@ -209,8 +209,8 @@ public final class JsonDeserialisers {
     public static JsonDeserialiser<ItemStack> ITEM_STACK = register(ItemStack.class,
             input -> ITEM.deserialise(input).map((Result.SimpleMapper<Item, ItemStack>) ItemStack::new));
 
-    public static final JsonDeserialiser<AABB> AXIS_ALIGNED_BB =
-            register(AABB.class, new AxisAlignedBBDeserialiser());
+    public static final JsonDeserialiser<Box> AXIS_ALIGNED_BB =
+            register(Box.class, new AxisAlignedBBDeserialiser());
     public static final JsonDeserialiser<VoxelShape> VOXEL_SHAPE =
             register(VoxelShape.class, new VoxelShapeDeserialiser());
 
@@ -269,8 +269,8 @@ public final class JsonDeserialisers {
             register(VinesGenFeature.VineType.class, new EnumDeserialiser<>(VinesGenFeature.VineType.class));
     public static final JsonDeserialiser<BiomeDatabase.Operation> OPERATION =
             register(BiomeDatabase.Operation.class, new EnumDeserialiser<>(BiomeDatabase.Operation.class));
-    public static final JsonDeserialiser<GenerationStep.Decoration> DECORATION_STAGE =
-            register(GenerationStep.Decoration.class, new EnumDeserialiser<>(GenerationStep.Decoration.class));
+    public static final JsonDeserialiser<GenerationStep.Feature> DECORATION_STAGE =
+            register(GenerationStep.Feature.class, new EnumDeserialiser<>(GenerationStep.Feature.class));
 
     public static final JsonDeserialiser<DTBiomeHolderSet> BIOME_LIST = register(DTBiomeHolderSet.class, new BiomeListDeserialiser());
     public static final JsonDeserialiser<BiomePredicate> BIOME_PREDICATE = register(BiomePredicate.class, jsonElement ->
@@ -291,10 +291,10 @@ public final class JsonDeserialisers {
 
     public static final JsonDeserialiser<Material> MATERIAL =
             register(Material.class, new MaterialDeserialiser());
-    public static final JsonDeserialiser<MaterialColor> MATERIAL_COLOR =
-            register(MaterialColor.class, new MaterialColorDeserialiser());
-    public static final JsonDeserialiser<SoundType> SOUND_TYPE =
-            register(SoundType.class, new SoundTypeDeserialiser());
+    public static final JsonDeserialiser<MapColor> MATERIAL_COLOR =
+            register(MapColor.class, new MaterialColorDeserialiser());
+    public static final JsonDeserialiser<BlockSoundGroup> SOUND_TYPE =
+            register(BlockSoundGroup.class, new SoundTypeDeserialiser());
 
     // private static final Map<String, ToolType> TOOL_TYPES =
     //         ReflectionHelper.getPrivateFieldUnchecked(ToolType.class, "VALUES");

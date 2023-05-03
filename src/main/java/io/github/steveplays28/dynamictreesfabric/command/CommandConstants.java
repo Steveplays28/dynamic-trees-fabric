@@ -1,11 +1,10 @@
 package io.github.steveplays28.dynamictreesfabric.command;
 
 import com.mojang.brigadier.suggestion.SuggestionProvider;
-import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.SharedSuggestionProvider;
-
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import net.minecraft.command.CommandSource;
+import net.minecraft.server.command.ServerCommandSource;
 
 public final class CommandConstants {
 
@@ -55,9 +54,9 @@ public final class CommandConstants {
     // Suggestions
     //////////////////////////////
 
-    public static final SuggestionProvider<CommandSourceStack> TURNS_SUGGESTIONS = (context, builder) ->
-            SharedSuggestionProvider.suggest(Stream.of(0, 1, 2).map(String::valueOf).collect(Collectors.toList()), builder);
-    public static final SuggestionProvider<CommandSourceStack> FERTILITY_SUGGESTIONS = (context, builder) ->
-            SharedSuggestionProvider.suggest(Stream.of(0, 7, 15).map(String::valueOf).collect(Collectors.toList()), builder);
+    public static final SuggestionProvider<ServerCommandSource> TURNS_SUGGESTIONS = (context, builder) ->
+            CommandSource.suggestMatching(Stream.of(0, 1, 2).map(String::valueOf).collect(Collectors.toList()), builder);
+    public static final SuggestionProvider<ServerCommandSource> FERTILITY_SUGGESTIONS = (context, builder) ->
+            CommandSource.suggestMatching(Stream.of(0, 7, 15).map(String::valueOf).collect(Collectors.toList()), builder);
 
 }

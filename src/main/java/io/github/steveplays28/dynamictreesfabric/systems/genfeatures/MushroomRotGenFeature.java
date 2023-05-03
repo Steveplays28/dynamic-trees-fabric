@@ -2,13 +2,13 @@ package io.github.steveplays28.dynamictreesfabric.systems.genfeatures;
 
 import io.github.steveplays28.dynamictreesfabric.api.configurations.ConfigurationProperty;
 import io.github.steveplays28.dynamictreesfabric.systems.genfeatures.context.PostRotContext;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.LightLayer;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
+import net.minecraft.block.Block;
+import net.minecraft.block.Blocks;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
+import net.minecraft.world.LightType;
+import net.minecraft.world.WorldAccess;
 import net.minecraftforge.common.IPlantable;
 
 /**
@@ -24,7 +24,7 @@ public class MushroomRotGenFeature extends GenFeature {
     public static final ConfigurationProperty<Block> ALTERNATE_MUSHROOM = ConfigurationProperty.block("alternate_mushroom");
     public static final ConfigurationProperty<Float> ALTERNATE_MUSHROOM_CHANCE = ConfigurationProperty.floatProperty("alternate_mushroom_chance");
 
-    public MushroomRotGenFeature(final ResourceLocation registryName) {
+    public MushroomRotGenFeature(final Identifier registryName) {
         super(registryName);
     }
 
@@ -43,21 +43,21 @@ public class MushroomRotGenFeature extends GenFeature {
 
     @Override
     protected boolean postRot(GenFeatureConfiguration configuration, PostRotContext context) {
-        final LevelAccessor world = context.world();
+        final WorldAccess world = context.world();
         final BlockPos pos = context.pos();
         final Block mushroom = configuration.get(ALTERNATE_MUSHROOM_CHANCE) > context.random().nextFloat() ?
                 configuration.get(MUSHROOM) : configuration.get(ALTERNATE_MUSHROOM);
 
         if (context.radius() <= 4 || !this.canSustainMushroom(world, pos, mushroom) ||
-                world.getBrightness(LightLayer.SKY, pos) >= 4) {
+                world.getLightLevel(LightType.SKY, pos) >= 4) {
             return false;
         }
 
-        world.setBlock(pos, mushroom.defaultBlockState(), 3);
+        world.setBlockState(pos, mushroom.getDefaultState(), 3);
         return true;
     }
 
-    private boolean canSustainMushroom(final LevelAccessor world, final BlockPos pos, final Block block) {
+    private boolean canSustainMushroom(final WorldAccess world, final BlockPos pos, final Block block) {
         return block instanceof IPlantable && world.getBlockState(pos).canSustainPlant(world, pos, Direction.UP, (IPlantable) block);
     }
 

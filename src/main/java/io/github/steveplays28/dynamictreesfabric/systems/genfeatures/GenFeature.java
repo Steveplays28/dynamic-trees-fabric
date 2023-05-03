@@ -12,8 +12,8 @@ import io.github.steveplays28.dynamictreesfabric.util.function.BiomePredicate;
 import io.github.steveplays28.dynamictreesfabric.util.function.CanGrowPredicate;
 import io.github.steveplays28.dynamictreesfabric.util.function.TriFunction;
 import io.github.steveplays28.dynamictreesfabric.worldgen.JoCode;
-import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockPos;
 
 /**
  * Base class for all gen features. These are features that grow on/in/around a tree on generation, or whilst growing,
@@ -73,7 +73,7 @@ public abstract class GenFeature extends ConfigurableRegistryEntry<GenFeature, G
     public static final ConfigurableRegistry<GenFeature, GenFeatureConfiguration> REGISTRY =
             new ConfigurableRegistry<>(GenFeature.class, NULL, GenFeatureConfiguration.TEMPLATES);
 
-    public GenFeature(final ResourceLocation registryName) {
+    public GenFeature(final Identifier registryName) {
         super(registryName);
     }
 

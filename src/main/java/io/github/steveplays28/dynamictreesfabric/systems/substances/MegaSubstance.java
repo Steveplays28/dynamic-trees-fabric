@@ -5,15 +5,15 @@ import io.github.steveplays28.dynamictreesfabric.api.substances.SubstanceEffect;
 import io.github.steveplays28.dynamictreesfabric.blocks.rootyblocks.RootyBlock;
 import io.github.steveplays28.dynamictreesfabric.compat.waila.WailaOther;
 import io.github.steveplays28.dynamictreesfabric.trees.Species;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.block.BlockState;
+import net.minecraft.particle.ParticleTypes;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 
 public class MegaSubstance implements SubstanceEffect {
 
     @Override
-    public boolean apply(Level world, BlockPos rootPos) {
+    public boolean apply(World world, BlockPos rootPos) {
 
         BlockState blockState = world.getBlockState(rootPos);
         RootyBlock dirt = TreeHelper.getRooty(blockState);

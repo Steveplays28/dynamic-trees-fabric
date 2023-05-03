@@ -7,16 +7,15 @@ import io.github.steveplays28.dynamictreesfabric.blocks.leaves.LeavesProperties;
 import io.github.steveplays28.dynamictreesfabric.systems.nodemappers.NetVolumeNode;
 import io.github.steveplays28.dynamictreesfabric.trees.Species;
 import com.google.common.collect.AbstractIterator;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.Mth;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.BlockState;
-
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.MathHelper;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.function.Function;
@@ -50,7 +49,7 @@ public class BranchDestructionData {
         this.woodVolume = new NetVolumeNode.Volume();
         this.cutDir = Direction.DOWN;
         this.toolDir = Direction.DOWN;
-        this.cutPos = BlockPos.ZERO;
+        this.cutPos = BlockPos.ORIGIN;
         this.trunkHeight = 0;
     }
 
@@ -72,8 +71,8 @@ public class BranchDestructionData {
         this.trunkHeight = trunkHeight;
     }
 
-    public BranchDestructionData(CompoundTag nbt) {
-        this.species = TreeRegistry.findSpecies(new ResourceLocation(nbt.getString("species")));
+    public BranchDestructionData(NbtCompound nbt) {
+        this.species = TreeRegistry.findSpecies(new Identifier(nbt.getString("species")));
         this.destroyedBranchesRadiusPosition = nbt.getIntArray("branchpos");
         this.destroyedBranchesConnections = nbt.getIntArray("branchcon");
         this.destroyedBranchesBlockIndex = nbt.getIntArray("branchblock");
@@ -83,12 +82,12 @@ public class BranchDestructionData {
         this.endPoints = nbt.getIntArray("ends");
         this.woodVolume = new NetVolumeNode.Volume(nbt.getIntArray("volume"));
         this.cutPos = new BlockPos(nbt.getInt("cutx"), nbt.getInt("cuty"), nbt.getInt("cutz"));
-        this.cutDir = Direction.values()[Mth.clamp(nbt.getInt("cutdir"), 0, Direction.values().length - 1)];
-        this.toolDir = Direction.values()[Mth.clamp(nbt.getInt("tooldir"), 0, Direction.values().length - 1)];
+        this.cutDir = Direction.values()[MathHelper.clamp(nbt.getInt("cutdir"), 0, Direction.values().length - 1)];
+        this.toolDir = Direction.values()[MathHelper.clamp(nbt.getInt("tooldir"), 0, Direction.values().length - 1)];
         this.trunkHeight = nbt.getInt("trunkheight");
     }
 
-    public CompoundTag writeToNBT(CompoundTag tag) {
+    public NbtCompound writeToNBT(NbtCompound tag) {
         tag.putString("species", species.getRegistryName().toString());
         tag.putIntArray("branchpos", destroyedBranchesRadiusPosition);
         tag.putIntArray("branchcon", destroyedBranchesConnections);
@@ -100,8 +99,8 @@ public class BranchDestructionData {
         tag.putInt("cutx", cutPos.getX());
         tag.putInt("cuty", cutPos.getY());
         tag.putInt("cutz", cutPos.getZ());
-        tag.putInt("cutdir", cutDir.get3DDataValue());
-        tag.putInt("tooldir", toolDir.get3DDataValue());
+        tag.putInt("cutdir", cutDir.getId());
+        tag.putInt("tooldir", toolDir.getId());
         tag.putInt("trunkheight", trunkHeight);
         return tag;
     }
@@ -117,14 +116,14 @@ public class BranchDestructionData {
         int index = 0;
 
         //Ensure the origin block is at the first index
-        BranchConnectionData origConnData = branchList.get(BlockPos.ZERO);
+        BranchConnectionData origConnData = branchList.get(BlockPos.ORIGIN);
         if (origConnData != null) {
             BlockState origState = origConnData.getBlockState();
             if (origState != null) {
-                radPosData[index] = encodeBranchesRadiusPos(BlockPos.ZERO, (BranchBlock) origState.getBlock(), origState);
+                radPosData[index] = encodeBranchesRadiusPos(BlockPos.ORIGIN, (BranchBlock) origState.getBlock(), origState);
                 connectionData[index] = encodeBranchesConnections(origConnData.getConnections());
                 blockIndexData[index++] = encodeBranchBlocks((BranchBlock) origState.getBlock());
-                branchList.remove(BlockPos.ZERO);
+                branchList.remove(BlockPos.ORIGIN);
             }
         }
 
@@ -159,7 +158,7 @@ public class BranchDestructionData {
         int result = 0;
         int[] radii = exState.getAllRadii();
         for (Direction face : Direction.values()) {
-            int faceIndex = face.get3DDataValue();
+            int faceIndex = face.getId();
             int rad = radii[faceIndex];
             result |= (rad & 0x1F) << (faceIndex * 5);//5 bits per face * 6 faces = 30bits
         }
@@ -202,8 +201,8 @@ public class BranchDestructionData {
         int encodedConnections = destroyedBranchesConnections[index];
 
         for (Direction face : Direction.values()) {
-            int rad = (encodedConnections >> (face.get3DDataValue() * 5) & 0x1F);
-            connections[face.get3DDataValue()] = Math.max(0, rad);
+            int rad = (encodedConnections >> (face.getId() * 5) & 0x1F);
+            connections[face.getId()] = Math.max(0, rad);
         }
     }
 
@@ -253,7 +252,7 @@ public class BranchDestructionData {
     }
 
     private int encodeLeavesPos(BlockPos relPos, DynamicLeavesBlock block, BlockState state) {
-        return (state.getValue(DynamicLeavesBlock.DISTANCE) << 24) | encodeRelBlockPos(relPos);
+        return (state.get(DynamicLeavesBlock.DISTANCE) << 24) | encodeRelBlockPos(relPos);
     }
 
     private int encodeLeavesBlocks(DynamicLeavesBlock block, Species species) {
@@ -287,7 +286,7 @@ public class BranchDestructionData {
     public BlockState getLeavesBlockState(int index) {
         DynamicLeavesBlock leaves = species.getValidLeafBlock(destroyedLeavesBlockIndex[index]);
         if (leaves != null) {
-            return leaves.defaultBlockState();
+            return leaves.getDefaultState();
         }
         return null;
     }
@@ -353,15 +352,15 @@ public class BranchDestructionData {
         switch (posType) {
             default:
             case BRANCHES:
-                getter = absolute ? i -> getBranchRelPos(i).offset(cutPos) : this::getBranchRelPos;
+                getter = absolute ? i -> getBranchRelPos(i).add(cutPos) : this::getBranchRelPos;
                 limit = getNumBranches();
                 break;
             case ENDPOINTS:
-                getter = absolute ? i -> getEndPointRelPos(i).offset(cutPos) : this::getEndPointRelPos;
+                getter = absolute ? i -> getEndPointRelPos(i).add(cutPos) : this::getEndPointRelPos;
                 limit = getNumEndpoints();
                 break;
             case LEAVES:
-                getter = absolute ? i -> getLeavesRelPos(i).offset(cutPos) : this::getLeavesRelPos;
+                getter = absolute ? i -> getLeavesRelPos(i).add(cutPos) : this::getLeavesRelPos;
                 limit = getNumLeaves();
                 break;
         }

@@ -1,7 +1,7 @@
 package io.github.steveplays28.dynamictreesfabric.util;
 
 import io.github.steveplays28.dynamictreesfabric.items.DendroPotion;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.brewing.IBrewingRecipe;
 
 /**
@@ -24,7 +24,7 @@ public final class DendroBrewingRecipe implements IBrewingRecipe {
     @Override
     public boolean isInput(final ItemStack inputStack) {
         // For transformation potion, only allow input if it doesn't already have a tree tag.
-        return DendroPotion.getPotionType(inputStack) == DendroPotion.getPotionType(this.input) && !inputStack.getOrCreateTag().contains(DendroPotion.TREE_TAG_KEY);
+        return DendroPotion.getPotionType(inputStack) == DendroPotion.getPotionType(this.input) && !inputStack.getOrCreateNbt().contains(DendroPotion.TREE_TAG_KEY);
     }
 
     @Override
@@ -36,7 +36,7 @@ public final class DendroBrewingRecipe implements IBrewingRecipe {
     public ItemStack getOutput(final ItemStack inputStack, final ItemStack ingredientStack) {
         if (!inputStack.isEmpty() && !ingredientStack.isEmpty() && isIngredient(ingredientStack)) {
             // For transformation potion, only brew if it doesn't already have a tree tag (must check here too, in case potion is left in after being brewed).
-            if (!inputStack.getOrCreateTag().contains(DendroPotion.TREE_TAG_KEY)) {
+            if (!inputStack.getOrCreateNbt().contains(DendroPotion.TREE_TAG_KEY)) {
                 return this.output.copy();
             }
         }

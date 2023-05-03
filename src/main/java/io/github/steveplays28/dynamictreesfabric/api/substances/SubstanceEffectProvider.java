@@ -1,6 +1,6 @@
 package io.github.steveplays28.dynamictreesfabric.api.substances;
 
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.item.ItemStack;
 
 /**
  * An interface for items that can have an effect on trees when right clicked.  Such as a tree potion.

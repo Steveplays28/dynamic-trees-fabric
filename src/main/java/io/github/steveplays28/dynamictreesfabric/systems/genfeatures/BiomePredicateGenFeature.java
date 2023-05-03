@@ -3,14 +3,14 @@ package io.github.steveplays28.dynamictreesfabric.systems.genfeatures;
 import io.github.steveplays28.dynamictreesfabric.api.configurations.ConfigurationProperty;
 import io.github.steveplays28.dynamictreesfabric.init.DTTrees;
 import io.github.steveplays28.dynamictreesfabric.systems.genfeatures.context.PostGenerationContext;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Identifier;
 
 public class BiomePredicateGenFeature extends GenFeature {
 
     public static final ConfigurationProperty<Boolean> ONLY_WORLD_GEN = ConfigurationProperty.bool("only_world_gen");
     public static final ConfigurationProperty<GenFeatureConfiguration> GEN_FEATURE = ConfigurationProperty.property("gen_feature", GenFeatureConfiguration.class);
 
-    public BiomePredicateGenFeature(ResourceLocation registryName) {
+    public BiomePredicateGenFeature(Identifier registryName) {
         super(registryName);
     }
 

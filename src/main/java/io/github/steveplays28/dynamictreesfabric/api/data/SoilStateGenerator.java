@@ -3,7 +3,7 @@ package io.github.steveplays28.dynamictreesfabric.api.data;
 import io.github.steveplays28.dynamictreesfabric.blocks.rootyblocks.RootyBlock;
 import io.github.steveplays28.dynamictreesfabric.blocks.rootyblocks.SoilProperties;
 import io.github.steveplays28.dynamictreesfabric.data.provider.DTBlockStateProvider;
-import net.minecraft.world.level.block.Block;
+import net.minecraft.block.Block;
 import net.minecraftforge.client.model.generators.BlockModelBuilder;
 import net.minecraftforge.registries.ForgeRegistries;
 

@@ -4,10 +4,10 @@ import io.github.steveplays28.dynamictreesfabric.api.TreeHelper;
 import io.github.steveplays28.dynamictreesfabric.api.network.NodeInspector;
 import io.github.steveplays28.dynamictreesfabric.blocks.branches.BranchBlock;
 import io.github.steveplays28.dynamictreesfabric.trees.Species;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.block.BlockState;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
+import net.minecraft.world.WorldAccess;
 
 /**
  * Destroys all thin(radius == 1) branches on a tree.. leaving it to postRot.
@@ -23,7 +23,7 @@ public class DiseaseNode implements NodeInspector {
     }
 
     @Override
-    public boolean run(BlockState blockState, LevelAccessor world, BlockPos pos, Direction fromDir) {
+    public boolean run(BlockState blockState, WorldAccess world, BlockPos pos, Direction fromDir) {
         BranchBlock branch = TreeHelper.getBranch(blockState);
 
         if (branch != null && species.getFamily() == branch.getFamily()) {
@@ -36,7 +36,7 @@ public class DiseaseNode implements NodeInspector {
     }
 
     @Override
-    public boolean returnRun(BlockState blockState, LevelAccessor world, BlockPos pos, Direction fromDir) {
+    public boolean returnRun(BlockState blockState, WorldAccess world, BlockPos pos, Direction fromDir) {
         return false;
     }
 

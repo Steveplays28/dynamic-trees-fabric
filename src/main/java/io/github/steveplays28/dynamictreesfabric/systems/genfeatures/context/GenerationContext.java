@@ -1,14 +1,14 @@
 package io.github.steveplays28.dynamictreesfabric.systems.genfeatures.context;
 
 import io.github.steveplays28.dynamictreesfabric.trees.Species;
-import net.minecraft.core.BlockPos;
-import net.minecraft.util.RandomSource;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.random.Random;
+import net.minecraft.world.WorldAccess;
 
 /**
  * @author Harley O'Connor
  */
-public abstract class GenerationContext<W extends LevelAccessor> {
+public abstract class GenerationContext<W extends WorldAccess> {
 
     private final W world;
     private final BlockPos pos;
@@ -32,7 +32,7 @@ public abstract class GenerationContext<W extends LevelAccessor> {
         return species;
     }
 
-    public final RandomSource random() {
+    public final Random random() {
         return this.world.getRandom();
     }
 

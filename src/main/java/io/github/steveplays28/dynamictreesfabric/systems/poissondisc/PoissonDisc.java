@@ -1,7 +1,7 @@
 package io.github.steveplays28.dynamictreesfabric.systems.poissondisc;
 
 import io.github.steveplays28.dynamictreesfabric.util.SimpleBitmap;
-import net.minecraft.core.BlockPos;
+import net.minecraft.util.math.BlockPos;
 
 public class PoissonDisc extends Vec2i {
 
@@ -116,7 +116,7 @@ public class PoissonDisc extends Vec2i {
     }
 
     public PoissonDisc setRadius(int radius) {
-        this.radius = net.minecraft.util.Mth.clamp(radius, 2, 8);
+        this.radius = net.minecraft.util.math.MathHelper.clamp(radius, 2, 8);
         return this;
     }
 

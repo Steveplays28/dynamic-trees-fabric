@@ -5,7 +5,7 @@ import io.github.steveplays28.dynamictreesfabric.api.registry.SimpleRegistry;
 import io.github.steveplays28.dynamictreesfabric.cells.LeafClusters;
 import io.github.steveplays28.dynamictreesfabric.init.DTTrees;
 import io.github.steveplays28.dynamictreesfabric.util.SimpleVoxmap;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Identifier;
 
 public abstract class CellKit extends RegistryEntry<CellKit> {
 
@@ -43,7 +43,7 @@ public abstract class CellKit extends RegistryEntry<CellKit> {
      */
     public static final SimpleRegistry<CellKit> REGISTRY = new SimpleRegistry<>(CellKit.class, NULL_CELL_KIT);
 
-    public CellKit(final ResourceLocation registryName) {
+    public CellKit(final Identifier registryName) {
         this.setRegistryName(registryName);
     }
 

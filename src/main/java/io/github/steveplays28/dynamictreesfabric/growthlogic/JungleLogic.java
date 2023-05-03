@@ -5,15 +5,15 @@ import io.github.steveplays28.dynamictreesfabric.growthlogic.context.DirectionMa
 import io.github.steveplays28.dynamictreesfabric.growthlogic.context.DirectionSelectionContext;
 import io.github.steveplays28.dynamictreesfabric.growthlogic.context.PositionalSpeciesContext;
 import io.github.steveplays28.dynamictreesfabric.util.CoordUtils;
-import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.math.Direction;
 
 public class JungleLogic extends GrowthLogicKit {
 
     public static final ConfigurationProperty<Integer> CANOPY_HEIGHT = ConfigurationProperty.integer("canopy_height");
     public static final ConfigurationProperty<Integer> BRANCH_OUT_CHANCE = ConfigurationProperty.integer("branch_out_chance");
 
-    public JungleLogic(final ResourceLocation registryName) {
+    public JungleLogic(final Identifier registryName) {
         super(registryName);
     }
 

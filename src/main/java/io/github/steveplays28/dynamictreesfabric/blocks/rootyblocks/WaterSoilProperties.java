@@ -5,32 +5,32 @@ import io.github.steveplays28.dynamictreesfabric.api.data.WaterRootGenerator;
 import io.github.steveplays28.dynamictreesfabric.api.registry.TypedRegistry;
 import io.github.steveplays28.dynamictreesfabric.blocks.branches.BranchBlock;
 import io.github.steveplays28.dynamictreesfabric.init.DTConfigs;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.context.BlockPlaceContext;
-import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.SimpleWaterloggedBlock;
-import net.minecraft.world.level.block.state.BlockBehaviour;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.StateDefinition;
-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.minecraft.world.level.material.FluidState;
-import net.minecraft.world.level.material.Fluids;
-import net.minecraft.world.level.material.Material;
-import net.minecraft.world.level.material.MaterialColor;
-import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.HitResult;
-import net.minecraft.world.phys.shapes.CollisionContext;
-import net.minecraft.world.phys.shapes.Shapes;
-import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraft.block.AbstractBlock;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.MapColor;
+import net.minecraft.block.Material;
+import net.minecraft.block.ShapeContext;
+import net.minecraft.block.Waterloggable;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.fluid.FluidState;
+import net.minecraft.fluid.Fluids;
+import net.minecraft.item.ItemPlacementContext;
+import net.minecraft.item.ItemStack;
+import net.minecraft.state.StateManager;
+import net.minecraft.state.property.BooleanProperty;
+import net.minecraft.state.property.Properties;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.shape.VoxelShape;
+import net.minecraft.util.shape.VoxelShapes;
+import net.minecraft.world.BlockView;
+import net.minecraft.world.World;
+import net.minecraft.world.WorldAccess;
 
 /**
  * @author Max Hyper
@@ -39,14 +39,14 @@ public class WaterSoilProperties extends SoilProperties {
 
     public static final TypedRegistry.EntryType<SoilProperties> TYPE = TypedRegistry.newType(WaterSoilProperties::new);
 
-    public WaterSoilProperties(final ResourceLocation registryName) {
+    public WaterSoilProperties(final Identifier registryName) {
         super(null, registryName);
 
         this.soilStateGenerator.reset(WaterRootGenerator::new);
     }
 
     @Override
-    protected RootyBlock createBlock(BlockBehaviour.Properties blockProperties) {
+    protected RootyBlock createBlock(AbstractBlock.Settings blockProperties) {
         return new RootyWaterBlock(this, blockProperties);
     }
 
@@ -56,33 +56,33 @@ public class WaterSoilProperties extends SoilProperties {
     }
 
     @Override
-    public BlockBehaviour.Properties getDefaultBlockProperties(Material material, MaterialColor materialColor) {
-        return BlockBehaviour.Properties.copy(Blocks.WATER);
+    public AbstractBlock.Settings getDefaultBlockProperties(Material material, MapColor materialColor) {
+        return AbstractBlock.Settings.copy(Blocks.WATER);
     }
 
-    public static class RootyWaterBlock extends RootyBlock implements SimpleWaterloggedBlock {
+    public static class RootyWaterBlock extends RootyBlock implements Waterloggable {
 
-        protected static final AABB WATER_ROOTS_AABB = new AABB(0.1, 0.0, 0.1, 0.9, 1.0, 0.9);
-        public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
+        protected static final Box WATER_ROOTS_AABB = new Box(0.1, 0.0, 0.1, 0.9, 1.0, 0.9);
+        public static final BooleanProperty WATERLOGGED = Properties.WATERLOGGED;
 
-        public RootyWaterBlock(SoilProperties properties, Properties blockProperties) {
+        public RootyWaterBlock(SoilProperties properties, Settings blockProperties) {
             super(properties, blockProperties);
-            registerDefaultState(defaultBlockState().setValue(WATERLOGGED, true));
+            setDefaultState(getDefaultState().with(WATERLOGGED, true));
         }
 
         @Override
-        protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-            super.createBlockStateDefinition(builder.add(WATERLOGGED));
+        protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
+            super.appendProperties(builder.add(WATERLOGGED));
         }
 
         @Override
-        public int getRadiusForConnection(BlockState state, BlockGetter reader, BlockPos pos, BranchBlock from, Direction side, int fromRadius) {
+        public int getRadiusForConnection(BlockState state, BlockView reader, BlockPos pos, BranchBlock from, Direction side, int fromRadius) {
             return 1;
         }
 
         @Override
-        public ItemStack getCloneItemStack(BlockState state, HitResult target, BlockGetter world, BlockPos pos, Player player) {
-            BlockState upState = world.getBlockState(pos.above());
+        public ItemStack getCloneItemStack(BlockState state, HitResult target, BlockView world, BlockPos pos, PlayerEntity player) {
+            BlockState upState = world.getBlockState(pos.up());
             if (TreeHelper.isBranch(upState)) {
                 return TreeHelper.getBranch(upState).getFamily().getBranchItem()
                         .map(ItemStack::new)
@@ -92,42 +92,42 @@ public class WaterSoilProperties extends SoilProperties {
         }
 
         @Override
-        public float getHardness(BlockState state, BlockGetter worldIn, BlockPos pos) {
+        public float getHardness(BlockState state, BlockView worldIn, BlockPos pos) {
             return (float) (0.5 * DTConfigs.ROOTY_BLOCK_HARDNESS_MULTIPLIER.get());
         }
 
         @Override
-        public VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
-            return Shapes.create(WATER_ROOTS_AABB);
+        public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
+            return VoxelShapes.cuboid(WATER_ROOTS_AABB);
         }
 
         @Override
-        public VoxelShape getBlockSupportShape(BlockState state, BlockGetter reader, BlockPos pos) {
-            return Shapes.empty();
+        public VoxelShape getSidesShape(BlockState state, BlockView reader, BlockPos pos) {
+            return VoxelShapes.empty();
         }
 
         @Override
-        public boolean canBeReplaced(BlockState state, BlockPlaceContext useContext) {
+        public boolean canReplace(BlockState state, ItemPlacementContext useContext) {
             return false;
         }
 
         @Override
         public FluidState getFluidState(BlockState state) {
-            return state.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(state);
+            return state.get(WATERLOGGED) ? Fluids.WATER.getStill(false) : super.getFluidState(state);
         }
 
         @Override
-        public BlockState updateShape(BlockState stateIn, Direction facing, BlockState facingState, LevelAccessor worldIn, BlockPos currentPos, BlockPos facingPos) {
-            if (stateIn.getValue(WATERLOGGED)) {
-                worldIn.scheduleTick(currentPos, Fluids.WATER, Fluids.WATER.getTickDelay(worldIn));
+        public BlockState getStateForNeighborUpdate(BlockState stateIn, Direction facing, BlockState facingState, WorldAccess worldIn, BlockPos currentPos, BlockPos facingPos) {
+            if (stateIn.get(WATERLOGGED)) {
+                worldIn.scheduleFluidTick(currentPos, Fluids.WATER, Fluids.WATER.getTickRate(worldIn));
             }
-            return super.updateShape(stateIn, facing, facingState, worldIn, currentPos, facingPos);
+            return super.getStateForNeighborUpdate(stateIn, facing, facingState, worldIn, currentPos, facingPos);
         }
 
         @Override
-        public BlockState getDecayBlockState(BlockState state, BlockGetter access, BlockPos pos) {
-            if (state.hasProperty(WATERLOGGED) && !state.getValue(WATERLOGGED)) {
-                return Blocks.AIR.defaultBlockState();
+        public BlockState getDecayBlockState(BlockState state, BlockView access, BlockPos pos) {
+            if (state.contains(WATERLOGGED) && !state.get(WATERLOGGED)) {
+                return Blocks.AIR.getDefaultState();
             }
             return super.getDecayBlockState(state, access, pos);
         }
@@ -141,9 +141,9 @@ public class WaterSoilProperties extends SoilProperties {
             return true;
         }
 
-        public boolean fallWithTree(BlockState state, Level world, BlockPos pos) {
+        public boolean fallWithTree(BlockState state, World world, BlockPos pos) {
             //The block is removed when this is checked because it means it got attached to a tree
-            world.setBlockAndUpdate(pos, getDecayBlockState(state, world, pos));
+            world.setBlockState(pos, getDecayBlockState(state, world, pos));
             return true;
         }
 

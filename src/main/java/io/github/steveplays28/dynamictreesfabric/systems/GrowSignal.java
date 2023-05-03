@@ -1,9 +1,9 @@
 package io.github.steveplays28.dynamictreesfabric.systems;
 
 import io.github.steveplays28.dynamictreesfabric.trees.Species;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.util.RandomSource;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.random.Random;
 
 public class GrowSignal {
 
@@ -27,9 +27,9 @@ public class GrowSignal {
      */
     public boolean choked;
 
-    public RandomSource rand;
+    public Random rand;
 
-    public GrowSignal(Species species, BlockPos rootPos, float energy, RandomSource random) {
+    public GrowSignal(Species species, BlockPos rootPos, float energy, Random random) {
         this.species = species;
         this.energy = energy;
         dir = Direction.UP;
@@ -51,7 +51,7 @@ public class GrowSignal {
 
     public boolean step() {
         numSteps++;
-        delta = delta.relative(dir);
+        delta = delta.offset(dir);
 
         if (--energy <= 0.0f) {
             success = false; // Ran out of energy before it could grow.

@@ -3,8 +3,8 @@ package io.github.steveplays28.dynamictreesfabric.api.worldgen;
 import io.github.steveplays28.dynamictreesfabric.api.registry.RegistryEntry;
 import io.github.steveplays28.dynamictreesfabric.api.registry.SimpleRegistry;
 import io.github.steveplays28.dynamictreesfabric.init.DTTrees;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
+import net.minecraft.util.Identifier;
+import net.minecraft.world.gen.feature.ConfiguredFeature;
 
 /**
  * @author Harley O'Connor
@@ -20,7 +20,7 @@ public abstract class FeatureCanceller extends RegistryEntry<FeatureCanceller> {
 
     public static final SimpleRegistry<FeatureCanceller> REGISTRY = new SimpleRegistry<>(FeatureCanceller.class, NULL_CANCELLER);
 
-    public FeatureCanceller(final ResourceLocation registryName) {
+    public FeatureCanceller(final Identifier registryName) {
         super(registryName);
     }
 

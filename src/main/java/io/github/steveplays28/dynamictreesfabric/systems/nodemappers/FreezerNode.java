@@ -6,11 +6,11 @@ import io.github.steveplays28.dynamictreesfabric.blocks.branches.BranchBlock;
 import io.github.steveplays28.dynamictreesfabric.blocks.leaves.DynamicLeavesBlock;
 import io.github.steveplays28.dynamictreesfabric.trees.Family;
 import io.github.steveplays28.dynamictreesfabric.trees.Species;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.block.LeavesBlock;
-import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.LeavesBlock;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
+import net.minecraft.world.WorldAccess;
 
 public class FreezerNode implements NodeInspector {
 
@@ -22,7 +22,7 @@ public class FreezerNode implements NodeInspector {
     }
 
     @Override
-    public boolean run(BlockState blockState, LevelAccessor world, BlockPos pos, Direction fromDir) {
+    public boolean run(BlockState blockState, WorldAccess world, BlockPos pos, Direction fromDir) {
         final BranchBlock branch = TreeHelper.getBranch(blockState);
         if (branch != null) {
             final int radius = branch.getRadius(blockState);
@@ -35,18 +35,18 @@ public class FreezerNode implements NodeInspector {
     }
 
     @Override
-    public boolean returnRun(BlockState blockState, LevelAccessor world, BlockPos pos, Direction fromDir) {
+    public boolean returnRun(BlockState blockState, WorldAccess world, BlockPos pos, Direction fromDir) {
         return false;
     }
 
     // Clumsy hack to freeze leaves
-    public void freezeSurroundingLeaves(LevelAccessor world, BranchBlock branch, BlockPos twigPos) {
-        if (world.isClientSide()) {
+    public void freezeSurroundingLeaves(WorldAccess world, BranchBlock branch, BlockPos twigPos) {
+        if (world.isClient()) {
             return;
         }
 
         final Family tree = branch.getFamily();
-        BlockPos.betweenClosedStream(twigPos.offset(-freezeRadius, -freezeRadius, -freezeRadius), twigPos.offset(freezeRadius, freezeRadius, freezeRadius)).forEach(leavesPos -> {
+        BlockPos.stream(twigPos.add(-freezeRadius, -freezeRadius, -freezeRadius), twigPos.add(freezeRadius, freezeRadius, freezeRadius)).forEach(leavesPos -> {
             if (!tree.isCompatibleGenericLeaves(this.species, world.getBlockState(leavesPos), world, leavesPos)) {
                 return;
             }
@@ -58,8 +58,8 @@ public class FreezerNode implements NodeInspector {
                 return;
             }
 
-            world.setBlock(leavesPos, leaves.getProperties(state).getPrimitiveLeaves()
-                    .setValue(LeavesBlock.PERSISTENT, true), 2);
+            world.setBlockState(leavesPos, leaves.getProperties(state).getPrimitiveLeaves()
+                    .with(LeavesBlock.PERSISTENT, true), 2);
         });
     }
 

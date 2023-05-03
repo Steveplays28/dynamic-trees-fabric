@@ -1,8 +1,7 @@
 package io.github.steveplays28.dynamictreesfabric.api.resource;
 
-import net.minecraft.resources.ResourceLocation;
-
 import java.util.function.Function;
+import net.minecraft.util.Identifier;
 
 /**
  * Container for a resource object that is keyed by its location.
@@ -12,10 +11,10 @@ import java.util.function.Function;
  */
 public final class DTResource<R> {
 
-    private final ResourceLocation location;
+    private final Identifier location;
     private final R resource;
 
-    public DTResource(ResourceLocation location, R resource) {
+    public DTResource(Identifier location, R resource) {
         this.location = location;
         this.resource = resource;
     }
@@ -24,7 +23,7 @@ public final class DTResource<R> {
         return new DTResource<>(this.location, mapper.apply(this.resource));
     }
 
-    public ResourceLocation getLocation() {
+    public Identifier getLocation() {
         return location;
     }
 

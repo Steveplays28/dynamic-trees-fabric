@@ -1,33 +1,33 @@
 package io.github.steveplays28.dynamictreesfabric.util;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Identifier;
 
 /**
  * @author Harley O'Connor
  */
 public final class ResourceLocationUtils {
 
-    public static ResourceLocation parse(String string, final String defaultNamespace) {
+    public static Identifier parse(String string, final String defaultNamespace) {
         if (!string.contains(":")) {
             string = defaultNamespace + ":" + string;
         }
-        return new ResourceLocation(string);
+        return new Identifier(string);
     }
 
-    public static ResourceLocation namespace(final ResourceLocation resourceLocation, final String namespace) {
-        return new ResourceLocation(namespace, resourceLocation.getPath());
+    public static Identifier namespace(final Identifier resourceLocation, final String namespace) {
+        return new Identifier(namespace, resourceLocation.getPath());
     }
 
-    public static ResourceLocation prefix(final ResourceLocation resourceLocation, final String prefix) {
-        return new ResourceLocation(resourceLocation.getNamespace(), prefix + resourceLocation.getPath());
+    public static Identifier prefix(final Identifier resourceLocation, final String prefix) {
+        return new Identifier(resourceLocation.getNamespace(), prefix + resourceLocation.getPath());
     }
 
-    public static ResourceLocation suffix(final ResourceLocation resourceLocation, final String suffix) {
-        return new ResourceLocation(resourceLocation.getNamespace(), resourceLocation.getPath() + suffix);
+    public static Identifier suffix(final Identifier resourceLocation, final String suffix) {
+        return new Identifier(resourceLocation.getNamespace(), resourceLocation.getPath() + suffix);
     }
 
-    public static ResourceLocation surround(final ResourceLocation resourceLocation, final String prefix, final String suffix) {
-        return new ResourceLocation(resourceLocation.getNamespace(), prefix + resourceLocation.getPath() + suffix);
+    public static Identifier surround(final Identifier resourceLocation, final String prefix, final String suffix) {
+        return new Identifier(resourceLocation.getNamespace(), prefix + resourceLocation.getPath() + suffix);
     }
 
 }

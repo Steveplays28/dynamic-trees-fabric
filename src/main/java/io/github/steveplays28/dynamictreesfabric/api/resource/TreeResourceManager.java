@@ -1,16 +1,15 @@
 package io.github.steveplays28.dynamictreesfabric.api.resource;
 
 import io.github.steveplays28.dynamictreesfabric.api.resource.loading.ResourceLoader;
-import net.minecraft.server.packs.PackResources;
-
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.stream.Stream;
+import net.minecraft.resource.ResourcePack;
 
 /**
  * @author Harley O'Connor
  */
-public interface TreeResourceManager extends net.minecraft.server.packs.resources.ResourceManager {
+public interface TreeResourceManager extends net.minecraft.resource.ResourceManager {
 
     void addLoader(ResourceLoader<?> loader);
 
@@ -35,6 +34,6 @@ public interface TreeResourceManager extends net.minecraft.server.packs.resource
     void addPack(TreeResourcePack pack);
 
     @Override
-    Stream<PackResources> listPacks();
+    Stream<ResourcePack> streamResourcePacks();
 
 }

@@ -4,52 +4,51 @@ import io.github.steveplays28.dynamictreesfabric.api.TreeHelper;
 import io.github.steveplays28.dynamictreesfabric.trees.Family;
 import io.github.steveplays28.dynamictreesfabric.util.CoordUtils;
 import io.github.steveplays28.dynamictreesfabric.util.RootConnections;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.util.Mth;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.BlockAndTintGetter;
-import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.SimpleWaterloggedBlock;
-import net.minecraft.world.level.block.SoundType;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.StateDefinition;
-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.minecraft.world.level.block.state.properties.IntegerProperty;
-import net.minecraft.world.level.material.FluidState;
-import net.minecraft.world.level.material.Fluids;
-import net.minecraft.world.level.material.Material;
-import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.HitResult;
-import net.minecraft.world.phys.shapes.BooleanOp;
-import net.minecraft.world.phys.shapes.CollisionContext;
-import net.minecraft.world.phys.shapes.Shapes;
-import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraft.world.ticks.ScheduledTick;
-
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.Material;
+import net.minecraft.block.ShapeContext;
+import net.minecraft.block.Waterloggable;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.fluid.FluidState;
+import net.minecraft.fluid.Fluids;
+import net.minecraft.item.ItemStack;
+import net.minecraft.sound.BlockSoundGroup;
+import net.minecraft.state.StateManager;
+import net.minecraft.state.property.BooleanProperty;
+import net.minecraft.state.property.IntProperty;
+import net.minecraft.state.property.Properties;
+import net.minecraft.util.function.BooleanBiFunction;
+import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.shape.VoxelShape;
+import net.minecraft.util.shape.VoxelShapes;
+import net.minecraft.world.BlockRenderView;
+import net.minecraft.world.BlockView;
+import net.minecraft.world.World;
+import net.minecraft.world.WorldAccess;
+import net.minecraft.world.tick.OrderedTick;
 
 @SuppressWarnings("deprecation")
-public class SurfaceRootBlock extends Block implements SimpleWaterloggedBlock {
+public class SurfaceRootBlock extends Block implements Waterloggable {
 
     public static final int MAX_RADIUS = 8;
 
-    protected static final IntegerProperty RADIUS = IntegerProperty.create("radius", 1, MAX_RADIUS);
-    public static final BooleanProperty GROUNDED = BooleanProperty.create("grounded");
-    public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
+    protected static final IntProperty RADIUS = IntProperty.of("radius", 1, MAX_RADIUS);
+    public static final BooleanProperty GROUNDED = BooleanProperty.of("grounded");
+    public static final BooleanProperty WATERLOGGED = Properties.WATERLOGGED;
 
     private final Family family;
 
     public SurfaceRootBlock(Family family) {
         this(Material.WOOD, family);
-        registerDefaultState(defaultBlockState().setValue(WATERLOGGED, false));
+        setDefaultState(getDefaultState().with(WATERLOGGED, false));
     }
 
     public SurfaceRootBlock(Material material, Family family) {
@@ -57,7 +56,7 @@ public class SurfaceRootBlock extends Block implements SimpleWaterloggedBlock {
 //                .harvestTool(ToolType.AXE)
 //                .harvestLevel(0)
                 .strength(2.5f, 1.0F)
-                .sound(SoundType.WOOD));
+                .sounds(BlockSoundGroup.WOOD));
 
         this.family = family;
     }
@@ -82,7 +81,7 @@ public class SurfaceRootBlock extends Block implements SimpleWaterloggedBlock {
     }
 
     @Override
-    public ItemStack getCloneItemStack(BlockState state, HitResult target, BlockGetter world, BlockPos pos, Player player) {
+    public ItemStack getCloneItemStack(BlockState state, HitResult target, BlockView world, BlockPos pos, PlayerEntity player) {
         return this.family.getBranchItem().map(ItemStack::new).orElse(ItemStack.EMPTY);
     }
 
@@ -91,22 +90,22 @@ public class SurfaceRootBlock extends Block implements SimpleWaterloggedBlock {
     ///////////////////////////////////////////
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+    protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
         builder.add(RADIUS, GROUNDED, WATERLOGGED);
     }
 
     public int getRadius(BlockState blockState) {
-        return blockState.getBlock() == this ? blockState.getValue(RADIUS) : 0;
+        return blockState.getBlock() == this ? blockState.get(RADIUS) : 0;
     }
 
-    public int setRadius(LevelAccessor world, BlockPos pos, int radius, int flags) {
-        boolean replacingWater = world.getBlockState(pos).getFluidState() == Fluids.WATER.getSource(false);
-        world.setBlock(pos, this.getStateForRadius(radius).setValue(WATERLOGGED, replacingWater), flags);
+    public int setRadius(WorldAccess world, BlockPos pos, int radius, int flags) {
+        boolean replacingWater = world.getBlockState(pos).getFluidState() == Fluids.WATER.getStill(false);
+        world.setBlockState(pos, this.getStateForRadius(radius).with(WATERLOGGED, replacingWater), flags);
         return radius;
     }
 
     public BlockState getStateForRadius(int radius) {
-        return this.defaultBlockState().setValue(RADIUS, Mth.clamp(radius, 0, getMaxRadius()));
+        return this.getDefaultState().with(RADIUS, MathHelper.clamp(radius, 0, getMaxRadius()));
     }
 
     public int getMaxRadius() {
@@ -123,22 +122,22 @@ public class SurfaceRootBlock extends Block implements SimpleWaterloggedBlock {
 
     @Override
     public FluidState getFluidState(BlockState state) {
-        return state.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(state);
+        return state.get(WATERLOGGED) ? Fluids.WATER.getStill(false) : super.getFluidState(state);
     }
 
     @Override
-    public BlockState updateShape(BlockState stateIn, Direction facing, BlockState facingState, LevelAccessor worldIn, BlockPos currentPos, BlockPos facingPos) {
-        if (stateIn.getValue(WATERLOGGED)) {
-            worldIn.getFluidTicks().schedule(new ScheduledTick<>(Fluids.WATER, currentPos, Fluids.WATER.getTickDelay(worldIn), 1));
+    public BlockState getStateForNeighborUpdate(BlockState stateIn, Direction facing, BlockState facingState, WorldAccess worldIn, BlockPos currentPos, BlockPos facingPos) {
+        if (stateIn.get(WATERLOGGED)) {
+            worldIn.getFluidTickScheduler().scheduleTick(new OrderedTick<>(Fluids.WATER, currentPos, Fluids.WATER.getTickRate(worldIn), 1));
         }
-        return super.updateShape(stateIn, facing, facingState, worldIn, currentPos, facingPos);
+        return super.getStateForNeighborUpdate(stateIn, facing, facingState, worldIn, currentPos, facingPos);
     }
 
     ///////////////////////////////////////////
     // RENDERING
     ///////////////////////////////////////////
 
-    public RootConnections getConnectionData(final BlockAndTintGetter world, final BlockPos pos) {
+    public RootConnections getConnectionData(final BlockRenderView world, final BlockPos pos) {
         final RootConnections connections = new RootConnections();
 
         for (Direction dir : CoordUtils.HORIZONTALS) {
@@ -162,11 +161,11 @@ public class SurfaceRootBlock extends Block implements SimpleWaterloggedBlock {
 
     @Nonnull
     @Override
-    public VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
+    public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
         boolean connectionMade = false;
         final int thisRadius = getRadius(state);
 
-        VoxelShape shape = Shapes.empty();
+        VoxelShape shape = VoxelShapes.empty();
 
         for (Direction dir : CoordUtils.HORIZONTALS) {
             final RootConnection conn = this.getSideConnectionRadius(world, pos, dir);
@@ -176,21 +175,21 @@ public class SurfaceRootBlock extends Block implements SimpleWaterloggedBlock {
             }
 
             connectionMade = true;
-            final int r = Mth.clamp(conn.radius, 1, thisRadius);
+            final int r = MathHelper.clamp(conn.radius, 1, thisRadius);
             final double radius = r / 16.0;
             final double radialHeight = getRadialHeight(r) / 16.0;
             final double gap = 0.5 - radius;
 
-            AABB aabb = new AABB(-radius, 0, -radius, radius, radialHeight, radius);
-            aabb = aabb.expandTowards(dir.getStepX() * gap, 0, dir.getStepZ() * gap).move(0.5, 0.0, 0.5);
-            shape = Shapes.joinUnoptimized(shape, Shapes.create(aabb), BooleanOp.OR);
+            Box aabb = new Box(-radius, 0, -radius, radius, radialHeight, radius);
+            aabb = aabb.stretch(dir.getOffsetX() * gap, 0, dir.getOffsetZ() * gap).offset(0.5, 0.0, 0.5);
+            shape = VoxelShapes.combine(shape, VoxelShapes.cuboid(aabb), BooleanBiFunction.OR);
         }
 
         if (!connectionMade) {
             double radius = thisRadius / 16.0;
             double radialHeight = getRadialHeight(thisRadius) / 16.0;
-            AABB aabb = new AABB(0.5 - radius, 0, 0.5 - radius, 0.5 + radius, radialHeight, 0.5 + radius);
-            shape = Shapes.joinUnoptimized(shape, Shapes.create(aabb), BooleanOp.OR);
+            Box aabb = new Box(0.5 - radius, 0, 0.5 - radius, 0.5 + radius, radialHeight, 0.5 + radius);
+            shape = VoxelShapes.combine(shape, VoxelShapes.cuboid(aabb), BooleanBiFunction.OR);
         }
 
         return shape;
@@ -201,20 +200,20 @@ public class SurfaceRootBlock extends Block implements SimpleWaterloggedBlock {
     }
 
     @Nullable
-    protected RootConnection getSideConnectionRadius(BlockGetter blockReader, BlockPos pos, Direction side) {
+    protected RootConnection getSideConnectionRadius(BlockView blockReader, BlockPos pos, Direction side) {
         if (!side.getAxis().isHorizontal()) {
             return null;
         }
 
-        BlockPos dPos = pos.relative(side);
+        BlockPos dPos = pos.offset(side);
         BlockState state = CoordUtils.getStateSafe(blockReader, dPos);
-        final BlockState upState = CoordUtils.getStateSafe(blockReader, pos.above());
+        final BlockState upState = CoordUtils.getStateSafe(blockReader, pos.up());
 
-        final RootConnections.ConnectionLevel level = (upState != null && isAirOrWater(upState) && state != null && state.isRedstoneConductor(blockReader, dPos)) ?
+        final RootConnections.ConnectionLevel level = (upState != null && isAirOrWater(upState) && state != null && state.isSolidBlock(blockReader, dPos)) ?
                 RootConnections.ConnectionLevel.HIGH : (state != null && isAirOrWater(state) ? RootConnections.ConnectionLevel.LOW : RootConnections.ConnectionLevel.MID);
 
         if (level != RootConnections.ConnectionLevel.MID) {
-            dPos = dPos.above(level.getYOffset());
+            dPos = dPos.up(level.getYOffset());
             state = CoordUtils.getStateSafe(blockReader, dPos);
         }
 
@@ -228,35 +227,35 @@ public class SurfaceRootBlock extends Block implements SimpleWaterloggedBlock {
     }
 
     @Override
-    public boolean onDestroyedByPlayer(BlockState state, Level world, BlockPos pos, Player player, boolean willHarvest, FluidState fluid) {
-        final BlockState upstate = world.getBlockState(pos.above());
+    public boolean onDestroyedByPlayer(BlockState state, World world, BlockPos pos, PlayerEntity player, boolean willHarvest, FluidState fluid) {
+        final BlockState upstate = world.getBlockState(pos.up());
 
         if (upstate.getBlock() instanceof TrunkShellBlock) {
-            world.setBlockAndUpdate(pos, upstate);
+            world.setBlockState(pos, upstate);
         }
 
         for (Direction dir : CoordUtils.HORIZONTALS) {
-            final BlockPos dPos = pos.relative(dir).below();
-            world.getBlockState(dPos).neighborChanged(world, dPos, this, pos, false);
+            final BlockPos dPos = pos.offset(dir).down();
+            world.getBlockState(dPos).neighborUpdate(world, dPos, this, pos, false);
         }
 
         return super.onDestroyedByPlayer(state, world, pos, player, willHarvest, fluid);
     }
 
     @Override
-    public void neighborChanged(BlockState state, Level world, BlockPos pos, Block blockIn, BlockPos fromPos, boolean isMoving) {
+    public void neighborUpdate(BlockState state, World world, BlockPos pos, Block blockIn, BlockPos fromPos, boolean isMoving) {
         if (!canBlockStay(world, pos, state)) {
             world.removeBlock(pos, false);
         }
     }
 
-    protected boolean canBlockStay(Level world, BlockPos pos, BlockState state) {
-        final BlockPos below = pos.below();
+    protected boolean canBlockStay(World world, BlockPos pos, BlockState state) {
+        final BlockPos below = pos.down();
         final BlockState belowState = world.getBlockState(below);
 
         final int radius = getRadius(state);
 
-        if (belowState.isRedstoneConductor(world, below)) { // If a root is sitting on a solid block.
+        if (belowState.isSolidBlock(world, below)) { // If a root is sitting on a solid block.
             for (Direction dir : CoordUtils.HORIZONTALS) {
                 final RootConnection conn = this.getSideConnectionRadius(world, pos, dir);
 

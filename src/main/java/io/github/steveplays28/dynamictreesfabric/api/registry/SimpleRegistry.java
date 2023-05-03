@@ -1,6 +1,6 @@
 package io.github.steveplays28.dynamictreesfabric.api.registry;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Identifier;
 import net.minecraftforge.registries.ForgeRegistry;
 
 import java.util.Collections;
@@ -72,8 +72,8 @@ public class SimpleRegistry<V extends RegistryEntry<V>> extends AbstractRegistry
      * Registers the given {@link RegistryEntry} to this {@link SimpleRegistry}.
      *
      * <p>Note that this will throw a runtime exception if this {@link SimpleRegistry} is locked, or if
-     * the {@link ResourceLocation} already has a value registered, therefore {@link #isLocked()} or/and {@link
-     * #has(ResourceLocation)} should be checked before calling if either conditions are uncertain.</p>
+     * the {@link Identifier} already has a value registered, therefore {@link #isLocked()} or/and {@link
+     * #has(Identifier)} should be checked before calling if either conditions are uncertain.</p>
      *
      * <p>If you're thinking of using this you should probably be doing it from a
      * {@link RegistryEvent}, in which case you don't have to worry about locking.</p>

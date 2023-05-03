@@ -2,28 +2,28 @@ package io.github.steveplays28.dynamictreesfabric.systems.genfeatures.context;
 
 import io.github.steveplays28.dynamictreesfabric.trees.Species;
 import io.github.steveplays28.dynamictreesfabric.util.SafeChunkBounds;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Holder;
-import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.biome.Biome;
+import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.WorldAccess;
+import net.minecraft.world.biome.Biome;
 
 /**
  * @author Harley O'Connor
  */
-public final class FullGenerationContext extends GenerationContext<LevelAccessor> {
+public final class FullGenerationContext extends GenerationContext<WorldAccess> {
 
-    private final Holder<Biome> biome;
+    private final RegistryEntry<Biome> biome;
     private final int radius;
     private final SafeChunkBounds bounds;
 
-    public FullGenerationContext(LevelAccessor world, BlockPos rootPos, Species species, Holder<Biome> biome, int radius, SafeChunkBounds bounds) {
+    public FullGenerationContext(WorldAccess world, BlockPos rootPos, Species species, RegistryEntry<Biome> biome, int radius, SafeChunkBounds bounds) {
         super(world, rootPos, species);
         this.biome = biome;
         this.radius = radius;
         this.bounds = bounds;
     }
 
-    public Holder<Biome> biome() {
+    public RegistryEntry<Biome> biome() {
         return biome;
     }
 

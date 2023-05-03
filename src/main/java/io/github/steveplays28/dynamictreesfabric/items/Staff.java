@@ -12,23 +12,23 @@ import io.github.steveplays28.dynamictreesfabric.util.SafeChunkBounds;
 import io.github.steveplays28.dynamictreesfabric.worldgen.JoCode;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
-import net.minecraft.client.Minecraft;
-import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
-import net.minecraft.network.chat.Component;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.ai.attributes.Attribute;
-import net.minecraft.world.entity.ai.attributes.AttributeModifier;
-import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.item.context.UseOnContext;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.block.BlockState;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.item.TooltipContext;
+import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.attribute.EntityAttribute;
+import net.minecraft.entity.attribute.EntityAttributeModifier;
+import net.minecraft.entity.attribute.EntityAttributes;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.ItemUsageContext;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.text.Text;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -51,32 +51,32 @@ public class Staff extends Item {
     public final static String USES = "uses";
     public final static String MAX_USES = "max_uses";
 
-    private final Multimap<Attribute, AttributeModifier> attributeModifiers;
+    private final Multimap<EntityAttribute, EntityAttributeModifier> attributeModifiers;
 
     public Staff() {
-        super(new Item.Properties().stacksTo(1)
+        super(new Item.Settings().maxCount(1)
                 .tab(DTRegistries.ITEM_GROUP));
 
-        ImmutableMultimap.Builder<Attribute, AttributeModifier> builder = ImmutableMultimap.builder();
-        builder.put(Attributes.ATTACK_DAMAGE, new AttributeModifier(BASE_ATTACK_DAMAGE_UUID, "Weapon modifier", 5.0, AttributeModifier.Operation.ADDITION));
-        builder.put(Attributes.ATTACK_SPEED, new AttributeModifier(BASE_ATTACK_SPEED_UUID, "Weapon modifier", -2.4, AttributeModifier.Operation.ADDITION));
+        ImmutableMultimap.Builder<EntityAttribute, EntityAttributeModifier> builder = ImmutableMultimap.builder();
+        builder.put(EntityAttributes.GENERIC_ATTACK_DAMAGE, new EntityAttributeModifier(ATTACK_DAMAGE_MODIFIER_ID, "Weapon modifier", 5.0, EntityAttributeModifier.Operation.ADDITION));
+        builder.put(EntityAttributes.GENERIC_ATTACK_SPEED, new EntityAttributeModifier(ATTACK_SPEED_MODIFIER_ID, "Weapon modifier", -2.4, EntityAttributeModifier.Operation.ADDITION));
         this.attributeModifiers = builder.build();
     }
 
 
     @Override
-    public float getDestroySpeed(ItemStack stack, BlockState state) {
+    public float getMiningSpeedMultiplier(ItemStack stack, BlockState state) {
         if (state.getBlock() instanceof BranchBlock || state.getBlock() instanceof TrunkShellBlock) {
             return 64.0f;
         }
-        return super.getDestroySpeed(stack, state);
+        return super.getMiningSpeedMultiplier(stack, state);
     }
 
     @Override
-    public boolean mineBlock(ItemStack stack, Level worldIn, BlockState state, BlockPos pos, LivingEntity entityLiving) {
+    public boolean postMine(ItemStack stack, World worldIn, BlockState state, BlockPos pos, LivingEntity entityLiving) {
         if (state.getBlock() instanceof BranchBlock || state.getBlock() instanceof TrunkShellBlock) {
             if (decUses(stack)) {
-                stack.shrink(1);
+                stack.decrement(1);
             }
             return true;
         }
@@ -84,11 +84,11 @@ public class Staff extends Item {
     }
 
     @Override
-    public InteractionResult useOn(UseOnContext context) {
-        Level world = context.getLevel();
-        ItemStack heldStack = context.getPlayer().getItemInHand(context.getHand());
+    public ActionResult useOnBlock(ItemUsageContext context) {
+        World world = context.getWorld();
+        ItemStack heldStack = context.getPlayer().getStackInHand(context.getHand());
 
-        BlockPos pos = context.getClickedPos();
+        BlockPos pos = context.getBlockPos();
         BlockState state = world.getBlockState(pos);
 
         BlockPos rootPos = TreeHelper.findRootNode(world, pos);
@@ -98,52 +98,52 @@ public class Staff extends Item {
         if (!isReadOnly(heldStack) && treePart.isRootNode()) {
             Species species = TreeHelper.getExactSpecies(world, rootPos);
             if (species.isValid()) {
-                if (!context.getPlayer().isShiftKeyDown()) {
-                    String code = new JoCode(world, rootPos, context.getPlayer().getDirection()).toString();
+                if (!context.getPlayer().isSneaking()) {
+                    String code = new JoCode(world, rootPos, context.getPlayer().getHorizontalFacing()).toString();
                     setCode(heldStack, code);
-                    if (world.isClientSide) { // Make sure this doesn't run on the server
-                        Minecraft.getInstance().keyboardHandler.setClipboard(code); // Put the code in the system clipboard to annoy everyone.
+                    if (world.isClient) { // Make sure this doesn't run on the server
+                        MinecraftClient.getInstance().keyboard.setClipboard(code); // Put the code in the system clipboard to annoy everyone.
                     }
                 }
                 setSpecies(heldStack, species);
-                return InteractionResult.SUCCESS;
+                return ActionResult.SUCCESS;
             }
         }
 
         //Create a tree from right clicking on soil
         Species species = getSpecies(heldStack);
         if (species.isValid() && species.isAcceptableSoil(world, pos, state)) {
-            species.getJoCode(getCode(heldStack)).setCareful(true).generate(world, world, species, pos, world.getBiome(pos), context.getPlayer().getDirection(), 8, SafeChunkBounds.ANY, false);
+            species.getJoCode(getCode(heldStack)).setCareful(true).generate(world, world, species, pos, world.getBiome(pos), context.getPlayer().getHorizontalFacing(), 8, SafeChunkBounds.ANY, false);
             if (hasMaxUses(heldStack)) {
                 if (decUses(heldStack)) {
-                    heldStack.shrink(1);//If the player is in creative this will have no effect.
+                    heldStack.decrement(1);//If the player is in creative this will have no effect.
                 }
             } else {
-                heldStack.shrink(1);//If the player is in creative this will have no effect.
+                heldStack.decrement(1);//If the player is in creative this will have no effect.
             }
-            return InteractionResult.SUCCESS;
+            return ActionResult.SUCCESS;
         }
 
-        return InteractionResult.FAIL;
+        return ActionResult.FAIL;
     }
 
     @Override
-    public boolean isBarVisible(ItemStack pStack) {
+    public boolean isItemBarVisible(ItemStack pStack) {
         return hasMaxUses(pStack);
     }
 
     @Override
-    public int getBarWidth(ItemStack stack) {
+    public int getItemBarStep(ItemStack stack) {
         int damage = getUses(stack) / getMaxUses(stack);
         return 1 - damage;
     }
 
     public boolean isReadOnly(ItemStack itemStack) {
-        return itemStack.getOrCreateTag().getBoolean(READ_ONLY);
+        return itemStack.getOrCreateNbt().getBoolean(READ_ONLY);
     }
 
     public Staff setReadOnly(ItemStack itemStack, boolean readonly) {
-        itemStack.getOrCreateTag().putBoolean(READ_ONLY, readonly);
+        itemStack.getOrCreateNbt().putBoolean(READ_ONLY, readonly);
         return this;
     }
 
@@ -156,17 +156,17 @@ public class Staff extends Item {
             name = species.getRegistryName().toString();
         }
 
-        itemStack.getOrCreateTag().putString(TREE, name);
+        itemStack.getOrCreateNbt().putString(TREE, name);
         return this;
     }
 
     public Staff setCode(ItemStack itemStack, String code) {
-        itemStack.getOrCreateTag().putString(CODE, code);
+        itemStack.getOrCreateNbt().putString(CODE, code);
         return this;
     }
 
     public Species getSpecies(ItemStack itemStack) {
-        CompoundTag nbt = itemStack.getOrCreateTag();
+        NbtCompound nbt = itemStack.getOrCreateNbt();
 
         if (nbt.contains(TREE)) {
             return TreeRegistry.findSpecies(nbt.getString(TREE));
@@ -178,7 +178,7 @@ public class Staff extends Item {
     }
 
     public int getUses(ItemStack itemStack) {
-        CompoundTag nbt = itemStack.getOrCreateTag();
+        NbtCompound nbt = itemStack.getOrCreateNbt();
 
         if (nbt.contains(USES)) {
             return nbt.getInt(USES);
@@ -191,12 +191,12 @@ public class Staff extends Item {
     }
 
     public Staff setUses(ItemStack itemStack, int value) {
-        itemStack.getOrCreateTag().putInt(USES, value);
+        itemStack.getOrCreateNbt().putInt(USES, value);
         return this;
     }
 
     public int getMaxUses(ItemStack itemStack) {
-        CompoundTag nbt = itemStack.getOrCreateTag();
+        NbtCompound nbt = itemStack.getOrCreateNbt();
 
         if (nbt.contains(MAX_USES)) {
             return nbt.getInt(MAX_USES);
@@ -206,12 +206,12 @@ public class Staff extends Item {
     }
 
     public Staff setMaxUses(ItemStack itemStack, int value) {
-        itemStack.getOrCreateTag().putInt(MAX_USES, value);
+        itemStack.getOrCreateNbt().putInt(MAX_USES, value);
         return this;
     }
 
     public boolean hasMaxUses(ItemStack itemStack) {
-        return itemStack.getOrCreateTag().contains(MAX_USES);
+        return itemStack.getOrCreateNbt().contains(MAX_USES);
     }
 
     public boolean decUses(ItemStack itemStack) {
@@ -221,7 +221,7 @@ public class Staff extends Item {
     }
 
     public int getColor(ItemStack itemStack, int tint) {
-        final CompoundTag tag = itemStack.getOrCreateTag();
+        final NbtCompound tag = itemStack.getOrCreateNbt();
 
         if (tint == 0) {
             int color = 0x005b472f; // Original brown wood color
@@ -244,7 +244,7 @@ public class Staff extends Item {
 
             if (tag.contains(COLOR)) {
                 // Convert legacy string tag to int tag if tag type is String.
-                if (tag.getTagType(COLOR) == Tag.TAG_STRING) {
+                if (tag.getType(COLOR) == NbtElement.STRING_TYPE) {
                     this.tryConvertLegacyTag(tag);
                 }
                 color = tag.getInt(COLOR);
@@ -261,11 +261,11 @@ public class Staff extends Item {
      * The {@link #COLOR} tag used to store a Hex String, such as {@code #FFFFFF}, but was recently changed to store an
      * int instead. This attempts to convert the legacy tag to an int.
      *
-     * @param tag The {@link CompoundTag} tag containing the {@link #COLOR} string.
+     * @param tag The {@link NbtCompound} tag containing the {@link #COLOR} string.
      * @deprecated This will no longer be necessary in 1.17.
      */
     @Deprecated
-    private void tryConvertLegacyTag(final CompoundTag tag) {
+    private void tryConvertLegacyTag(final NbtCompound tag) {
         final String color = tag.getString(COLOR);
         tag.remove(COLOR);
 
@@ -276,17 +276,17 @@ public class Staff extends Item {
     }
 
     public Staff setColor(ItemStack itemStack, int color) {
-        itemStack.getOrCreateTag().putInt(COLOR, color);
+        itemStack.getOrCreateNbt().putInt(COLOR, color);
         return this;
     }
 
     public String getCode(ItemStack itemStack) {
         String code = "P";//Code of a sapling
 
-        if (itemStack.getOrCreateTag().contains(CODE)) {
-            code = itemStack.getTag().getString(CODE);
+        if (itemStack.getOrCreateNbt().contains(CODE)) {
+            code = itemStack.getNbt().getString(CODE);
         } else {
-            itemStack.getTag().putString(CODE, code);
+            itemStack.getNbt().putString(CODE, code);
         }
 
         return code;
@@ -294,9 +294,9 @@ public class Staff extends Item {
 
     @OnlyIn(Dist.CLIENT)
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn) {
-        tooltip.add(Component.translatable("tooltip.dynamictrees.species", this.getSpecies(stack).getTextComponent()));
-        tooltip.add(Component.translatable("tooltip.dynamictrees.jo_code", new JoCode(this.getCode(stack)).getTextComponent()));
+    public void appendTooltip(ItemStack stack, @Nullable World worldIn, List<Text> tooltip, TooltipContext flagIn) {
+        tooltip.add(Text.translatable("tooltip.dynamictrees.species", this.getSpecies(stack).getTextComponent()));
+        tooltip.add(Text.translatable("tooltip.dynamictrees.jo_code", new JoCode(this.getCode(stack)).getTextComponent()));
     }
 
     /**
@@ -304,7 +304,7 @@ public class Staff extends Item {
      */
 
     @Override
-    public Multimap<Attribute, AttributeModifier> getAttributeModifiers(EquipmentSlot slot, ItemStack stack) {
+    public Multimap<EntityAttribute, EntityAttributeModifier> getAttributeModifiers(EquipmentSlot slot, ItemStack stack) {
         return slot == EquipmentSlot.MAINHAND ? this.attributeModifiers : super.getAttributeModifiers(slot, stack);
     }
 

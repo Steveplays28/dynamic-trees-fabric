@@ -13,16 +13,15 @@ import io.github.steveplays28.dynamictreesfabric.trees.Species;
 import io.github.steveplays28.dynamictreesfabric.util.SafeChunkBounds;
 import io.github.steveplays28.dynamictreesfabric.util.SimpleVoxmap;
 import io.github.steveplays28.dynamictreesfabric.worldgen.JoCode;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.core.particles.SimpleParticleType;
-import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.BlockState;
-
 import javax.annotation.Nullable;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.particle.DefaultParticleType;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
+import net.minecraft.world.BlockView;
+import net.minecraft.world.World;
+import net.minecraft.world.WorldAccess;
 import java.util.Optional;
 
 public class TreeHelper {
@@ -40,7 +39,7 @@ public class TreeHelper {
      * @param world
      * @param rootPos
      */
-    public static void growPulse(Level world, BlockPos rootPos) {
+    public static void growPulse(World world, BlockPos rootPos) {
         BlockState rootyState = world.getBlockState(rootPos);
         RootyBlock dirt = TreeHelper.getRooty(rootyState);
         if (dirt != null) {
@@ -53,18 +52,18 @@ public class TreeHelper {
      * Pulses an entire leafMap volume of blocks each with an age signal. Warning: CPU intensive and should be used
      * sparingly.
      *
-     * @param world      The {@link LevelAccessor} instance.
+     * @param world      The {@link WorldAccess} instance.
      * @param leafMap    The voxel map of hydro values to use as an iterator.
      * @param iterations The number of times to age the volume.
      */
-    public static void ageVolume(LevelAccessor world, SimpleVoxmap leafMap, int iterations, SafeChunkBounds safeBounds) {
+    public static void ageVolume(WorldAccess world, SimpleVoxmap leafMap, int iterations, SafeChunkBounds safeBounds) {
 
         //The iterMap is the voxmap we will use as a discardable.  The leafMap must survive for snow
         SimpleVoxmap iterMap = leafMap != null ? new SimpleVoxmap(leafMap) : null;
-        Iterable<BlockPos.MutableBlockPos> iterable = iterMap.getAllNonZero();
+        Iterable<BlockPos.Mutable> iterable = iterMap.getAllNonZero();
 
         for (int i = 0; i < iterations; i++) {
-            for (BlockPos.MutableBlockPos iPos : iterable) {
+            for (BlockPos.Mutable iPos : iterable) {
                 BlockState blockState = world.getBlockState(iPos);
                 Block block = blockState.getBlock();
                 if (block instanceof DynamicLeavesBlock) {//Special case for leaves
@@ -84,7 +83,7 @@ public class TreeHelper {
                             iterMap.setVoxel(iPos, (byte) newHydro);
                             //Copy all the surrounding values from the leafMap to the iterMap since they now also have potential to change
                             for (Direction dir : Direction.values()) {
-                                BlockPos dPos = iPos.relative(dir);
+                                BlockPos dPos = iPos.offset(dir);
                                 iterMap.setVoxel(dPos, leafMap.getVoxel(dPos));
                             }
                         }
@@ -110,9 +109,9 @@ public class TreeHelper {
      * @param height     The height of the cuboid volume
      * @param iterations The number of times to age the volume
      */
-    public static void ageVolume(LevelAccessor world, BlockPos treePos, int halfWidth, int height, int iterations, SafeChunkBounds safeBounds) {
+    public static void ageVolume(WorldAccess world, BlockPos treePos, int halfWidth, int height, int iterations, SafeChunkBounds safeBounds) {
         //Slow and dirty iteration over a cuboid volume.  Try to avoid this by using a voxmap if you can
-        Iterable<BlockPos> iterable = BlockPos.betweenClosed(treePos.offset(new BlockPos(-halfWidth, 0, -halfWidth)), treePos.offset(new BlockPos(halfWidth, height, halfWidth)));
+        Iterable<BlockPos> iterable = BlockPos.iterate(treePos.add(new BlockPos(-halfWidth, 0, -halfWidth)), treePos.add(new BlockPos(halfWidth, height, halfWidth)));
         for (int i = 0; i < iterations; i++) {
             for (BlockPos iPos : iterable) {
                 BlockState blockState = world.getBlockState(iPos);
@@ -125,20 +124,20 @@ public class TreeHelper {
 
     }
 
-    public static Optional<JoCode> getJoCode(Level world, BlockPos pos) {
+    public static Optional<JoCode> getJoCode(World world, BlockPos pos) {
         return getJoCode(world, pos, Direction.SOUTH);
     }
 
-    public static Optional<JoCode> getJoCode(Level world, BlockPos pos, Direction direction) {
+    public static Optional<JoCode> getJoCode(World world, BlockPos pos, Direction direction) {
         if (pos == null) {
             return Optional.empty();
         }
         pos = dereferenceTrunkShell(world, pos);
         BlockPos rootPos = TreeHelper.findRootNode(world, pos);
-        return rootPos != BlockPos.ZERO ? Optional.of(new JoCode(world, rootPos, direction)) : Optional.empty();
+        return rootPos != BlockPos.ORIGIN ? Optional.of(new JoCode(world, rootPos, direction)) : Optional.empty();
     }
 
-    public static BlockPos dereferenceTrunkShell(Level world, BlockPos pos) {
+    public static BlockPos dereferenceTrunkShell(World world, BlockPos pos) {
 
         BlockState blockState = world.getBlockState(pos);
 
@@ -152,7 +151,7 @@ public class TreeHelper {
         return pos;
     }
 
-    public static Species getCommonSpecies(Level world, BlockPos pos) {
+    public static Species getCommonSpecies(World world, BlockPos pos) {
         pos = dereferenceTrunkShell(world, pos);
         BlockState state = world.getBlockState(pos);
         if (state.getBlock() instanceof BranchBlock) {
@@ -167,14 +166,14 @@ public class TreeHelper {
      * This is resource intensive.  Use only for interaction code. Only the root node can determine the exact species
      * and it has to be found by mapping the branch network.
      *
-     * @param world The {@link Level} instance.
+     * @param world The {@link World} instance.
      * @param pos   The {@link BlockPos} to find the {@link Species} at.
      * @return The {@link Species}, or {@link Species#NULL_SPECIES} if one couldn't be found.
      */
-    public static Species getExactSpecies(Level world, BlockPos pos) {
+    public static Species getExactSpecies(World world, BlockPos pos) {
         BlockPos rootPos = findRootNode(world, pos);
 
-        if (rootPos != BlockPos.ZERO) {
+        if (rootPos != BlockPos.ORIGIN) {
             BlockState rootyState = world.getBlockState(rootPos);
             return TreeHelper.getRooty(rootyState).getSpecies(rootyState, world, rootPos);
         }
@@ -190,7 +189,7 @@ public class TreeHelper {
      * @param pos
      * @return
      */
-    public static Species getBestGuessSpecies(Level world, BlockPos pos) {
+    public static Species getBestGuessSpecies(World world, BlockPos pos) {
         Species species = getExactSpecies(world, pos);
         return species == Species.NULL_SPECIES ? getCommonSpecies(world, pos) : species;
     }
@@ -202,7 +201,7 @@ public class TreeHelper {
      * @param pos   The position being analyzed
      * @return The position of the root node of the tree or BlockPos.ZERO if nothing was found.
      */
-    public static BlockPos findRootNode(Level world, BlockPos pos) {
+    public static BlockPos findRootNode(World world, BlockPos pos) {
 
         pos = dereferenceTrunkShell(world, pos);
         BlockState state = world.getBlockState(pos);
@@ -218,10 +217,10 @@ public class TreeHelper {
             case ROOT:
                 return pos;
             default:
-                return BlockPos.ZERO;
+                return BlockPos.ORIGIN;
         }
 
-        return BlockPos.ZERO;
+        return BlockPos.ORIGIN;
     }
 
     /**
@@ -251,16 +250,16 @@ public class TreeHelper {
      * @param type
      * @param num
      */
-    public static void treeParticles(Level world, BlockPos rootPos, SimpleParticleType type, int num) {
-        if (world.isClientSide) {
+    public static void treeParticles(World world, BlockPos rootPos, DefaultParticleType type, int num) {
+        if (world.isClient) {
             startAnalysisFromRoot(world, rootPos, new MapSignal(new TwinkleNode(type, num)));
         }
     }
 
-    public static void rootParticles(Level world, BlockPos rootPos, Direction offset, SimpleParticleType type, int num) {
-        if (world.isClientSide) {
-            if (world.isClientSide() && world.getBlockState(rootPos).getBlock() instanceof RootyBlock) {
-                final BlockPos particlePos = rootPos.offset(offset.getNormal());
+    public static void rootParticles(World world, BlockPos rootPos, Direction offset, DefaultParticleType type, int num) {
+        if (world.isClient) {
+            if (world.isClient() && world.getBlockState(rootPos).getBlock() instanceof RootyBlock) {
+                final BlockPos particlePos = rootPos.add(offset.getVector());
                 DTClient.spawnParticles(world, type, particlePos.getX(), particlePos.getY(), particlePos.getZ(), num, world.getRandom());
             }
         }
@@ -274,7 +273,7 @@ public class TreeHelper {
      * @param signal  The signal carrying the inspectors
      * @return true if a root block was found.
      */
-    public static boolean startAnalysisFromRoot(LevelAccessor world, BlockPos rootPos, MapSignal signal) {
+    public static boolean startAnalysisFromRoot(WorldAccess world, BlockPos rootPos, MapSignal signal) {
         RootyBlock dirt = TreeHelper.getRooty(world.getBlockState(rootPos));
         if (dirt != null) {
             dirt.startAnalysis(world, rootPos, signal);
@@ -293,7 +292,7 @@ public class TreeHelper {
         return isTreePart(blockState.getBlock());
     }
 
-    public static boolean isTreePart(LevelAccessor blockAccess, BlockPos pos) {
+    public static boolean isTreePart(WorldAccess blockAccess, BlockPos pos) {
         return isTreePart(blockAccess.getBlockState(pos).getBlock());
     }
 
@@ -331,7 +330,7 @@ public class TreeHelper {
         return getBranch(state.getBlock());
     }
 
-    public static int getRadius(BlockGetter access, BlockPos pos) {
+    public static int getRadius(BlockView access, BlockPos pos) {
         BlockState state = access.getBlockState(pos);
         return getTreePart(state).getRadius(state);
     }

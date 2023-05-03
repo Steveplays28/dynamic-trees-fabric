@@ -4,10 +4,10 @@ import io.github.steveplays28.dynamictreesfabric.api.TreeRegistry;
 import io.github.steveplays28.dynamictreesfabric.blocks.DynamicSaplingBlock;
 import io.github.steveplays28.dynamictreesfabric.trees.Species;
 import io.github.steveplays28.dynamictreesfabric.util.ItemUtils;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.block.BlockState;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
+import net.minecraft.world.WorldAccess;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.event.level.SaplingGrowTreeEvent;
 import net.minecraftforge.eventbus.api.Event;
@@ -19,7 +19,7 @@ public class VanillaSaplingEventHandler {
     public void onPlayerPlaceBlock(BlockEvent.EntityPlaceEvent event) {
         final BlockState state = event.getPlacedBlock();
 
-        if (!(event.getLevel() instanceof Level world) || !TreeRegistry.SAPLING_REPLACERS.containsKey(state)) {
+        if (!(event.getLevel() instanceof World world) || !TreeRegistry.SAPLING_REPLACERS.containsKey(state)) {
             return;
         }
 
@@ -38,15 +38,15 @@ public class VanillaSaplingEventHandler {
 
     @SubscribeEvent
     public void onSaplingGrowTree(SaplingGrowTreeEvent event) {
-        final LevelAccessor iWorld = event.getLevel();
+        final WorldAccess iWorld = event.getLevel();
         final BlockPos pos = event.getPos();
         final BlockState blockState = iWorld.getBlockState(pos);
 
-        if (!(iWorld instanceof Level) || !TreeRegistry.SAPLING_REPLACERS.containsKey(blockState)) {
+        if (!(iWorld instanceof World) || !TreeRegistry.SAPLING_REPLACERS.containsKey(blockState)) {
             return;
         }
 
-        final Level world = ((Level) iWorld);
+        final World world = ((World) iWorld);
         final Species species = TreeRegistry.SAPLING_REPLACERS.get(blockState)
                 .selfOrLocationOverride(world, pos);
 

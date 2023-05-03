@@ -1,6 +1,6 @@
 package io.github.steveplays28.dynamictreesfabric.util;
 
-import net.minecraft.util.RandomSource;
+import net.minecraft.util.math.random.Random;
 
 /**
  * Just a few math helper functions.
@@ -16,7 +16,7 @@ public class MathHelper {
      * @param distMap The probability map.
      * @return A random direction.
      */
-    public static int selectRandomFromDistribution(final RandomSource random, final int[] distMap) {
+    public static int selectRandomFromDistribution(final Random random, final int[] distMap) {
         int distSize = 0;
 
         for (int j : distMap) {
@@ -51,7 +51,7 @@ public class MathHelper {
         return ang1 + shortDegreesDist(ang1, ang2) * t;
     }
 
-    public static int randomBetween(RandomSource random, int min, int max) {
+    public static int randomBetween(Random random, int min, int max) {
         if (min == max) {
             return min;
         }

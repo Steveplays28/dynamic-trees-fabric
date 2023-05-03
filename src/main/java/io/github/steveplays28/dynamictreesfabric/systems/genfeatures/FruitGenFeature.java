@@ -14,14 +14,13 @@ import io.github.steveplays28.dynamictreesfabric.systems.nodemappers.FindEndsNod
 import io.github.steveplays28.dynamictreesfabric.trees.Species;
 import io.github.steveplays28.dynamictreesfabric.util.CoordUtils;
 import io.github.steveplays28.dynamictreesfabric.util.SafeChunkBounds;
-import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.block.state.BlockState;
-
 import java.util.List;
 import java.util.function.Supplier;
+import net.minecraft.block.BlockState;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
+import net.minecraft.world.WorldAccess;
 
 @GeneratesFruit
 public class FruitGenFeature extends GenFeature {
@@ -29,7 +28,7 @@ public class FruitGenFeature extends GenFeature {
     @SuppressWarnings("unchecked")
     public static final ConfigurationProperty<Supplier<FruitBlock>> FRUIT_BLOCK = ConfigurationProperty.property("fruit_block", (Class<Supplier<FruitBlock>>) (Class) Supplier.class);
 
-    public FruitGenFeature(ResourceLocation registryName) {
+    public FruitGenFeature(Identifier registryName) {
         super(registryName);
     }
 
@@ -55,7 +54,7 @@ public class FruitGenFeature extends GenFeature {
             qty *= context.fruitProductionFactor();
             for (int i = 0; i < qty; i++) {
                 final BlockPos endPoint = context.endPoints().get(context.random().nextInt(context.endPoints().size()));
-                this.addFruit(configuration, context.world(), context.species(), context.pos().above(), endPoint, true,
+                this.addFruit(configuration, context.world(), context.species(), context.pos().up(), endPoint, true,
                         false, context.bounds(), context.seasonValue());
             }
             return true;
@@ -65,7 +64,7 @@ public class FruitGenFeature extends GenFeature {
 
     @Override
     protected boolean postGrow(GenFeatureConfiguration configuration, PostGrowContext context) {
-        final Level world = context.world();
+        final World world = context.world();
         final BlockState blockState = world.getBlockState(context.treePos());
         final BranchBlock branch = TreeHelper.getBranch(blockState);
 
@@ -81,7 +80,7 @@ public class FruitGenFeature extends GenFeature {
                 if (!endPoints.isEmpty()) {
                     for (int i = 0; i < qty; i++) {
                         final BlockPos endPoint = endPoints.get(world.random.nextInt(endPoints.size()));
-                        this.addFruit(configuration, world, context.species(), rootPos.above(), endPoint, false, true,
+                        this.addFruit(configuration, world, context.species(), rootPos.up(), endPoint, false, true,
                                 SafeChunkBounds.ANY, SeasonHelper.getSeasonValue(world, rootPos));
                     }
                 }
@@ -91,14 +90,14 @@ public class FruitGenFeature extends GenFeature {
         return true;
     }
 
-    protected void addFruit(GenFeatureConfiguration configuration, LevelAccessor world, Species species, BlockPos treePos, BlockPos branchPos, boolean worldGen, boolean enableHash, SafeChunkBounds safeBounds, Float seasonValue) {
+    protected void addFruit(GenFeatureConfiguration configuration, WorldAccess world, Species species, BlockPos treePos, BlockPos branchPos, boolean worldGen, boolean enableHash, SafeChunkBounds safeBounds, Float seasonValue) {
         final BlockPos fruitPos = CoordUtils.getRayTraceFruitPos(world, species, treePos, branchPos, safeBounds);
-        if (fruitPos != BlockPos.ZERO &&
+        if (fruitPos != BlockPos.ORIGIN &&
                 (!enableHash || ((CoordUtils.coordHashCode(fruitPos, 0) & 3) == 0)) &&
                 world.getRandom().nextFloat() <= configuration.get(PLACE_CHANCE)) {
             FruitBlock fruitBlock = configuration.get(FRUIT_BLOCK).get();
             BlockState setState = fruitBlock.getStateForAge(worldGen ? fruitBlock.getAgeForSeasonalWorldGen(world, fruitPos, seasonValue) : 0);
-            world.setBlock(fruitPos, setState, 3);
+            world.setBlockState(fruitPos, setState, 3);
         }
     }
 

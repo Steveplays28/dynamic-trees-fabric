@@ -6,9 +6,9 @@ import io.github.steveplays28.dynamictreesfabric.models.bakedmodels.BranchBlockB
 import io.github.steveplays28.dynamictreesfabric.models.loaders.BranchBlockModelLoader;
 import io.github.steveplays28.dynamictreesfabric.models.loaders.RootBlockModelLoader;
 import io.github.steveplays28.dynamictreesfabric.models.loaders.ThickBranchBlockModelLoader;
-import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.client.resources.model.ModelResourceLocation;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.render.model.BakedModel;
+import net.minecraft.client.util.ModelIdentifier;
+import net.minecraft.util.Identifier;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ModelEvent.BakingCompleted;
 import net.minecraftforge.client.event.ModelEvent.RegisterGeometryLoaders;
@@ -21,9 +21,9 @@ import net.minecraftforge.fml.common.Mod;
 @Mod.EventBusSubscriber(modid = io.github.steveplays28.dynamictreesfabric.DynamicTreesFabric.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public final class BakedModelEventHandler {
 
-    public static final ResourceLocation BRANCH = io.github.steveplays28.dynamictreesfabric.DynamicTreesFabric.resLoc("branch");
-    public static final ResourceLocation ROOT = io.github.steveplays28.dynamictreesfabric.DynamicTreesFabric.resLoc("root");
-    public static final ResourceLocation THICK_BRANCH = io.github.steveplays28.dynamictreesfabric.DynamicTreesFabric.resLoc("thick_branch");
+    public static final Identifier BRANCH = io.github.steveplays28.dynamictreesfabric.DynamicTreesFabric.resLoc("branch");
+    public static final Identifier ROOT = io.github.steveplays28.dynamictreesfabric.DynamicTreesFabric.resLoc("root");
+    public static final Identifier THICK_BRANCH = io.github.steveplays28.dynamictreesfabric.DynamicTreesFabric.resLoc("thick_branch");
 
     @SubscribeEvent
     public static void onModelRegistryEvent(RegisterGeometryLoaders event) {
@@ -40,8 +40,8 @@ public final class BakedModelEventHandler {
         BranchBlockBakedModel.INSTANCES.clear();
 
         // Put bonsai pot baked model into its model location.
-        BakedModel flowerPotModel = event.getModelManager().getModel(new ModelResourceLocation(PottedSaplingBlock.REG_NAME, ""));
-        event.getModels().put(new ModelResourceLocation(PottedSaplingBlock.REG_NAME, ""),
+        BakedModel flowerPotModel = event.getModelManager().getModel(new ModelIdentifier(PottedSaplingBlock.REG_NAME, ""));
+        event.getModels().put(new ModelIdentifier(PottedSaplingBlock.REG_NAME, ""),
                 new BakedModelBlockBonsaiPot(flowerPotModel));
 
         ////Highly experimental code

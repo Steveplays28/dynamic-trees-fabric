@@ -2,31 +2,30 @@ package io.github.steveplays28.dynamictreesfabric.items;
 
 import io.github.steveplays28.dynamictreesfabric.init.DTConfigs;
 import io.github.steveplays28.dynamictreesfabric.init.DTRegistries;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
-import net.minecraft.stats.Stats;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.InteractionResultHolder;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.level.ClipContext;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.HitResult;
-
 import javax.annotation.Nullable;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvents;
+import net.minecraft.stat.Stats;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.Hand;
+import net.minecraft.util.TypedActionResult;
+import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
+import net.minecraft.world.RaycastContext;
+import net.minecraft.world.World;
 
 public class DirtBucket extends Item {
 
     public DirtBucket() {
-        super(new Item.Properties().stacksTo(1).tab(DTRegistries.ITEM_GROUP));
+        super(new Item.Settings().maxCount(1).tab(DTRegistries.ITEM_GROUP));
     }
 
     @Override
@@ -40,54 +39,54 @@ public class DirtBucket extends Item {
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level world, Player player, InteractionHand hand) {
+    public TypedActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand) {
 
-        final ItemStack itemStack = player.getItemInHand(hand);
+        final ItemStack itemStack = player.getStackInHand(hand);
         final BlockHitResult blockRayTraceResult;
 
         {
-            blockRayTraceResult = getPlayerPOVHitResult(world, player, ClipContext.Fluid.NONE);
+            blockRayTraceResult = raycast(world, player, RaycastContext.FluidHandling.NONE);
             if (blockRayTraceResult.getType() != HitResult.Type.BLOCK) {
-                return new InteractionResultHolder<>(InteractionResult.FAIL, itemStack);
+                return new TypedActionResult<>(ActionResult.FAIL, itemStack);
             }
         }
 
         if (DTConfigs.DIRT_BUCKET_PLACES_DIRT.get()) {
             if (blockRayTraceResult.getType() != HitResult.Type.BLOCK) {
-                return new InteractionResultHolder<>(InteractionResult.PASS, itemStack);
+                return new TypedActionResult<>(ActionResult.PASS, itemStack);
             } else {
                 final BlockPos pos = blockRayTraceResult.getBlockPos();
 
-                if (!world.mayInteract(player, pos)) {
-                    return new InteractionResultHolder<>(InteractionResult.FAIL, itemStack);
+                if (!world.canPlayerModifyAt(player, pos)) {
+                    return new TypedActionResult<>(ActionResult.FAIL, itemStack);
                 } else {
                     final boolean isReplaceable = world.getBlockState(pos).getMaterial().isReplaceable();
-                    final BlockPos workingPos = isReplaceable && blockRayTraceResult.getDirection() == Direction.UP ? pos : pos.relative(blockRayTraceResult.getDirection());
+                    final BlockPos workingPos = isReplaceable && blockRayTraceResult.getSide() == Direction.UP ? pos : pos.offset(blockRayTraceResult.getSide());
 
-                    if (!player.mayUseItemAt(workingPos, blockRayTraceResult.getDirection(), itemStack)) {
-                        return new InteractionResultHolder<>(InteractionResult.FAIL, itemStack);
+                    if (!player.canPlaceOn(workingPos, blockRayTraceResult.getSide(), itemStack)) {
+                        return new TypedActionResult<>(ActionResult.FAIL, itemStack);
                     } else if (this.tryPlaceContainedDirt(player, world, workingPos)) {
-                        player.awardStat(Stats.ITEM_USED.get(this));
-                        return !player.getAbilities().instabuild ? new InteractionResultHolder<>(InteractionResult.SUCCESS, new ItemStack(Items.BUCKET)) : new InteractionResultHolder<>(InteractionResult.SUCCESS, itemStack);
+                        player.incrementStat(Stats.USED.getOrCreateStat(this));
+                        return !player.getAbilities().creativeMode ? new TypedActionResult<>(ActionResult.SUCCESS, new ItemStack(Items.BUCKET)) : new TypedActionResult<>(ActionResult.SUCCESS, itemStack);
                     } else {
-                        return new InteractionResultHolder<>(InteractionResult.FAIL, itemStack);
+                        return new TypedActionResult<>(ActionResult.FAIL, itemStack);
                     }
                 }
             }
         } else {
-            return new InteractionResultHolder<>(InteractionResult.PASS, itemStack);
+            return new TypedActionResult<>(ActionResult.PASS, itemStack);
         }
     }
 
-    public boolean tryPlaceContainedDirt(@Nullable Player player, Level world, BlockPos posIn) {
+    public boolean tryPlaceContainedDirt(@Nullable PlayerEntity player, World world, BlockPos posIn) {
         BlockState blockState = world.getBlockState(posIn);
         if (blockState.getMaterial().isReplaceable()) {
-            if (!world.isClientSide && !blockState.isAir()) {
-                world.destroyBlock(posIn, true);
+            if (!world.isClient && !blockState.isAir()) {
+                world.breakBlock(posIn, true);
             }
 
-            world.playSound(player, posIn, SoundEvents.GRAVEL_PLACE, SoundSource.BLOCKS, 1.0F, 0.8F);
-            world.setBlock(posIn, Blocks.DIRT.defaultBlockState(), 11);
+            world.playSound(player, posIn, SoundEvents.BLOCK_GRAVEL_PLACE, SoundCategory.BLOCKS, 1.0F, 0.8F);
+            world.setBlockState(posIn, Blocks.DIRT.getDefaultState(), 11);
             return true;
         }
 

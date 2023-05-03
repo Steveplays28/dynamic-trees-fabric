@@ -3,8 +3,8 @@ package io.github.steveplays28.dynamictreesfabric.api.data;
 import io.github.steveplays28.dynamictreesfabric.blocks.DynamicSaplingBlock;
 import io.github.steveplays28.dynamictreesfabric.data.provider.DTBlockStateProvider;
 import io.github.steveplays28.dynamictreesfabric.trees.Species;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.block.Block;
+import net.minecraft.block.Block;
+import net.minecraft.util.Identifier;
 import net.minecraftforge.client.model.generators.BlockModelBuilder;
 import net.minecraftforge.registries.ForgeRegistries;
 
@@ -22,9 +22,9 @@ public class SaplingStateGenerator implements Generator<DTBlockStateProvider, Sp
 
     @Override
     public void generate(DTBlockStateProvider provider, Species input, Dependencies dependencies) {
-        final Optional<ResourceLocation> leavesTextureLocation = dependencies.getOptional(PRIMITIVE_LEAVES)
+        final Optional<Identifier> leavesTextureLocation = dependencies.getOptional(PRIMITIVE_LEAVES)
                 .map(primitiveLeaves -> provider.block(Objects.requireNonNull(ForgeRegistries.BLOCKS.getKey(primitiveLeaves))));
-        final ResourceLocation primitiveLogLocation = Objects.requireNonNull(ForgeRegistries.BLOCKS.getKey(dependencies.get(PRIMITIVE_LOG)));
+        final Identifier primitiveLogLocation = Objects.requireNonNull(ForgeRegistries.BLOCKS.getKey(dependencies.get(PRIMITIVE_LOG)));
 
         final BlockModelBuilder builder = provider.models().getBuilder("block/saplings/" + input.getRegistryName().getPath())
                 .parent(provider.models().getExistingFile(input.getSaplingSmartModelLocation()))

@@ -1,9 +1,9 @@
 package io.github.steveplays28.dynamictreesfabric.data;
 
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.TagKey;
-import net.minecraft.world.level.block.Block;
+import net.minecraft.block.Block;
+import net.minecraft.registry.tag.BlockTags;
+import net.minecraft.registry.tag.TagKey;
+import net.minecraft.util.Identifier;
 
 /**
  * @author Harley O'Connor
@@ -23,6 +23,6 @@ public final class DTBlockTags {
     public static final TagKey<Block> WART_BLOCKS = bind("wart_blocks");
 
     private static TagKey<Block> bind(String identifier) {
-        return BlockTags.create(new ResourceLocation(io.github.steveplays28.dynamictreesfabric.DynamicTreesFabric.MOD_ID, identifier));
+        return BlockTags.of(new Identifier(io.github.steveplays28.dynamictreesfabric.DynamicTreesFabric.MOD_ID, identifier));
     }
 }

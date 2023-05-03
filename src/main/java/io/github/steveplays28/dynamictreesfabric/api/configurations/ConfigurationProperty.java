@@ -5,10 +5,9 @@ import io.github.steveplays28.dynamictreesfabric.deserialisation.JsonDeserialise
 import io.github.steveplays28.dynamictreesfabric.deserialisation.result.Result;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.level.block.Block;
-
 import javax.annotation.Nonnull;
+import net.minecraft.block.Block;
+import net.minecraft.item.Item;
 import java.util.Objects;
 import java.util.Optional;
 

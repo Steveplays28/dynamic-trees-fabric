@@ -1,7 +1,7 @@
 package io.github.steveplays28.dynamictreesfabric.api.substances;
 
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.Level;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 
 /**
  * A substance effect is like a potion effect but for trees.
@@ -17,7 +17,7 @@ public interface SubstanceEffect {
      * @param rootPos
      * @return true for success.  false otherwise
      */
-    boolean apply(Level world, BlockPos rootPos);
+    boolean apply(World world, BlockPos rootPos);
 
     /**
      * For a continuously updating effect.
@@ -27,7 +27,7 @@ public interface SubstanceEffect {
      * @param deltaTicks
      * @return true to stay alive. false to kill effector
      */
-    default boolean update(Level world, BlockPos rootPos, int deltaTicks, int fertility) {
+    default boolean update(World world, BlockPos rootPos, int deltaTicks, int fertility) {
         return false;
     }
 

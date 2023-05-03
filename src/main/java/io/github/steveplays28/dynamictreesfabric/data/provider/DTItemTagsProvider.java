@@ -4,9 +4,9 @@ import io.github.steveplays28.dynamictreesfabric.data.DTItemTags;
 import io.github.steveplays28.dynamictreesfabric.trees.Family;
 import io.github.steveplays28.dynamictreesfabric.trees.Species;
 import net.minecraft.data.DataGenerator;
-import net.minecraft.data.tags.BlockTagsProvider;
-import net.minecraft.data.tags.ItemTagsProvider;
-import net.minecraft.tags.ItemTags;
+import net.minecraft.data.server.tag.vanilla.VanillaBlockTagProvider;
+import net.minecraft.data.server.tag.vanilla.VanillaItemTagProvider;
+import net.minecraft.registry.tag.ItemTags;
 import net.minecraftforge.common.data.ExistingFileHelper;
 
 import javax.annotation.Nullable;
@@ -14,14 +14,14 @@ import javax.annotation.Nullable;
 /**
  * @author Harley O'Connor
  */
-public class DTItemTagsProvider extends ItemTagsProvider {
+public class DTItemTagsProvider extends VanillaItemTagProvider {
 
-    public DTItemTagsProvider(DataGenerator dataGenerator, String modId, BlockTagsProvider blockTagsProvider, @Nullable ExistingFileHelper existingFileHelper) {
+    public DTItemTagsProvider(DataGenerator dataGenerator, String modId, VanillaBlockTagProvider blockTagsProvider, @Nullable ExistingFileHelper existingFileHelper) {
         super(dataGenerator, blockTagsProvider, modId, existingFileHelper);
     }
 
     @Override
-    protected void addTags() {
+    protected void configure() {
         if (this.modId.equals(io.github.steveplays28.dynamictreesfabric.DynamicTreesFabric.MOD_ID)) {
             this.addDTOnlyTags();
         }
@@ -29,14 +29,14 @@ public class DTItemTagsProvider extends ItemTagsProvider {
     }
 
     private void addDTOnlyTags() {
-        this.tag(DTItemTags.BRANCHES)
+        this.getOrCreateTagBuilder(DTItemTags.BRANCHES)
                 .addTag(DTItemTags.BRANCHES_THAT_BURN)
                 .addTag(DTItemTags.FUNGUS_BRANCHES);
 
-        this.tag(DTItemTags.SEEDS)
+        this.getOrCreateTagBuilder(DTItemTags.SEEDS)
                 .addTag(DTItemTags.FUNGUS_CAPS);
 
-        this.tag(ItemTags.SAPLINGS)
+        this.getOrCreateTagBuilder(ItemTags.SAPLINGS)
                 .addTag(DTItemTags.SEEDS);
     }
 

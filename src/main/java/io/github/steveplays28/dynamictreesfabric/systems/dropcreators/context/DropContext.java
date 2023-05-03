@@ -1,12 +1,11 @@
 package io.github.steveplays28.dynamictreesfabric.systems.dropcreators.context;
 
 import io.github.steveplays28.dynamictreesfabric.trees.Species;
-import net.minecraft.core.BlockPos;
-import net.minecraft.util.RandomSource;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
-
 import javax.annotation.Nullable;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.random.Random;
+import net.minecraft.world.World;
 import java.util.List;
 
 /**
@@ -16,8 +15,8 @@ import java.util.List;
  */
 public class DropContext {
 
-    private final Level world;
-    private final RandomSource random;
+    private final World world;
+    private final Random random;
     private final BlockPos pos;
 
     private final Species species;
@@ -27,17 +26,17 @@ public class DropContext {
     private final int fertility;
     private final int fortune;
 
-    public DropContext(@Nullable Level world, BlockPos pos, Species species, List<ItemStack> dropList) {
+    public DropContext(@Nullable World world, BlockPos pos, Species species, List<ItemStack> dropList) {
         this(world, pos, species, dropList, ItemStack.EMPTY, -1, 0);
     }
 
-    public DropContext(Level world, RandomSource random, BlockPos pos, Species species, List<ItemStack> dropList, int fertility, int fortune) {
+    public DropContext(World world, Random random, BlockPos pos, Species species, List<ItemStack> dropList, int fertility, int fortune) {
         this(world, pos, species, dropList, ItemStack.EMPTY, fertility, fortune);
     }
 
-    public DropContext(@Nullable Level world, BlockPos pos, Species species, List<ItemStack> dropList, ItemStack tool, int fertility, int fortune) {
+    public DropContext(@Nullable World world, BlockPos pos, Species species, List<ItemStack> dropList, ItemStack tool, int fertility, int fortune) {
         this.world = world;
-        this.random = world == null ? RandomSource.create() : world.random;
+        this.random = world == null ? Random.create() : world.random;
         this.pos = pos;
         this.species = species;
         this.dropList = dropList;
@@ -46,11 +45,11 @@ public class DropContext {
         this.fortune = fortune;
     }
 
-    public Level world() {
+    public World world() {
         return world;
     }
 
-    public RandomSource random() {
+    public Random random() {
         return this.random;
     }
 

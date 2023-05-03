@@ -3,18 +3,17 @@ package io.github.steveplays28.dynamictreesfabric.api.worldgen;
 import io.github.steveplays28.dynamictreesfabric.api.TreeRegistry;
 import io.github.steveplays28.dynamictreesfabric.trees.Species;
 import com.google.common.collect.Sets;
-import net.minecraft.core.BlockPos;
-import net.minecraft.util.RandomSource;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.GenerationStep;
-
 import javax.annotation.Nonnull;
+import net.minecraft.block.BlockState;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.random.Random;
+import net.minecraft.world.gen.GenerationStep;
 import java.util.ArrayList;
 import java.util.Collection;
 
 /**
  * Provides the forest density for a given biome. Mods should implement this interface and register it via the {@link
- * TreeRegistry} to control how densely populated a {@link net.minecraft.world.level.biome.Biome} is.
+ * TreeRegistry} to control how densely populated a {@link net.minecraft.world.biome.Biome} is.
  *
  * @author ferreusveritas
  */
@@ -22,23 +21,23 @@ public class BiomePropertySelectors {
 
     @FunctionalInterface
     public interface ChanceSelector {
-        Chance getChance(RandomSource random, @Nonnull Species species, int radius);
+        Chance getChance(Random random, @Nonnull Species species, int radius);
     }
 
     @FunctionalInterface
     public interface DensitySelector {
-        double getDensity(RandomSource random, double noiseDensity);
+        double getDensity(Random random, double noiseDensity);
     }
 
     @FunctionalInterface
     public interface SpeciesSelector {
-        SpeciesSelection getSpecies(BlockPos pos, BlockState dirt, RandomSource random);
+        SpeciesSelection getSpecies(BlockPos pos, BlockState dirt, Random random);
     }
 
     public static final class FeatureCancellations {
         private final Collection<String> namespaces = Sets.newHashSet();
         private final Collection<FeatureCanceller> featureCancellers = Sets.newHashSet();
-        private final Collection<GenerationStep.Decoration> stages = Sets.newHashSet();
+        private final Collection<GenerationStep.Feature> stages = Sets.newHashSet();
 
         public void putNamespace(final String namespace) {
             this.namespaces.add(namespace);
@@ -52,13 +51,13 @@ public class BiomePropertySelectors {
             this.featureCancellers.add(featureCanceller);
         }
 
-        public void putStage(final GenerationStep.Decoration stage) {
+        public void putStage(final GenerationStep.Feature stage) {
             this.stages.add(stage);
         }
 
         public void putDefaultStagesIfEmpty() {
             if (this.stages.size() < 1) {
-                this.stages.add(GenerationStep.Decoration.VEGETAL_DECORATION);
+                this.stages.add(GenerationStep.Feature.VEGETAL_DECORATION);
             }
         }
 
@@ -78,7 +77,7 @@ public class BiomePropertySelectors {
             return this.featureCancellers;
         }
 
-        public Collection<GenerationStep.Decoration> getStages() {
+        public Collection<GenerationStep.Feature> getStages() {
             return this.stages;
         }
 
@@ -126,7 +125,7 @@ public class BiomePropertySelectors {
         }
 
         @Override
-        public SpeciesSelection getSpecies(BlockPos pos, BlockState dirt, RandomSource random) {
+        public SpeciesSelection getSpecies(BlockPos pos, BlockState dirt, Random random) {
             return decision;
         }
     }
@@ -163,7 +162,7 @@ public class BiomePropertySelectors {
         }
 
         @Override
-        public SpeciesSelection getSpecies(BlockPos pos, BlockState dirt, RandomSource random) {
+        public SpeciesSelection getSpecies(BlockPos pos, BlockState dirt, Random random) {
             int chance = random.nextInt(totalWeight);
 
             for (Entry entry : decisionTable) {

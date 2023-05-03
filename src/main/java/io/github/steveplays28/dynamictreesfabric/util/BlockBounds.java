@@ -1,12 +1,11 @@
 package io.github.steveplays28.dynamictreesfabric.util;
 
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.LevelAccessor;
-
 import java.util.Iterator;
 import java.util.List;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.math.Direction;
+import net.minecraft.world.WorldAccess;
 
 public class BlockBounds implements Iterable<BlockPos> {
 
@@ -46,14 +45,14 @@ public class BlockBounds implements Iterable<BlockPos> {
         this.maxZ = maxZ;
     }
 
-    public BlockBounds(LevelAccessor level, ChunkPos cPos) {
-        minX = cPos.getMinBlockX();
-        minY = level.getMinBuildHeight();
-        minZ = cPos.getMinBlockZ();
+    public BlockBounds(WorldAccess level, ChunkPos cPos) {
+        minX = cPos.getStartX();
+        minY = level.getBottomY();
+        minZ = cPos.getStartZ();
 
-        maxX = cPos.getMaxBlockX();
-        maxY = level.getMaxBuildHeight();
-        maxZ = cPos.getMaxBlockZ();
+        maxX = cPos.getEndX();
+        maxY = level.getTopY();
+        maxZ = cPos.getEndZ();
     }
 
     public BlockBounds(BlockBounds other) {
@@ -172,7 +171,7 @@ public class BlockBounds implements Iterable<BlockPos> {
 
     @Override
     public Iterator<BlockPos> iterator() {
-        return BlockPos.betweenClosed(this.minX, this.minY, this.minZ, this.maxX, this.maxY, this.maxZ).iterator();
+        return BlockPos.iterate(this.minX, this.minY, this.minZ, this.maxX, this.maxY, this.maxZ).iterator();
     }
 
     public int getXSize() {

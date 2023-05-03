@@ -1,10 +1,10 @@
 package io.github.steveplays28.dynamictreesfabric.blocks.branches;
 
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.block.BlockState;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.BlockView;
 
 @FunctionalInterface
 public interface Musable {
-    boolean isMusable(BlockGetter world, BlockState state, BlockPos pos);
+    boolean isMusable(BlockView world, BlockState state, BlockPos pos);
 }

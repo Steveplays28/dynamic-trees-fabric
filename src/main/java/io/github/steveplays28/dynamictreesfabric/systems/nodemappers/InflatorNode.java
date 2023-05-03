@@ -6,10 +6,10 @@ import io.github.steveplays28.dynamictreesfabric.api.treedata.TreePart;
 import io.github.steveplays28.dynamictreesfabric.blocks.branches.BranchBlock;
 import io.github.steveplays28.dynamictreesfabric.trees.Species;
 import io.github.steveplays28.dynamictreesfabric.util.SimpleVoxmap;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.block.BlockState;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
+import net.minecraft.world.WorldAccess;
 
 public class InflatorNode implements NodeInspector {
 
@@ -23,18 +23,18 @@ public class InflatorNode implements NodeInspector {
     public InflatorNode(Species species, SimpleVoxmap leafMap) {
         this.species = species;
         this.leafMap = leafMap;
-        last = BlockPos.ZERO;
+        last = BlockPos.ORIGIN;
         highestTrunkBlock = null;
     }
 
     @Override
-    public boolean run(BlockState blockState, LevelAccessor world, BlockPos pos, Direction fromDir) {
+    public boolean run(BlockState blockState, WorldAccess world, BlockPos pos, Direction fromDir) {
         BranchBlock branch = TreeHelper.getBranch(blockState);
 
         if (branch != null) {
             radius = species.getFamily().getPrimaryThickness();
             //Store the last block to be part of the trunk
-            if (highestTrunkBlock == null && !TreeHelper.isBranch(world.getBlockState(pos.above())))
+            if (highestTrunkBlock == null && !TreeHelper.isBranch(world.getBlockState(pos.up())))
                 highestTrunkBlock = pos;
         }
 
@@ -42,7 +42,7 @@ public class InflatorNode implements NodeInspector {
     }
 
     @Override
-    public boolean returnRun(BlockState blockState, LevelAccessor world, BlockPos pos, Direction fromDir) {
+    public boolean returnRun(BlockState blockState, WorldAccess world, BlockPos pos, Direction fromDir) {
         //Calculate Branch Thickness based on neighboring branches
 
         BranchBlock branch = TreeHelper.getBranch(blockState);
@@ -54,7 +54,7 @@ public class InflatorNode implements NodeInspector {
             for (Direction dir : Direction.values()) {
                 if (!dir.equals(fromDir)) {//Don't count where the signal originated from
 
-                    BlockPos dPos = pos.relative(dir);
+                    BlockPos dPos = pos.offset(dir);
 
                     if (dPos.equals(last)) {//or the branch we just came back from
                         isTwig = false;//on the return journey if the block we just came from is a branch we are obviously not the endpoint(twig)

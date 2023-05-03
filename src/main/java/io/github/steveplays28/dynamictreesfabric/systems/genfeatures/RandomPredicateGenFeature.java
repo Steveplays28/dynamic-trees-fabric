@@ -4,14 +4,14 @@ import io.github.steveplays28.dynamictreesfabric.api.configurations.Configuratio
 import io.github.steveplays28.dynamictreesfabric.systems.genfeatures.context.PostGenerationContext;
 import io.github.steveplays28.dynamictreesfabric.systems.genfeatures.context.PostGrowContext;
 import io.github.steveplays28.dynamictreesfabric.util.CoordUtils;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Identifier;
 
 public class RandomPredicateGenFeature extends GenFeature {
 
     public static final ConfigurationProperty<Boolean> ONLY_WORLD_GEN = ConfigurationProperty.bool("only_world_gen");
     public static final ConfigurationProperty<GenFeatureConfiguration> GEN_FEATURE = ConfigurationProperty.property("gen_feature", GenFeatureConfiguration.class);
 
-    public RandomPredicateGenFeature(ResourceLocation registryName) {
+    public RandomPredicateGenFeature(Identifier registryName) {
         super(registryName);
     }
 

@@ -1,14 +1,14 @@
 package io.github.steveplays28.dynamictreesfabric.blocks;
 
 import io.github.steveplays28.dynamictreesfabric.blocks.branches.BasicBranchBlock;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.state.StateManager;
+import net.minecraft.state.property.Property;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.BlockView;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.serialization.MapCodec;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.StateDefinition;
-import net.minecraft.world.level.block.state.properties.Property;
 
 /**
  * An abstract class to allow for Blocks with dynamic hardness.
@@ -19,29 +19,29 @@ import net.minecraft.world.level.block.state.properties.Property;
  */
 public abstract class BlockWithDynamicHardness extends Block {
 
-    public BlockWithDynamicHardness(Properties properties) {
-        super(properties.destroyTime(2.0f));
+    public BlockWithDynamicHardness(Settings properties) {
+        super(properties.hardness(2.0f));
 
         // Create and fill a new state container.
-        final StateDefinition.Builder<Block, BlockState> builder = new StateDefinition.Builder<>(this);
-        this.createBlockStateDefinition(builder);
+        final StateManager.Builder<Block, BlockState> builder = new StateManager.Builder<>(this);
+        this.appendProperties(builder);
 
         // Set the state container to use our custom BlockState class.
-        this.stateDefinition = builder.create(Block::defaultBlockState, DynamicHardnessBlockState::new);
+        this.stateManager = builder.build(Block::getDefaultState, DynamicHardnessBlockState::new);
 
         // Sets the default state to the current default state, but with our new BlockState class.
-        this.registerDefaultState(this.stateDefinition.any());
+        this.setDefaultState(this.stateManager.getDefaultState());
     }
 
     /**
      * Sub-classes can override this method to return a hardness value that could, for example, depend on the {@link
      * BlockState}.
      *
-     * @param world An {@link BlockGetter} instance.
+     * @param world An {@link BlockView} instance.
      * @param pos   The {@link BlockPos}.
      * @return The hardness value.
      */
-    public float getHardness(BlockState state, final BlockGetter world, final BlockPos pos) {
+    public float getHardness(BlockState state, final BlockView world, final BlockPos pos) {
         return 2.0f;
     }
 
@@ -55,7 +55,7 @@ public abstract class BlockWithDynamicHardness extends Block {
         }
 
         @Override
-        public float getDestroySpeed(BlockGetter worldIn, BlockPos pos) {
+        public float getHardness(BlockView worldIn, BlockPos pos) {
             return getHardness(this, worldIn, pos);
         }
 

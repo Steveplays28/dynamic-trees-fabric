@@ -9,7 +9,7 @@ import io.github.steveplays28.dynamictreesfabric.init.DTTrees;
 import io.github.steveplays28.dynamictreesfabric.systems.dropcreators.context.DropContext;
 import io.github.steveplays28.dynamictreesfabric.systems.dropcreators.context.LogDropContext;
 import io.github.steveplays28.dynamictreesfabric.trees.Resettable;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Identifier;
 import org.apache.logging.log4j.util.TriConsumer;
 
 /**
@@ -31,7 +31,7 @@ public abstract class DropCreator extends ConfigurableRegistryEntry<DropCreator,
     public static final ConfigurableRegistry<DropCreator, DropCreatorConfiguration> REGISTRY =
             new ConfigurableRegistry<>(DropCreator.class, NULL, DropCreatorConfiguration.TEMPLATES);
 
-    public DropCreator(final ResourceLocation registryName) {
+    public DropCreator(final Identifier registryName) {
         super(registryName);
     }
 
@@ -75,7 +75,7 @@ public abstract class DropCreator extends ConfigurableRegistryEntry<DropCreator,
                 DropCreator::appendLogDrops));
         private final TriConsumer<DropCreator, DropCreatorConfiguration, C> appendDropConsumer;
 
-        public Type(ResourceLocation registryName,
+        public Type(Identifier registryName,
                     TriConsumer<DropCreator, DropCreatorConfiguration, C> appendDropConsumer) {
             super(registryName);
             this.appendDropConsumer = appendDropConsumer;

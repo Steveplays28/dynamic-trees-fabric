@@ -22,13 +22,13 @@ accessWidener	v2 named
 #accessible method net/minecraft/world/entity/ai/behavior/WeightedList f_24715_ # entries
 #accessible method net/minecraft/world/entity/ai/behavior/WeightedList$WeightedEntry f_24740_ # data
 
-accessible method net/minecraft/resources/ResourceLocation m_135832 (Ljava/lang/String;C)[Ljava/lang/String; # decompose
-accessible method net/minecraft/resources/ResourceLocation m_135843 (Ljava/lang/String;)Z # isValidNamespace
-accessible method net/minecraft/resources/ResourceLocation m_135841 (Ljava/lang/String;)Z # isValidPath
+#accessible method net/minecraft/resources/ResourceLocation m_135832 (Ljava/lang/String;C)[Ljava/lang/String; # decompose
+#accessible method net/minecraft/resources/ResourceLocation m_135843 (Ljava/lang/String;)Z # isValidNamespace
+#accessible method net/minecraft/resources/ResourceLocation m_135841 (Ljava/lang/String;)Z # isValidPath
 
-accessible method net/minecraft/world/level/block/ComposterBlock m_51920 (FLnet/minecraft/world/level/ItemLike;)V # add
+#accessible method net/minecraft/world/level/block/ComposterBlock m_51920 (FLnet/minecraft/world/level/ItemLike;)V # add
 #accessible method net/minecraft/util/random/WeightedEntry$Wrapper f_146299_ # data
 #accessible method net/minecraft/world/level/storage/loot/parameters/LootContextParamSets f_81422_ # REGISTRY
 #accessible method net/minecraft/util/random/WeightedRandomList f_146325_ # items
-accessible method net/minecraft/world/level/PathNavigationRegion m_47185 (Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/level/chunk/ChunkAccess; # getChunk
-accessible method net/minecraft/world/level/biome/Biome m_47567 ()Lnet/minecraft/world/level/biome/Biome$BiomeCategory; # getBiomeCategory
+#accessible method net/minecraft/world/level/PathNavigationRegion m_47185 (Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/level/chunk/ChunkAccess; # getChunk
+#accessible method net/minecraft/world/level/biome/Biome m_47567 ()Lnet/minecraft/world/level/biome/Biome$BiomeCategory; # getBiomeCategory

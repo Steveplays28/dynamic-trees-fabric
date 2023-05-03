@@ -1,6 +1,6 @@
 package io.github.steveplays28.dynamictreesfabric.api.cells;
 
-import net.minecraft.core.Direction;
+import net.minecraft.util.math.Direction;
 
 public interface Cell {
 

@@ -7,10 +7,10 @@ import io.github.steveplays28.dynamictreesfabric.api.resource.loading.Applicatio
 import io.github.steveplays28.dynamictreesfabric.api.resource.loading.preparation.JsonResourcePreparer;
 import io.github.steveplays28.dynamictreesfabric.deserialisation.JsonDeserialisers;
 import io.github.steveplays28.dynamictreesfabric.systems.dropcreators.GlobalDropCreators;
+import net.minecraft.resource.ResourceManager;
+import net.minecraft.util.Identifier;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.ResourceManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -46,7 +46,7 @@ public final class GlobalDropCreatorResourceLoader extends AbstractResourceLoade
         this.deserialiseAndPutEntry(resource.getLocation(), resource.getResource().getAsJsonObject());
     }
 
-    private void deserialiseAndPutEntry(ResourceLocation name, JsonObject json) {
+    private void deserialiseAndPutEntry(Identifier name, JsonObject json) {
         JsonDeserialisers.CONFIGURED_DROP_CREATOR.deserialise(json)
                 .ifSuccessOrElse(
                         result -> GlobalDropCreators.put(name, result),

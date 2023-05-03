@@ -4,15 +4,14 @@ import io.github.steveplays28.dynamictreesfabric.api.configurations.Configuratio
 import io.github.steveplays28.dynamictreesfabric.systems.genfeatures.context.FullGenerationContext;
 import io.github.steveplays28.dynamictreesfabric.systems.genfeatures.context.PostGenerationContext;
 import io.github.steveplays28.dynamictreesfabric.util.CoordUtils;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Vec3i;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.Mth;
-import net.minecraft.util.RandomSource;
-import net.minecraft.world.level.LevelAccessor;
-
 import java.util.Collections;
 import java.util.Comparator;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3i;
+import net.minecraft.util.math.random.Random;
+import net.minecraft.world.WorldAccess;
 
 /**
  * Used to add mushrooms under a tree canopy.  Currently used by dark oaks for roofed forests.
@@ -24,7 +23,7 @@ public class HugeMushroomsGenFeature extends HugeMushroomGenFeature {
     public static final ConfigurationProperty<Integer> MAX_MUSHROOMS = ConfigurationProperty.integer("max_mushrooms");
     public static final ConfigurationProperty<Integer> MAX_ATTEMPTS = ConfigurationProperty.integer("max_attempts");
 
-    public HugeMushroomsGenFeature(ResourceLocation registryName) {
+    public HugeMushroomsGenFeature(Identifier registryName) {
         super(registryName);
     }
 
@@ -47,27 +46,27 @@ public class HugeMushroomsGenFeature extends HugeMushroomGenFeature {
             return false;
         }
 
-        final LevelAccessor world = context.world();
+        final WorldAccess world = context.world();
         final BlockPos rootPos = context.pos();
         final BlockPos lowest = Collections.min(context.endPoints(), Comparator.comparingInt(Vec3i::getY));
-        final RandomSource rand = context.random();
+        final Random rand = context.random();
 
         int success = 0;
 
         for (int tries = 0; tries < configuration.get(MAX_ATTEMPTS); tries++) {
 
             float angle = (float) (rand.nextFloat() * Math.PI * 2);
-            int xOff = (int) (Mth.sin(angle) * (context.radius() - 1));
-            int zOff = (int) (Mth.cos(angle) * (context.radius() - 1));
+            int xOff = (int) (MathHelper.sin(angle) * (context.radius() - 1));
+            int zOff = (int) (MathHelper.cos(angle) * (context.radius() - 1));
 
-            BlockPos mushPos = rootPos.offset(xOff, 0, zOff);
+            BlockPos mushPos = rootPos.add(xOff, 0, zOff);
 
-            mushPos = CoordUtils.findWorldSurface(world, new BlockPos(mushPos), context.isWorldGen()).above();
+            mushPos = CoordUtils.findWorldSurface(world, new BlockPos(mushPos), context.isWorldGen()).up();
 
             if (context.bounds().inBounds(mushPos, true)) {
                 int maxHeight = lowest.getY() - mushPos.getY();
                 if (maxHeight >= 2) {
-                    int height = Mth.clamp(rand.nextInt(maxHeight) + 3, 3, maxHeight);
+                    int height = MathHelper.clamp(rand.nextInt(maxHeight) + 3, 3, maxHeight);
 
                     if (this.setHeight(height).generate(configuration, new FullGenerationContext(
                             context.world(),

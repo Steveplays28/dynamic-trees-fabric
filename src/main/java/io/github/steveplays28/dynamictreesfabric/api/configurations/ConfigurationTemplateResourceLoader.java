@@ -9,11 +9,11 @@ import io.github.steveplays28.dynamictreesfabric.deserialisation.result.JsonResu
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.minecraft.server.packs.resources.ResourceManager;
 import org.apache.logging.log4j.LogManager;
 
 import java.util.Collections;
 import java.util.List;
+import net.minecraft.resource.ResourceManager;
 
 /**
  * @author Harley O'Connor

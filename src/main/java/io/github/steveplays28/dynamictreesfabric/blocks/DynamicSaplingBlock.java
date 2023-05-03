@@ -4,26 +4,26 @@ import io.github.steveplays28.dynamictreesfabric.api.TreeHelper;
 import io.github.steveplays28.dynamictreesfabric.init.DTConfigs;
 import io.github.steveplays28.dynamictreesfabric.trees.Species;
 import io.github.steveplays28.dynamictreesfabric.util.CoordUtils;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.RandomSource;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.BonemealableBlock;
-import net.minecraft.world.level.block.SoundType;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.Material;
-import net.minecraft.world.level.storage.loot.LootContext;
-import net.minecraft.world.phys.HitResult;
-import net.minecraft.world.phys.shapes.CollisionContext;
-import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Fertilizable;
+import net.minecraft.block.Material;
+import net.minecraft.block.ShapeContext;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.ItemEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.loot.context.LootContext;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.sound.BlockSoundGroup;
+import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.random.Random;
+import net.minecraft.util.shape.VoxelShape;
+import net.minecraft.world.BlockView;
+import net.minecraft.world.World;
+import net.minecraft.world.WorldView;
 import net.minecraftforge.common.IPlantable;
 
 import javax.annotation.Nonnull;
@@ -32,12 +32,12 @@ import java.util.Collections;
 import java.util.List;
 
 @SuppressWarnings("deprecation")
-public class DynamicSaplingBlock extends Block implements BonemealableBlock, IPlantable {
+public class DynamicSaplingBlock extends Block implements Fertilizable, IPlantable {
 
     protected Species species;
 
     public DynamicSaplingBlock(Species species) {
-        super(Properties.of(Material.PLANT).sound(SoundType.GRASS).randomTicks().noOcclusion());
+        super(Settings.of(Material.PLANT).sounds(BlockSoundGroup.GRASS).ticksRandomly().nonOpaque());
         this.species = species;
     }
 
@@ -51,12 +51,12 @@ public class DynamicSaplingBlock extends Block implements BonemealableBlock, IPl
     }
 
     @Override
-    public boolean isValidBonemealTarget(@Nonnull BlockGetter world, @Nonnull BlockPos pos, @Nonnull BlockState state, boolean isClient) {
-        return this.getSpecies().canSaplingConsumeBoneMeal((Level) world, pos);
+    public boolean isFertilizable(@Nonnull BlockView world, @Nonnull BlockPos pos, @Nonnull BlockState state, boolean isClient) {
+        return this.getSpecies().canSaplingConsumeBoneMeal((World) world, pos);
     }
 
     @Override
-    public boolean isBonemealSuccess(@Nonnull Level world, @Nonnull RandomSource rand, @Nonnull BlockPos pos, @Nonnull BlockState state) {
+    public boolean canGrow(@Nonnull World world, @Nonnull Random rand, @Nonnull BlockPos pos, @Nonnull BlockState state) {
         return this.getSpecies().canSaplingGrowAfterBoneMeal(world, rand, pos);
     }
 
@@ -65,26 +65,26 @@ public class DynamicSaplingBlock extends Block implements BonemealableBlock, IPl
     ///////////////////////////////////////////
 
     @Override
-    public int getFireSpreadSpeed(BlockState state, BlockGetter world, BlockPos pos, Direction face) {
+    public int getFireSpreadSpeed(BlockState state, BlockView world, BlockPos pos, Direction face) {
         return this.getSpecies().saplingFireSpread();
     }
 
     @Override
-    public int getFlammability(BlockState state, BlockGetter world, BlockPos pos, Direction face) {
+    public int getFlammability(BlockState state, BlockView world, BlockPos pos, Direction face) {
         return this.getSpecies().saplingFlammability();
     }
 
     @Override
-    public void tick(BlockState state, ServerLevel worldIn, BlockPos pos, RandomSource rand) {
+    public void scheduledTick(BlockState state, ServerWorld worldIn, BlockPos pos, Random rand) {
         if (this.getSpecies().canSaplingGrowNaturally(worldIn, pos)) {
-            this.performBonemeal(worldIn, rand, pos, state);
+            this.grow(worldIn, rand, pos, state);
         }
     }
 
-    public static boolean canSaplingStay(LevelReader world, Species species, BlockPos pos) {
+    public static boolean canSaplingStay(WorldView world, Species species, BlockPos pos) {
         //Ensure there are no adjacent branches or other saplings
         for (Direction dir : CoordUtils.HORIZONTALS) {
-            BlockState blockState = world.getBlockState(pos.relative(dir));
+            BlockState blockState = world.getBlockState(pos.offset(dir));
             Block block = blockState.getBlock();
             if (TreeHelper.isBranch(block) || block instanceof DynamicSaplingBlock) {
                 return false;
@@ -92,17 +92,17 @@ public class DynamicSaplingBlock extends Block implements BonemealableBlock, IPl
         }
 
         //Air above and acceptable soil below
-        return world.isEmptyBlock(pos.above()) && species.isAcceptableSoil(world, pos.below(), world.getBlockState(pos.below()));
+        return world.isAir(pos.up()) && species.isAcceptableSoil(world, pos.down(), world.getBlockState(pos.down()));
     }
 
     @Override
-    public boolean canSurvive(BlockState state, LevelReader world, BlockPos pos) {
+    public boolean canPlaceAt(BlockState state, WorldView world, BlockPos pos) {
         return canSaplingStay(world, this.getSpecies(), pos);
     }
 
     @Override
-    public void performBonemeal(@Nonnull ServerLevel world, @Nonnull RandomSource rand, @Nonnull BlockPos pos, @Nonnull BlockState state) {
-        if (this.canSurvive(state, world, pos)) {
+    public void grow(@Nonnull ServerWorld world, @Nonnull Random rand, @Nonnull BlockPos pos, @Nonnull BlockState state) {
+        if (this.canPlaceAt(state, world, pos)) {
             final Species species = this.getSpecies();
             if (species.canSaplingGrow(world, pos)) {
                 species.transitionToTree(world, pos);
@@ -113,7 +113,7 @@ public class DynamicSaplingBlock extends Block implements BonemealableBlock, IPl
     }
 
     @Override
-    public SoundType getSoundType(BlockState state, LevelReader world, BlockPos pos, @Nullable Entity entity) {
+    public BlockSoundGroup getSoundType(BlockState state, WorldView world, BlockPos pos, @Nullable Entity entity) {
         return this.getSpecies().getSaplingSound();
     }
 
@@ -123,29 +123,29 @@ public class DynamicSaplingBlock extends Block implements BonemealableBlock, IPl
 
 
     @Override
-    public void neighborChanged(BlockState state, Level world, BlockPos pos, Block blockIn, BlockPos fromPos, boolean isMoving) {
-        if (!this.canSurvive(state, world, pos)) {
+    public void neighborUpdate(BlockState state, World world, BlockPos pos, Block blockIn, BlockPos fromPos, boolean isMoving) {
+        if (!this.canPlaceAt(state, world, pos)) {
             this.dropBlock(world, state, pos);
         }
     }
 
-    protected void dropBlock(Level world, BlockState state, BlockPos pos) {
-        world.addFreshEntity(new ItemEntity(world, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, getSpecies().getSeedStack(1)));
+    protected void dropBlock(World world, BlockState state, BlockPos pos) {
+        world.spawnEntity(new ItemEntity(world, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, getSpecies().getSeedStack(1)));
         world.removeBlock(pos, false);
     }
 
     @Nonnull
     @Override
-    public ItemStack getCloneItemStack(BlockGetter worldIn, BlockPos pos, BlockState state) {
+    public ItemStack getPickStack(BlockView worldIn, BlockPos pos, BlockState state) {
         return this.getSpecies().getSeedStack(1);
     }
 
     @Nonnull
     @Override
-    public List<ItemStack> getDrops(@Nonnull BlockState state, @Nonnull LootContext.Builder builder) {
+    public List<ItemStack> getDroppedStacks(@Nonnull BlockState state, @Nonnull LootContext.Builder builder) {
         // If a loot table has been added load those drops instead (until drop creators).
-        if (builder.getLevel().getServer().getLootTables().getIds().contains(this.getLootTable())) {
-            return super.getDrops(state, builder);
+        if (builder.getWorld().getServer().getLootManager().getTableIds().contains(this.getLootTableId())) {
+            return super.getDroppedStacks(state, builder);
         }
 
         return DTConfigs.DYNAMIC_SAPLING_DROPS.get() ?
@@ -154,7 +154,7 @@ public class DynamicSaplingBlock extends Block implements BonemealableBlock, IPl
     }
 
     @Override
-    public ItemStack getCloneItemStack(BlockState state, HitResult target, BlockGetter world, BlockPos pos, Player player) {
+    public ItemStack getCloneItemStack(BlockState state, HitResult target, BlockView world, BlockPos pos, PlayerEntity player) {
         return this.getSpecies().getSeedStack(1);
     }
 
@@ -165,7 +165,7 @@ public class DynamicSaplingBlock extends Block implements BonemealableBlock, IPl
 
     @Nonnull
     @Override
-    public VoxelShape getShape(BlockState state, BlockGetter access, BlockPos pos, CollisionContext context) {
+    public VoxelShape getOutlineShape(BlockState state, BlockView access, BlockPos pos, ShapeContext context) {
         return this.getSpecies().getSaplingShape();
     }
 
@@ -174,8 +174,8 @@ public class DynamicSaplingBlock extends Block implements BonemealableBlock, IPl
     ///////////////////////////////////////////
 
     @Override
-    public BlockState getPlant(BlockGetter world, BlockPos pos) {
-        return this.defaultBlockState();
+    public BlockState getPlant(BlockView world, BlockPos pos) {
+        return this.getDefaultState();
     }
 
 }

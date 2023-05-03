@@ -5,38 +5,37 @@ import io.github.steveplays28.dynamictreesfabric.init.DTRegistries;
 import io.github.steveplays28.dynamictreesfabric.systems.BranchConnectables;
 import io.github.steveplays28.dynamictreesfabric.util.CoordUtils;
 import io.github.steveplays28.dynamictreesfabric.util.CoordUtils.Surround;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.util.Mth;
-import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.BushBlock;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.StateDefinition;
-import net.minecraft.world.level.block.state.properties.IntegerProperty;
-import net.minecraft.world.level.material.Fluids;
-import net.minecraft.world.level.material.Material;
-import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.shapes.CollisionContext;
-import net.minecraft.world.phys.shapes.Shapes;
-import net.minecraft.world.phys.shapes.VoxelShape;
-
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Material;
+import net.minecraft.block.PlantBlock;
+import net.minecraft.block.ShapeContext;
+import net.minecraft.fluid.Fluids;
+import net.minecraft.state.StateManager;
+import net.minecraft.state.property.IntProperty;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.shape.VoxelShape;
+import net.minecraft.util.shape.VoxelShapes;
+import net.minecraft.world.BlockView;
+import net.minecraft.world.World;
+import net.minecraft.world.WorldAccess;
 
 public class ThickBranchBlock extends BasicBranchBlock implements Musable {
 
     public static final int MAX_RADIUS_TICK = 24;
 
-    protected static final IntegerProperty RADIUS_DOUBLE = IntegerProperty.create("radius", 1, MAX_RADIUS_TICK); //39 ?
+    protected static final IntProperty RADIUS_DOUBLE = IntProperty.of("radius", 1, MAX_RADIUS_TICK); //39 ?
 
     public ThickBranchBlock(Material material) {
-        this(Properties.of(material));
+        this(Settings.of(material));
     }
 
-    public ThickBranchBlock(Properties properties) {
+    public ThickBranchBlock(Settings properties) {
         super(properties, RADIUS_DOUBLE, MAX_RADIUS_TICK);
     }
 
@@ -45,7 +44,7 @@ public class ThickBranchBlock extends BasicBranchBlock implements Musable {
     }
 
     @Override
-    public void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+    public void appendProperties(StateManager.Builder<Block, BlockState> builder) {
         builder.add(RADIUS_DOUBLE).add(WATERLOGGED);
     }
 
@@ -58,11 +57,11 @@ public class ThickBranchBlock extends BasicBranchBlock implements Musable {
         if (!(state.getBlock() instanceof ThickBranchBlock)) {
             return super.getRadius(state);
         }
-        return isSameTree(state) ? Mth.clamp(state.getValue(RADIUS_DOUBLE), 1, getMaxRadius()) : 0;
+        return isSameTree(state) ? MathHelper.clamp(state.get(RADIUS_DOUBLE), 1, getMaxRadius()) : 0;
     }
 
     @Override
-    public int setRadius(LevelAccessor world, BlockPos pos, int radius, @Nullable Direction originDir, int flags) {
+    public int setRadius(WorldAccess world, BlockPos pos, int radius, @Nullable Direction originDir, int flags) {
         if (this.updateTrunkShells(world, pos, radius, flags)) {
             return super.setRadius(world, pos, radius, originDir, flags);
         }
@@ -70,12 +69,12 @@ public class ThickBranchBlock extends BasicBranchBlock implements Musable {
     }
 
     @Override
-    public void neighborChanged(BlockState state, Level worldIn, BlockPos pos, Block blockIn, BlockPos fromPos, boolean isMoving) {
+    public void neighborUpdate(BlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos, boolean isMoving) {
         updateTrunkShells(worldIn, pos, getRadius(state), 6);
-        super.neighborChanged(state, worldIn, pos, blockIn, fromPos, isMoving);
+        super.neighborUpdate(state, worldIn, pos, blockIn, fromPos, isMoving);
     }
 
-    private boolean updateTrunkShells(LevelAccessor world, BlockPos pos, int radius, int flags) {
+    private boolean updateTrunkShells(WorldAccess world, BlockPos pos, int radius, int flags) {
         // If the radius is <= 8 then we can just set the block as normal and move on.
         if (radius <= MAX_RADIUS) {
             return true;
@@ -85,7 +84,7 @@ public class ThickBranchBlock extends BasicBranchBlock implements Musable {
         final ReplaceableState[] repStates = new ReplaceableState[8];
 
         for (Surround dir : Surround.values()) {
-            final BlockPos dPos = pos.offset(dir.getOffset());
+            final BlockPos dPos = pos.add(dir.getOffset());
             final ReplaceableState rep = getReplaceability(world, dPos, pos);
 
             repStates[dir.ordinal()] = rep;
@@ -98,12 +97,12 @@ public class ThickBranchBlock extends BasicBranchBlock implements Musable {
 
         if (setable) {
             for (Surround dir : Surround.values()) {
-                final BlockPos dPos = pos.offset(dir.getOffset());
+                final BlockPos dPos = pos.add(dir.getOffset());
                 final ReplaceableState rep = repStates[dir.ordinal()];
-                final boolean replacingWater = world.getBlockState(dPos).getFluidState() == Fluids.WATER.getSource(false);
+                final boolean replacingWater = world.getBlockState(dPos).getFluidState() == Fluids.WATER.getStill(false);
 
                 if (rep == ReplaceableState.REPLACEABLE) {
-                    world.setBlock(dPos, getTrunkShell().defaultBlockState().setValue(TrunkShellBlock.CORE_DIR, dir.getOpposite()).setValue(TrunkShellBlock.WATERLOGGED, replacingWater), flags);
+                    world.setBlockState(dPos, getTrunkShell().getDefaultState().with(TrunkShellBlock.CORE_DIR, dir.getOpposite()).with(TrunkShellBlock.WATERLOGGED, replacingWater), flags);
                 }
             }
             return true;
@@ -112,7 +111,7 @@ public class ThickBranchBlock extends BasicBranchBlock implements Musable {
     }
 
     @Override
-    public int getRadiusForConnection(BlockState state, BlockGetter reader, BlockPos pos, BranchBlock from, Direction side, int fromRadius) {
+    public int getRadiusForConnection(BlockState state, BlockView reader, BlockPos pos, BranchBlock from, Direction side, int fromRadius) {
         if (from instanceof ThickBranchBlock) {
             return getRadius(state);
         }
@@ -120,8 +119,8 @@ public class ThickBranchBlock extends BasicBranchBlock implements Musable {
     }
 
     @Override
-    protected int getSideConnectionRadius(BlockGetter blockAccess, BlockPos pos, int radius, Direction side) {
-        final BlockPos deltaPos = pos.relative(side);
+    protected int getSideConnectionRadius(BlockView blockAccess, BlockPos pos, int radius, Direction side) {
+        final BlockPos deltaPos = pos.offset(side);
         final BlockState blockState = CoordUtils.getStateSafe(blockAccess, deltaPos);
 
         if (blockState == null) {
@@ -141,18 +140,18 @@ public class ThickBranchBlock extends BasicBranchBlock implements Musable {
         return Math.min(MAX_RADIUS, connectionRadius);
     }
 
-    public ReplaceableState getReplaceability(LevelAccessor world, BlockPos pos, BlockPos corePos) {
+    public ReplaceableState getReplaceability(WorldAccess world, BlockPos pos, BlockPos corePos) {
 
         final BlockState state = world.getBlockState(pos);
         final Block block = state.getBlock();
 
         if (block instanceof TrunkShellBlock) {
             // Determine if this shell belongs to the trunk.  Block otherwise.
-            Surround surr = state.getValue(TrunkShellBlock.CORE_DIR);
-            return pos.offset(surr.getOffset()).equals(corePos) ? ReplaceableState.SHELL : ReplaceableState.BLOCKING;
+            Surround surr = state.get(TrunkShellBlock.CORE_DIR);
+            return pos.add(surr.getOffset()).equals(corePos) ? ReplaceableState.SHELL : ReplaceableState.BLOCKING;
         }
 
-        if (state.getMaterial().isReplaceable() || block instanceof BushBlock) {
+        if (state.getMaterial().isReplaceable() || block instanceof PlantBlock) {
             return ReplaceableState.REPLACEABLE;
         }
 
@@ -195,18 +194,18 @@ public class ThickBranchBlock extends BasicBranchBlock implements Musable {
 
     @Nonnull
     @Override
-    public VoxelShape getShape(BlockState state, BlockGetter blockReader, BlockPos pos, CollisionContext context) {
+    public VoxelShape getOutlineShape(BlockState state, BlockView blockReader, BlockPos pos, ShapeContext context) {
         final int thisRadius = getRadius(state);
         if (thisRadius <= MAX_RADIUS) {
-            return super.getShape(state, blockReader, pos, context);
+            return super.getOutlineShape(state, blockReader, pos, context);
         }
 
         final double radius = thisRadius / 16.0;
-        return Shapes.create(new AABB(0.5 - radius, 0.0, 0.5 - radius, 0.5 + radius, 1.0, 0.5 + radius));
+        return VoxelShapes.cuboid(new Box(0.5 - radius, 0.0, 0.5 - radius, 0.5 + radius, 1.0, 0.5 + radius));
     }
 
     @Override
-    public boolean isMusable(BlockGetter world, BlockState state, BlockPos pos) {
+    public boolean isMusable(BlockView world, BlockState state, BlockPos pos) {
         return getRadius(state) > 8;
     }
 

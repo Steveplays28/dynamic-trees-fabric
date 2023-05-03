@@ -5,14 +5,13 @@ import io.github.steveplays28.dynamictreesfabric.api.worldgen.PoissonDiscProvide
 import io.github.steveplays28.dynamictreesfabric.api.worldgen.RadiusCoordinator;
 import io.github.steveplays28.dynamictreesfabric.util.CoordUtils;
 import io.github.steveplays28.dynamictreesfabric.util.RandomXOR;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Vec3i;
-import net.minecraft.util.Mth;
-import net.minecraft.util.RandomSource;
-import net.minecraft.world.level.ChunkPos;
-
 import java.util.*;
 import java.util.Map.Entry;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3i;
+import net.minecraft.util.math.random.Random;
 
 /**
  * Manages and creates all the Poisson discs in a single level (world).
@@ -64,7 +63,7 @@ public class LevelPoissonDiscProvider implements PoissonDiscProvider {
     private final List<PoissonDisc> discCache1 = new ArrayList<>(64); // 64 is above the typical range to expect for 9 chunks.
     private final List<PoissonDisc> discCache2 = new ArrayList<>(64);
 
-    public List<PoissonDisc> generatePoissonDiscs(RandomSource random, int chunkX, int chunkZ) {
+    public List<PoissonDisc> generatePoissonDiscs(Random random, int chunkX, int chunkZ) {
         final List<PoissonDisc> allDiscs = discCache1;
         final List<PoissonDisc> unsolvedDiscs = discCache2;
 
@@ -138,8 +137,8 @@ public class LevelPoissonDiscProvider implements PoissonDiscProvider {
                 // Step 7. Use the master disc and it's free arc angle to find the radius of the new tangential disc.
                 final float angle = CCW ? (float) master.getFreeAngleCCW() : (float) master.getFreeAngleCW();
                 //System.out.println("dir: " + (CCW ? "CCW" : "CW") + ", angle: " + (angle * 180 / Math.PI));
-                final double dx = master.x + (Mth.sin(angle) * master.radius * 1.5);
-                final double dz = master.z + (Mth.cos(angle) * master.radius * 1.5);
+                final double dx = master.x + (MathHelper.sin(angle) * master.radius * 1.5);
+                final double dz = master.z + (MathHelper.cos(angle) * master.radius * 1.5);
                 radius = this.radiusCoordinator.getRadiusAtCoords((int) dx, (int) dz);
                 this.debug.getRadius(master, radius, unsolvedDiscs, allDiscs);
 

@@ -4,10 +4,10 @@ import io.github.steveplays28.dynamictreesfabric.api.TreeRegistry;
 import io.github.steveplays28.dynamictreesfabric.trees.Species;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.minecraft.util.RandomSource;
 import org.apache.logging.log4j.LogManager;
 
 import javax.annotation.Nullable;
+import net.minecraft.util.math.random.Random;
 import java.util.ArrayList;
 import java.util.Map.Entry;
 
@@ -113,21 +113,21 @@ public class JsonMath {
 
     }
 
-    public float apply(RandomSource random, float noise) {
+    public float apply(Random random, float noise) {
         MathContext mc = new MathContext(noise, random);
         return rootOp.apply(mc);
     }
 
-    public float apply(RandomSource random, Species species, float radius) {
+    public float apply(Random random, Species species, float radius) {
         MathContext mc = new MathSpeciesContext(random, species, radius);
         return rootOp.apply(mc);
     }
 
     public static class MathContext {
         public float noise;
-        public RandomSource rand;
+        public Random rand;
 
-        public MathContext(float noise, RandomSource random) {
+        public MathContext(float noise, Random random) {
             this.noise = noise;
             this.rand = random;
         }
@@ -137,7 +137,7 @@ public class JsonMath {
         public float radius;
         public Species species;
 
-        public MathSpeciesContext(RandomSource random, Species species, float radius) {
+        public MathSpeciesContext(Random random, Species species, float radius) {
             super(0.0f, random);
             this.radius = radius;
             this.species = species;

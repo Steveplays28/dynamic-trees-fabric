@@ -1,12 +1,11 @@
 package io.github.steveplays28.dynamictreesfabric.util.holderset;
 
-import net.minecraft.core.HolderSet;
-import net.minecraft.core.Registry;
-import net.minecraft.tags.TagKey;
-
 import java.util.function.Supplier;
+import net.minecraft.registry.Registry;
+import net.minecraft.registry.entry.RegistryEntryList;
+import net.minecraft.registry.tag.TagKey;
 
-public class DelayedTagEntriesHolderSet<T> extends HolderSet.Named<T> {
+public class DelayedTagEntriesHolderSet<T> extends RegistryEntryList.Named<T> {
     private final Supplier<Registry<T>> registrySupplier;
 
     public DelayedTagEntriesHolderSet(Supplier<Registry<T>> registrySupplier, TagKey<T> key) {

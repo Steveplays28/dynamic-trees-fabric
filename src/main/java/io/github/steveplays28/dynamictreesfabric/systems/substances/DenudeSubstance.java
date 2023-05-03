@@ -7,10 +7,10 @@ import io.github.steveplays28.dynamictreesfabric.blocks.rootyblocks.RootyBlock;
 import io.github.steveplays28.dynamictreesfabric.systems.nodemappers.DenuderNode;
 import io.github.steveplays28.dynamictreesfabric.trees.Family;
 import io.github.steveplays28.dynamictreesfabric.trees.Species;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.block.BlockState;
+import net.minecraft.particle.ParticleTypes;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 
 /**
  * An {@link SubstanceEffect} that "denudes" the tree. This involves stripping all branches and removing all leaves.
@@ -20,7 +20,7 @@ import net.minecraft.world.level.block.state.BlockState;
 public class DenudeSubstance implements SubstanceEffect {
 
     @Override
-    public boolean apply(Level world, BlockPos rootPos) {
+    public boolean apply(World world, BlockPos rootPos) {
         final BlockState rootState = world.getBlockState(rootPos);
         final RootyBlock dirt = TreeHelper.getRooty(rootState);
 
@@ -39,7 +39,7 @@ public class DenudeSubstance implements SubstanceEffect {
         // Set fertility to zero so the leaves won't grow back.
         dirt.setFertility(world, rootPos, 0);
 
-        if (world.isClientSide) {
+        if (world.isClient) {
             TreeHelper.treeParticles(world, rootPos, ParticleTypes.ASH, 8);
         } else {
             dirt.startAnalysis(world, rootPos, new MapSignal(new DenuderNode(species, family)));

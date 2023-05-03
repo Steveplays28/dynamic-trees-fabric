@@ -1,10 +1,9 @@
 package io.github.steveplays28.dynamictreesfabric.util.function;
 
 import io.github.steveplays28.dynamictreesfabric.api.configurations.ConfigurationProperty;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.LevelAccessor;
-
 import java.util.function.BiPredicate;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.WorldAccess;
 
 /**
  * A {@link BiPredicate} that tests if something should grow based on the {@link IWorld} and {@link BlockPos}. Mainly
@@ -13,5 +12,5 @@ import java.util.function.BiPredicate;
  * @author Harley O'Connor
  */
 @FunctionalInterface
-public interface CanGrowPredicate extends BiPredicate<LevelAccessor, BlockPos> {
+public interface CanGrowPredicate extends BiPredicate<WorldAccess, BlockPos> {
 }

@@ -1,26 +1,26 @@
 package io.github.steveplays28.dynamictreesfabric.client;
 
 import com.mojang.math.Vector3f;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.renderer.block.model.BlockElement;
-import net.minecraft.client.renderer.block.model.BlockElementFace;
-import net.minecraft.client.renderer.block.model.FaceBakery;
-import net.minecraft.client.renderer.block.model.ItemOverrides;
-import net.minecraft.client.renderer.texture.TextureAtlas;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.BlockModelRotation;
-import net.minecraft.core.Direction;
-import net.minecraft.core.Direction.Axis;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.phys.AABB;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.render.model.BakedQuad;
+import net.minecraft.client.render.model.BakedQuadFactory;
+import net.minecraft.client.render.model.ModelRotation;
+import net.minecraft.client.render.model.json.ModelElement;
+import net.minecraft.client.render.model.json.ModelElementFace;
+import net.minecraft.client.render.model.json.ModelOverrideList;
+import net.minecraft.client.texture.Sprite;
+import net.minecraft.client.texture.SpriteAtlasTexture;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.math.Box;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Direction.Axis;
 import net.minecraftforge.client.RenderTypeGroup;
 import net.minecraftforge.client.model.IModelBuilder;
 import net.minecraftforge.client.model.geometry.IGeometryBakingContext;
 
 public class ModelUtils {
 
-    public static float[] getUVs(AABB box, Direction face) {
+    public static float[] getUVs(Box box, Direction face) {
         switch (face) {
             default:
             case DOWN:
@@ -74,32 +74,32 @@ public class ModelUtils {
         return uvs;
     }
 
-    public static Vector3f[] AABBLimits(AABB aabb) {
+    public static Vector3f[] AABBLimits(Box aabb) {
         return new Vector3f[]{
                 new Vector3f((float) aabb.minX, (float) aabb.minY, (float) aabb.minZ),
                 new Vector3f((float) aabb.maxX, (float) aabb.maxY, (float) aabb.maxZ),
         };
     }
 
-    public static BakedQuad makeBakedQuad(BlockElement blockPart, BlockElementFace partFace, TextureAtlasSprite atlasSprite, Direction dir, BlockModelRotation modelRotation, ResourceLocation modelResLoc) {
-        return new FaceBakery().bakeQuad(blockPart.from, blockPart.to, partFace, atlasSprite, dir, modelRotation, blockPart.rotation, true, modelResLoc);
+    public static BakedQuad makeBakedQuad(ModelElement blockPart, ModelElementFace partFace, Sprite atlasSprite, Direction dir, ModelRotation modelRotation, Identifier modelResLoc) {
+        return new BakedQuadFactory().bake(blockPart.from, blockPart.to, partFace, atlasSprite, dir, modelRotation, blockPart.rotation, true, modelResLoc);
     }
 
-    public static IModelBuilder<?> getModelBuilder(IGeometryBakingContext context, TextureAtlasSprite particle) {
-        ResourceLocation renderTypeHint = context.getRenderTypeHint();
+    public static IModelBuilder<?> getModelBuilder(IGeometryBakingContext context, Sprite particle) {
+        Identifier renderTypeHint = context.getRenderTypeHint();
         RenderTypeGroup renderTypes = renderTypeHint != null ? context.getRenderType(renderTypeHint) : RenderTypeGroup.EMPTY;
 
         return IModelBuilder.of(context.useAmbientOcclusion(), context.useBlockLight(), context.isGui3d(),
-                context.getTransforms(), ItemOverrides.EMPTY, particle, renderTypes);
+                context.getTransforms(), ModelOverrideList.EMPTY, particle, renderTypes);
     }
 
     @SuppressWarnings("deprecation")
-    public static TextureAtlasSprite getTexture(ResourceLocation resLoc) {
-        return getTexture(resLoc, TextureAtlas.LOCATION_BLOCKS);
+    public static Sprite getTexture(Identifier resLoc) {
+        return getTexture(resLoc, SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE);
     }
 
-    public static TextureAtlasSprite getTexture(ResourceLocation resLoc, ResourceLocation atlasResLoc) {
-        return Minecraft.getInstance().getTextureAtlas(atlasResLoc).apply(resLoc);
+    public static Sprite getTexture(Identifier resLoc, Identifier atlasResLoc) {
+        return MinecraftClient.getInstance().getSpriteAtlas(atlasResLoc).apply(resLoc);
     }
 
 }

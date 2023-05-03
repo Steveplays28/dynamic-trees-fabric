@@ -1,18 +1,18 @@
 package io.github.steveplays28.dynamictreesfabric.entities.render;
 
 import io.github.steveplays28.dynamictreesfabric.entities.LingeringEffectorEntity;
-import net.minecraft.client.renderer.culling.Frustum;
-import net.minecraft.client.renderer.entity.EntityRenderer;
-import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.render.Frustum;
+import net.minecraft.client.render.entity.EntityRenderer;
+import net.minecraft.client.render.entity.EntityRendererFactory;
+import net.minecraft.client.texture.MissingSprite;
+import net.minecraft.util.Identifier;
 
 /**
  * @author Harley O'Connor
  */
 public class LingeringEffectorRenderer extends EntityRenderer<LingeringEffectorEntity> {
 
-    public LingeringEffectorRenderer(EntityRendererProvider.Context renderManager) {
+    public LingeringEffectorRenderer(EntityRendererFactory.Context renderManager) {
         super(renderManager);
     }
 
@@ -22,8 +22,8 @@ public class LingeringEffectorRenderer extends EntityRenderer<LingeringEffectorE
     }
 
     @Override
-    public ResourceLocation getTextureLocation(LingeringEffectorEntity entity) {
-        return MissingTextureAtlasSprite.getLocation();
+    public Identifier getTextureLocation(LingeringEffectorEntity entity) {
+        return MissingSprite.getMissingSpriteId();
     }
 
 //    public static class Factory implements IRenderFactory<LingeringEffectorEntity> {

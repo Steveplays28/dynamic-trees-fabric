@@ -3,13 +3,12 @@ package io.github.steveplays28.dynamictreesfabric.systems.nodemappers;
 import io.github.steveplays28.dynamictreesfabric.api.TreeHelper;
 import io.github.steveplays28.dynamictreesfabric.api.network.NodeInspector;
 import io.github.steveplays28.dynamictreesfabric.blocks.branches.BranchBlock;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.block.state.BlockState;
-
 import java.util.HashMap;
 import java.util.Map;
+import net.minecraft.block.BlockState;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
+import net.minecraft.world.WorldAccess;
 
 public class NetVolumeNode implements NodeInspector {
 
@@ -98,7 +97,7 @@ public class NetVolumeNode implements NodeInspector {
     private final Volume volume = new Volume();//number of voxels(1x1x1 pixels) of wood accumulated from network analysis
 
     @Override
-    public boolean run(BlockState state, LevelAccessor world, BlockPos pos, Direction fromDir) {
+    public boolean run(BlockState state, WorldAccess world, BlockPos pos, Direction fromDir) {
         if (TreeHelper.isBranch(state)) {
             BranchBlock branchBlock = TreeHelper.getBranch(state);
             int radius = branchBlock.getRadius(state);
@@ -108,7 +107,7 @@ public class NetVolumeNode implements NodeInspector {
     }
 
     @Override
-    public boolean returnRun(BlockState blockState, LevelAccessor world, BlockPos pos, Direction fromDir) {
+    public boolean returnRun(BlockState blockState, WorldAccess world, BlockPos pos, Direction fromDir) {
         return false;
     }
 

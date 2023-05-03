@@ -1,7 +1,7 @@
 package io.github.steveplays28.dynamictreesfabric.util;
 
-import net.minecraft.core.Direction;
-import net.minecraft.util.StringRepresentable;
+import net.minecraft.util.StringIdentifiable;
+import net.minecraft.util.math.Direction;
 import net.minecraftforge.client.model.data.ModelProperty;
 
 /**
@@ -46,11 +46,11 @@ public class RootConnections extends Connections {
     @Override
     public void setRadius(Direction dir, int radius) {
         // Surface radii uses horizontal index, so use that instead.
-        this.radii[dir.get2DDataValue()] = radius;
+        this.radii[dir.getHorizontal()] = radius;
     }
 
     public void setConnectionLevel(Direction dir, ConnectionLevel connectionLevel) {
-        this.connectionLevels[dir.get2DDataValue()] = connectionLevel;
+        this.connectionLevels[dir.getHorizontal()] = connectionLevel;
     }
 
     public void setConnectionLevels(ConnectionLevel[] connectionLevels) {
@@ -66,7 +66,7 @@ public class RootConnections extends Connections {
      *     <li>A <tt>HIGH</tt> connection describes one where there is a surface root up one block in the y-direction and offset by one block in the given {@link Direction}.</li>
      * </ul>
      */
-    public enum ConnectionLevel implements StringRepresentable {
+    public enum ConnectionLevel implements StringIdentifiable {
         MID(0),
         LOW(-1),
         HIGH(1);
@@ -81,7 +81,7 @@ public class RootConnections extends Connections {
         }
 
         @Override
-        public String getSerializedName() {
+        public String asString() {
             return toString().toLowerCase();
         }
 

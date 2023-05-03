@@ -2,16 +2,15 @@ package io.github.steveplays28.dynamictreesfabric.blocks.leaves;
 
 import io.github.steveplays28.dynamictreesfabric.api.registry.TypedRegistry;
 import io.github.steveplays28.dynamictreesfabric.data.DTBlockTags;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagKey;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.SoundType;
-import net.minecraft.world.level.block.state.BlockBehaviour;
-import net.minecraft.world.level.material.Material;
-import net.minecraft.world.level.material.MaterialColor;
-
 import java.util.Collections;
 import java.util.List;
+import net.minecraft.block.AbstractBlock;
+import net.minecraft.block.Block;
+import net.minecraft.block.MapColor;
+import net.minecraft.block.Material;
+import net.minecraft.registry.tag.TagKey;
+import net.minecraft.sound.BlockSoundGroup;
+import net.minecraft.util.Identifier;
 
 /**
  * @author Harley O'Connor
@@ -20,7 +19,7 @@ public class WartProperties extends SolidLeavesProperties {
 
     public static final TypedRegistry.EntryType<LeavesProperties> TYPE = TypedRegistry.newType(WartProperties::new);
 
-    public WartProperties(final ResourceLocation registryName) {
+    public WartProperties(final Identifier registryName) {
         super(registryName);
     }
 
@@ -31,12 +30,12 @@ public class WartProperties extends SolidLeavesProperties {
 
     @Override
     public Material getDefaultMaterial() {
-        return Material.GRASS;
+        return Material.SOLID_ORGANIC;
     }
 
     @Override
-    public BlockBehaviour.Properties getDefaultBlockProperties(Material material, MaterialColor materialColor) {
-        return BlockBehaviour.Properties.of(material, materialColor).strength(1.0F).sound(SoundType.WART_BLOCK)./*harvestTool(ToolType.HOE).*/randomTicks();
+    public AbstractBlock.Settings getDefaultBlockProperties(Material material, MapColor materialColor) {
+        return AbstractBlock.Settings.of(material, materialColor).strength(1.0F).sounds(BlockSoundGroup.WART_BLOCK)./*harvestTool(ToolType.HOE).*/ticksRandomly();
     }
 
     @Override

@@ -5,20 +5,19 @@ import io.github.steveplays28.dynamictreesfabric.compat.seasons.SeasonProvider;
 import io.github.steveplays28.dynamictreesfabric.systems.poissondisc.PoissonDisc;
 import io.github.steveplays28.dynamictreesfabric.trees.Species;
 import io.github.steveplays28.dynamictreesfabric.util.SafeChunkBounds;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Holder;
-import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.block.state.BlockState;
-
 import java.util.List;
+import net.minecraft.block.BlockState;
+import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.WorldAccess;
+import net.minecraft.world.biome.Biome;
 
 /**
  * @author Harley O'Connor
  */
-public class PostGenerationContext extends GenerationContext<LevelAccessor> {
+public class PostGenerationContext extends GenerationContext<WorldAccess> {
 
-    private final Holder<Biome> biome;
+    private final RegistryEntry<Biome> biome;
     private final int radius;
     private final List<BlockPos> endPoints;
     private final SafeChunkBounds bounds;
@@ -29,7 +28,7 @@ public class PostGenerationContext extends GenerationContext<LevelAccessor> {
     /**
      * Instantiates a new {@link PostGenerationContext} object.
      *
-     * @param world                 The {@link LevelAccessor} object.
+     * @param world                 The {@link WorldAccess} object.
      * @param rootPos               The {@link BlockPos} of the {@link RootyBlock} the generated tree is planted on.
      * @param biome                 The {@link Biome} the tree has generated in.
      * @param radius                The radius of the {@link PoissonDisc} the tree generated in.
@@ -39,9 +38,9 @@ public class PostGenerationContext extends GenerationContext<LevelAccessor> {
      * @param seasonValue           The current season value, as obtained from {@link SeasonProvider#getSeasonValue(net.minecraft.world.level.Level,
      *                              BlockPos)}.
      * @param fruitProductionFactor The current fruit production factor, as obtained from {@link
-     *                              Species#seasonalFruitProductionFactor(net.minecraft.world.level.Level, BlockPos)}.
+     *                              Species#seasonalFruitProductionFactor(net.minecraft.world.World, BlockPos)}.
      */
-    public PostGenerationContext(LevelAccessor world, BlockPos rootPos, Species species, Holder<Biome> biome, int radius, List<BlockPos> endPoints,
+    public PostGenerationContext(WorldAccess world, BlockPos rootPos, Species species, RegistryEntry<Biome> biome, int radius, List<BlockPos> endPoints,
                                  SafeChunkBounds bounds, BlockState initialDirtState, Float seasonValue, Float fruitProductionFactor) {
         super(world, rootPos, species);
         this.biome = biome;
@@ -53,7 +52,7 @@ public class PostGenerationContext extends GenerationContext<LevelAccessor> {
         this.fruitProductionFactor = fruitProductionFactor;
     }
 
-    public Holder<Biome> biome() {
+    public RegistryEntry<Biome> biome() {
         return biome;
     }
 

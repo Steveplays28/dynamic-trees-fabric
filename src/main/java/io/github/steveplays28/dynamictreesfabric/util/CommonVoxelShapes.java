@@ -1,11 +1,10 @@
 package io.github.steveplays28.dynamictreesfabric.util;
 
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.phys.shapes.Shapes;
-import net.minecraft.world.phys.shapes.VoxelShape;
-
 import java.util.HashMap;
 import java.util.Map;
+import net.minecraft.block.Block;
+import net.minecraft.util.shape.VoxelShape;
+import net.minecraft.util.shape.VoxelShapes;
 
 /**
  * @author Harley O'Connor
@@ -17,26 +16,26 @@ public final class CommonVoxelShapes {
      */
     public static final Map<String, VoxelShape> SHAPES = new HashMap<>();
 
-    public static final VoxelShape SAPLING_TRUNK = Block.box(7D, 0D, 7D, 9D, 5D, 9D);
-    public static final VoxelShape SAPLING_LEAVES = Block.box(4D, 4D, 4D, 12D, 12D, 12D);
-    public static final VoxelShape SLIM_SAPLING_LEAVES = Block.box(5D, 4D, 5D, 11D, 14D, 11D);
-    public static final VoxelShape MUSHROOM_STEM = Block.box(7D, 0D, 7D, 9D, 5D, 9D);
-    public static final VoxelShape MUSHROOM_CAP_FLAT = Block.box(4D, 5D, 4D, 12D, 8D, 12D);
-    public static final VoxelShape MUSHROOM_CAP_ROUND = Block.box(5D, 3D, 5D, 11D, 8D, 11D);
-    public static final VoxelShape MUSHROOM_BRIM_E = Block.box(11D, 3D, 5D, 12D, 5D, 11D);
-    public static final VoxelShape MUSHROOM_BRIM_W = Block.box(4D, 3D, 5D, 5D, 5D, 11D);
-    public static final VoxelShape MUSHROOM_BRIM_S = Block.box(4D, 3D, 11D, 12D, 5D, 12D);
-    public static final VoxelShape MUSHROOM_BRIM_N = Block.box(4D, 3D, 4D, 12D, 5D, 5D);
+    public static final VoxelShape SAPLING_TRUNK = Block.createCuboidShape(7D, 0D, 7D, 9D, 5D, 9D);
+    public static final VoxelShape SAPLING_LEAVES = Block.createCuboidShape(4D, 4D, 4D, 12D, 12D, 12D);
+    public static final VoxelShape SLIM_SAPLING_LEAVES = Block.createCuboidShape(5D, 4D, 5D, 11D, 14D, 11D);
+    public static final VoxelShape MUSHROOM_STEM = Block.createCuboidShape(7D, 0D, 7D, 9D, 5D, 9D);
+    public static final VoxelShape MUSHROOM_CAP_FLAT = Block.createCuboidShape(4D, 5D, 4D, 12D, 8D, 12D);
+    public static final VoxelShape MUSHROOM_CAP_ROUND = Block.createCuboidShape(5D, 3D, 5D, 11D, 8D, 11D);
+    public static final VoxelShape MUSHROOM_BRIM_E = Block.createCuboidShape(11D, 3D, 5D, 12D, 5D, 11D);
+    public static final VoxelShape MUSHROOM_BRIM_W = Block.createCuboidShape(4D, 3D, 5D, 5D, 5D, 11D);
+    public static final VoxelShape MUSHROOM_BRIM_S = Block.createCuboidShape(4D, 3D, 11D, 12D, 5D, 12D);
+    public static final VoxelShape MUSHROOM_BRIM_N = Block.createCuboidShape(4D, 3D, 4D, 12D, 5D, 5D);
 
-    public static final VoxelShape SAPLING = Shapes.or(SAPLING_TRUNK, SAPLING_LEAVES);
-    public static final VoxelShape SLIM_SAPLING = Shapes.or(SAPLING_TRUNK, SLIM_SAPLING_LEAVES);
-    public static final VoxelShape FLAT_MUSHROOM = Shapes.or(MUSHROOM_STEM, MUSHROOM_CAP_FLAT);
-    public static final VoxelShape ROUND_MUSHROOM = Shapes.or(MUSHROOM_STEM, MUSHROOM_CAP_ROUND);
-    public static final VoxelShape ROUND_MUSHROOM_RIM = Shapes.or(MUSHROOM_STEM, MUSHROOM_CAP_ROUND, MUSHROOM_BRIM_E, MUSHROOM_BRIM_W, MUSHROOM_BRIM_S, MUSHROOM_BRIM_N);
+    public static final VoxelShape SAPLING = VoxelShapes.union(SAPLING_TRUNK, SAPLING_LEAVES);
+    public static final VoxelShape SLIM_SAPLING = VoxelShapes.union(SAPLING_TRUNK, SLIM_SAPLING_LEAVES);
+    public static final VoxelShape FLAT_MUSHROOM = VoxelShapes.union(MUSHROOM_STEM, MUSHROOM_CAP_FLAT);
+    public static final VoxelShape ROUND_MUSHROOM = VoxelShapes.union(MUSHROOM_STEM, MUSHROOM_CAP_ROUND);
+    public static final VoxelShape ROUND_MUSHROOM_RIM = VoxelShapes.union(MUSHROOM_STEM, MUSHROOM_CAP_ROUND, MUSHROOM_BRIM_E, MUSHROOM_BRIM_W, MUSHROOM_BRIM_S, MUSHROOM_BRIM_N);
 
     static {
-        SHAPES.put("empty", Shapes.empty());
-        SHAPES.put("block", Shapes.block());
+        SHAPES.put("empty", VoxelShapes.empty());
+        SHAPES.put("block", VoxelShapes.fullCube());
         SHAPES.put("sapling", SAPLING);
         SHAPES.put("slim_sapling", SLIM_SAPLING);
         SHAPES.put("flat_mushroom", FLAT_MUSHROOM);

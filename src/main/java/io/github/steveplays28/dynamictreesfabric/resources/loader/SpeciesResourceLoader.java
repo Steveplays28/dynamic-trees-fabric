@@ -20,16 +20,16 @@ import io.github.steveplays28.dynamictreesfabric.util.CommonSetup;
 import io.github.steveplays28.dynamictreesfabric.util.JsonMapWrapper;
 import io.github.steveplays28.dynamictreesfabric.util.holderset.DTBiomeHolderSet;
 import com.google.gson.JsonObject;
-import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagKey;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.ComposterBlock;
-import net.minecraft.world.level.block.SoundType;
-import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraft.block.Block;
+import net.minecraft.block.ComposterBlock;
+import net.minecraft.item.Item;
+import net.minecraft.registry.Registry;
+import net.minecraft.registry.tag.TagKey;
+import net.minecraft.sound.BlockSoundGroup;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.shape.VoxelShape;
+import net.minecraft.world.WorldView;
+import net.minecraft.world.biome.Biome;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -64,12 +64,12 @@ public final class SpeciesResourceLoader extends JsonRegistryResourceLoader<Spec
 
         JsonDeserialisers.register(Species.CommonOverride.class, input ->
                 JsonDeserialisers.BIOME_PREDICATE.deserialise(input)
-                        .map(biomePredicate -> (world, pos) -> world instanceof LevelReader &&
-                                biomePredicate.test(((LevelReader) world).getBiome(pos)))
+                        .map(biomePredicate -> (world, pos) -> world instanceof WorldView &&
+                                biomePredicate.test(((WorldView) world).getBiome(pos)))
         );
 
         this.loadAppliers
-                .register("seed", ResourceLocation.class, this::setSeed)
+                .register("seed", Identifier.class, this::setSeed)
                 .register("generate_seed", Boolean.class, Species::setShouldGenerateSeed)
                 .register("generate_sapling", Boolean.class, Species::setShouldGenerateSapling)
                 .register("sapling_name", String.class, Species::setSaplingName)
@@ -79,7 +79,7 @@ public final class SpeciesResourceLoader extends JsonRegistryResourceLoader<Spec
         // TODO: Consider marking certain reload appliers as being needed client-side and loaded when joining a server.
         this.commonAppliers
                 .register("always_show_on_waila", Boolean.class, Species::setAlwaysShowOnWaila)
-                .register("sapling_sound", SoundType.class, Species::setSaplingSound)
+                .register("sapling_sound", BlockSoundGroup.class, Species::setSaplingSound)
                 .register("sapling_shape", VoxelShape.class, Species::setSaplingShape);
 
         // We need the sapling shape to know which parent smartmodel the sapling model should use.
@@ -101,7 +101,7 @@ public final class SpeciesResourceLoader extends JsonRegistryResourceLoader<Spec
                 .register("environment_factors", JsonObject.class, this::applyEnvironmentFactors)
                 .register("seed_drop_rarity", Float.class, Species::setupStandardSeedDropping)
                 .register("stick_drop_rarity", Float.class, Species::setupStandardStickDropping)
-                .register("mega_species", ResourceLocation.class, this::setMegaSpecies)
+                .register("mega_species", Identifier.class, this::setMegaSpecies)
                 .register("seed", Seed.class, (species, seed) -> species.setSeed(() -> seed))
                 .register("seed_composter_chance", Float.class, this.composterChanceCache::put)
                 .register("sapling_grows_naturally", Boolean.class, Species::setCanSaplingGrowNaturally)
@@ -120,8 +120,8 @@ public final class SpeciesResourceLoader extends JsonRegistryResourceLoader<Spec
         super.registerAppliers();
     }
 
-    private void setSeed(Species species, ResourceLocation seedName) {
-        final ResourceLocation processedSeedName = TreeRegistry.processResLoc(seedName);
+    private void setSeed(Species species, Identifier seedName) {
+        final Identifier processedSeedName = TreeRegistry.processResLoc(seedName);
         species.setShouldGenerateSeed(false);
         species.setShouldGenerateSapling(false);
         CommonSetup.runOnCommonSetup(event -> {
@@ -144,8 +144,8 @@ public final class SpeciesResourceLoader extends JsonRegistryResourceLoader<Spec
                 );
     }
 
-    private void setMegaSpecies(Species species, ResourceLocation registryName) {
-        final ResourceLocation processedRegName = TreeRegistry.processResLoc(registryName);
+    private void setMegaSpecies(Species species, Identifier registryName) {
+        final Identifier processedRegName = TreeRegistry.processResLoc(registryName);
         Species.REGISTRY.runOnNextLock(Species.REGISTRY.generateIfValidRunnable(processedRegName, species::setMegaSpecies, () -> LOGGER.warn("Could not set mega species for '" +
                 species + "' as Species '" + processedRegName + "' was not found.")));
     }
@@ -179,7 +179,7 @@ public final class SpeciesResourceLoader extends JsonRegistryResourceLoader<Spec
     private void registerComposterChances() {
         this.composterChanceCache.forEach((species, chance) -> {
             if (species.getSeed().isPresent() && chance > 0) {
-                ComposterBlock.add(chance, species.getSeed().get());
+                ComposterBlock.registerCompostableItem(chance, species.getSeed().get());
             }
         });
         this.composterChanceCache.clear();

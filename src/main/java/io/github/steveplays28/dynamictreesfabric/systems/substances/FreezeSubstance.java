@@ -6,21 +6,21 @@ import io.github.steveplays28.dynamictreesfabric.api.substances.SubstanceEffect;
 import io.github.steveplays28.dynamictreesfabric.blocks.rootyblocks.RootyBlock;
 import io.github.steveplays28.dynamictreesfabric.systems.nodemappers.FreezerNode;
 import io.github.steveplays28.dynamictreesfabric.trees.Species;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.block.BlockState;
+import net.minecraft.particle.ParticleTypes;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 
 public class FreezeSubstance implements SubstanceEffect {
 
     @Override
-    public boolean apply(Level world, BlockPos rootPos) {
+    public boolean apply(World world, BlockPos rootPos) {
         final BlockState rootyState = world.getBlockState(rootPos);
         final RootyBlock dirt = TreeHelper.getRooty(rootyState);
         final Species species = dirt.getSpecies(rootyState, world, rootPos);
 
         if (species != Species.NULL_SPECIES && dirt != null) {
-            if (world.isClientSide) {
+            if (world.isClient) {
                 TreeHelper.treeParticles(world, rootPos, ParticleTypes.FIREWORK, 8);
             } else {
                 dirt.startAnalysis(world, rootPos, new MapSignal(new FreezerNode(species)));

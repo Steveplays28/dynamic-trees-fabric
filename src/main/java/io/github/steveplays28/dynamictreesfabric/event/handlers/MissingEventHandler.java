@@ -1,9 +1,9 @@
 package io.github.steveplays28.dynamictreesfabric.event.handlers;
 
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
+import net.minecraft.block.Block;
+import net.minecraft.block.Blocks;
+import net.minecraft.item.Item;
+import net.minecraft.util.Identifier;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -27,12 +27,12 @@ public class MissingEventHandler {
     @SubscribeEvent
     public void missingMappings(MissingMappingsEvent event) {
         for (MissingMappingsEvent.Mapping<Block> missing : event.getAllMappings(ForgeRegistries.Keys.BLOCKS)) {
-            ResourceLocation resLoc = missing.getKey();
+            Identifier resLoc = missing.getKey();
             String domain = resLoc.getNamespace();
             String path = resLoc.getPath();
             if (domain.equals("growingtrees")) {
                 Logger.getLogger(io.github.steveplays28.dynamictreesfabric.DynamicTreesFabric.MOD_ID).log(Level.CONFIG, "Remapping Missing Block: " + path);
-                Block mappedBlock = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(io.github.steveplays28.dynamictreesfabric.DynamicTreesFabric.MOD_ID, path));
+                Block mappedBlock = ForgeRegistries.BLOCKS.getValue(new Identifier(io.github.steveplays28.dynamictreesfabric.DynamicTreesFabric.MOD_ID, path));
                 if (mappedBlock != Blocks.AIR) { // Air is what you get when you don't get what you're looking for.
                     // assert mappedBlock != null;
                     missing.remap(mappedBlock);
@@ -41,12 +41,12 @@ public class MissingEventHandler {
         }
 
         for (MissingMappingsEvent.Mapping<Item> missing : event.getAllMappings(ForgeRegistries.Keys.ITEMS)) {
-            ResourceLocation resLoc = missing.getKey();
+            Identifier resLoc = missing.getKey();
             String domain = resLoc.getNamespace();
             String path = resLoc.getPath();
             if (domain.equals("growingtrees")) {
                 Logger.getLogger(io.github.steveplays28.dynamictreesfabric.DynamicTreesFabric.MOD_ID).log(Level.CONFIG, "Remapping Missing Item: " + path);
-                Item mappedItem = ForgeRegistries.ITEMS.getValue(new ResourceLocation(io.github.steveplays28.dynamictreesfabric.DynamicTreesFabric.MOD_ID, path));
+                Item mappedItem = ForgeRegistries.ITEMS.getValue(new Identifier(io.github.steveplays28.dynamictreesfabric.DynamicTreesFabric.MOD_ID, path));
                 if (mappedItem != null) { // Null is what you get when you don't get what you're looking for.
                     missing.remap(mappedItem);
                 }

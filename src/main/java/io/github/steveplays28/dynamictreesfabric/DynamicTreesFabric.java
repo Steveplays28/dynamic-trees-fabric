@@ -16,7 +16,6 @@ import io.github.steveplays28.dynamictreesfabric.trees.Family;
 import io.github.steveplays28.dynamictreesfabric.trees.Species;
 import io.github.steveplays28.dynamictreesfabric.util.CommonSetup;
 import io.github.steveplays28.dynamictreesfabric.worldgen.TreeGenerator;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.data.event.GatherDataEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -25,6 +24,10 @@ import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+
+import net.minecraft.util.Identifier;
+
+import net.fabricmc.api.ModInitializer;
 
 @Mod(io.github.steveplays28.dynamictreesfabric.DynamicTreesFabric.MOD_ID)
 public final class DynamicTreesFabric implements ModInitializer {
@@ -115,8 +118,8 @@ public final class DynamicTreesFabric implements ModInitializer {
         );
     }
 
-    public static ResourceLocation resLoc(final String path) {
-        return new ResourceLocation(MOD_ID, path);
+    public static Identifier resLoc(final String path) {
+        return new Identifier(MOD_ID, path);
     }
 
 }

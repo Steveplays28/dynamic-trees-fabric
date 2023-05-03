@@ -4,32 +4,32 @@ import io.github.steveplays28.dynamictreesfabric.entities.FallingTreeEntity;
 import io.github.steveplays28.dynamictreesfabric.models.FallingTreeEntityModel;
 import io.github.steveplays28.dynamictreesfabric.models.FallingTreeEntityModelTrackerCache;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.entity.EntityRenderer;
-import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.renderer.texture.TextureAtlas;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.render.OverlayTexture;
+import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.render.VertexConsumer;
+import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.entity.EntityRenderer;
+import net.minecraft.client.render.entity.EntityRendererFactory;
+import net.minecraft.client.texture.SpriteAtlasTexture;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.util.Identifier;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public class FallingTreeRenderer extends EntityRenderer<FallingTreeEntity> {
 
-    public FallingTreeRenderer(EntityRendererProvider.Context renderManager) {
+    public FallingTreeRenderer(EntityRendererFactory.Context renderManager) {
         super(renderManager);
     }
 
     @Override
-    public ResourceLocation getTextureLocation(FallingTreeEntity entity) {
-        return TextureAtlas.LOCATION_BLOCKS;
+    public Identifier getTextureLocation(FallingTreeEntity entity) {
+        return SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE;
     }
 
     @Override
-    public void render(FallingTreeEntity entity, float entityYaw, float partialTicks, PoseStack matrixStack, MultiBufferSource buffer, int packedLight) {
+    public void render(FallingTreeEntity entity, float entityYaw, float partialTicks, MatrixStack matrixStack, VertexConsumerProvider buffer, int packedLight) {
         super.render(entity, entityYaw, partialTicks, matrixStack, buffer, packedLight);
 
         if (!entity.isClientBuilt() || !entity.shouldRender()) {
@@ -40,9 +40,9 @@ public class FallingTreeRenderer extends EntityRenderer<FallingTreeEntity> {
 
         final FallingTreeEntityModel treeModel = FallingTreeEntityModelTrackerCache.getOrCreateModel(entity);
 
-        matrixStack.pushPose();
+        matrixStack.push();
 
-        final VertexConsumer vertexBuilder = buffer.getBuffer(RenderType.entityCutout(this.getTextureLocation(entity)));
+        final VertexConsumer vertexBuilder = buffer.getBuffer(RenderLayer.getEntityCutout(this.getTextureLocation(entity)));
 
 //		if (entity.onFire) {
 //			renderFire(matrixStack, vertexBuilder);
@@ -50,9 +50,9 @@ public class FallingTreeRenderer extends EntityRenderer<FallingTreeEntity> {
 
         entity.currentAnimationHandler.renderTransform(entity, entityYaw, partialTicks, matrixStack);
 
-        treeModel.renderToBuffer(matrixStack, vertexBuilder, packedLight, OverlayTexture.NO_OVERLAY, 1, 1, 1, 1.0F);
+        treeModel.render(matrixStack, vertexBuilder, packedLight, OverlayTexture.DEFAULT_UV, 1, 1, 1, 1.0F);
 
-        matrixStack.popPose();
+        matrixStack.pop();
     }
 
 //	private void renderFire(MatrixStack matrixStack, IVertexBuilder buffer) {

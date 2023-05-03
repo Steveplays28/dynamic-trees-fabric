@@ -4,7 +4,7 @@ import io.github.steveplays28.dynamictreesfabric.blocks.branches.SurfaceRootBloc
 import io.github.steveplays28.dynamictreesfabric.data.provider.BranchLoaderBuilder;
 import io.github.steveplays28.dynamictreesfabric.data.provider.DTBlockStateProvider;
 import io.github.steveplays28.dynamictreesfabric.trees.Family;
-import net.minecraft.world.level.block.Block;
+import net.minecraft.block.Block;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.Objects;

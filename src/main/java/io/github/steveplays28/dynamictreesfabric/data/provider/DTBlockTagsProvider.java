@@ -6,14 +6,14 @@ import io.github.steveplays28.dynamictreesfabric.init.DTRegistries;
 import io.github.steveplays28.dynamictreesfabric.init.DTTrees;
 import io.github.steveplays28.dynamictreesfabric.trees.Family;
 import io.github.steveplays28.dynamictreesfabric.trees.Species;
+import net.minecraft.block.Block;
+import net.minecraft.block.Blocks;
 import net.minecraft.data.DataGenerator;
-import net.minecraft.data.tags.BlockTagsProvider;
-import net.minecraft.data.tags.TagsProvider;
-import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.TagKey;
-import net.minecraft.world.item.Tier;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
+import net.minecraft.data.server.tag.TagProvider;
+import net.minecraft.data.server.tag.vanilla.VanillaBlockTagProvider;
+import net.minecraft.item.ToolMaterial;
+import net.minecraft.registry.tag.BlockTags;
+import net.minecraft.registry.tag.TagKey;
 import net.minecraftforge.common.data.ExistingFileHelper;
 
 import javax.annotation.Nullable;
@@ -22,14 +22,14 @@ import java.util.Optional;
 /**
  * @author Harley O'Connor
  */
-public class DTBlockTagsProvider extends BlockTagsProvider {
+public class DTBlockTagsProvider extends VanillaBlockTagProvider {
 
     public DTBlockTagsProvider(DataGenerator dataGenerator, String modId, @Nullable ExistingFileHelper existingFileHelper) {
         super(dataGenerator, modId, existingFileHelper);
     }
 
     @Override
-    protected void addTags() {
+    protected void configure() {
         if (this.modId.equals(io.github.steveplays28.dynamictreesfabric.DynamicTreesFabric.MOD_ID)) {
             this.addDTOnlyTags();
         }
@@ -37,42 +37,42 @@ public class DTBlockTagsProvider extends BlockTagsProvider {
     }
 
     private void addDTOnlyTags() {
-        this.tag(DTBlockTags.BRANCHES)
+        this.getOrCreateTagBuilder(DTBlockTags.BRANCHES)
                 .addTag(DTBlockTags.BRANCHES_THAT_BURN)
                 .addTag(DTBlockTags.FUNGUS_BRANCHES);
 
-        this.tag(DTBlockTags.FOLIAGE)
+        this.getOrCreateTagBuilder(DTBlockTags.FOLIAGE)
                 .add(Blocks.GRASS)
                 .add(Blocks.TALL_GRASS)
                 .add(Blocks.FERN);
 
-        this.tag(DTBlockTags.STRIPPED_BRANCHES)
+        this.getOrCreateTagBuilder(DTBlockTags.STRIPPED_BRANCHES)
                 .addTag(DTBlockTags.STRIPPED_BRANCHES_THAT_BURN)
                 .addTag(DTBlockTags.STRIPPED_FUNGUS_BRANCHES);
 
-        this.tag(BlockTags.ENDERMAN_HOLDABLE)
+        this.getOrCreateTagBuilder(BlockTags.ENDERMAN_HOLDABLE)
                 .addTag(DTBlockTags.FUNGUS_CAPS);
 
-        this.tag(BlockTags.FLOWER_POTS)
+        this.getOrCreateTagBuilder(BlockTags.FLOWER_POTS)
                 .add(DTRegistries.POTTED_SAPLING.get());
 
         Species.REGISTRY.get(DTTrees.WARPED).getSapling().ifPresent(sapling ->
-                this.tag(BlockTags.HOGLIN_REPELLENTS).add(sapling));
+                this.getOrCreateTagBuilder(BlockTags.HOGLIN_REPELLENTS).add(sapling));
 
-        this.tag(BlockTags.LEAVES)
+        this.getOrCreateTagBuilder(BlockTags.LEAVES)
                 .addTag(DTBlockTags.LEAVES);
 
-        this.tag(BlockTags.LOGS)
+        this.getOrCreateTagBuilder(BlockTags.LOGS)
                 .addTag(DTBlockTags.BRANCHES);
 
-        this.tag(BlockTags.LOGS_THAT_BURN)
+        this.getOrCreateTagBuilder(BlockTags.LOGS_THAT_BURN)
                 .addTag(DTBlockTags.BRANCHES_THAT_BURN)
                 .addTag(DTBlockTags.STRIPPED_BRANCHES_THAT_BURN);
 
-        this.tag(BlockTags.SAPLINGS)
+        this.getOrCreateTagBuilder(BlockTags.SAPLINGS)
                 .addTag(DTBlockTags.SAPLINGS);
 
-        this.tag(BlockTags.WART_BLOCKS)
+        this.getOrCreateTagBuilder(BlockTags.WART_BLOCKS)
                 .addTag(DTBlockTags.WART_BLOCKS);
     }
 
@@ -109,13 +109,13 @@ public class DTBlockTagsProvider extends BlockTagsProvider {
         });
     }
 
-    protected Optional<TagsProvider.TagAppender<Block>> tierTag(@Nullable Tier tier) {
+    protected Optional<TagProvider.ProvidedTagBuilder<Block>> tierTag(@Nullable ToolMaterial tier) {
         if (tier == null)
             return Optional.empty();
 
         TagKey<Block> tag = tier.getTag();
 
-        return tag == null ? Optional.empty() : Optional.of(this.tag(tag));
+        return tag == null ? Optional.empty() : Optional.of(this.getOrCreateTagBuilder(tag));
     }
 
     @Override

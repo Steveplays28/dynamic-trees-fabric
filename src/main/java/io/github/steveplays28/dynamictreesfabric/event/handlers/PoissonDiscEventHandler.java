@@ -2,11 +2,11 @@ package io.github.steveplays28.dynamictreesfabric.event.handlers;
 
 import io.github.steveplays28.dynamictreesfabric.systems.poissondisc.UniversalPoissonDiscProvider;
 import io.github.steveplays28.dynamictreesfabric.worldgen.TreeGenerator;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.chunk.ChunkAccess;
-import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.util.math.ChunkPos;
+import net.minecraft.world.WorldAccess;
+import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.chunk.WorldChunk;
 import net.minecraftforge.event.level.ChunkDataEvent;
 import net.minecraftforge.event.level.LevelEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -26,17 +26,17 @@ public class PoissonDiscEventHandler {
      */
     @SubscribeEvent
     public void onWorldUnload(LevelEvent.Unload event) {
-        final LevelAccessor world = event.getLevel();
-        if (!world.isClientSide()) {
-            TreeGenerator.getTreeGenerator().getCircleProvider().unloadWorld((ServerLevel) world);//clears the circles
+        final WorldAccess world = event.getLevel();
+        if (!world.isClient()) {
+            TreeGenerator.getTreeGenerator().getCircleProvider().unloadWorld((ServerWorld) world);//clears the circles
         }
     }
 
     @SubscribeEvent
     public void onChunkDataLoad(ChunkDataEvent.Load event) {
-        final LevelAccessor world = event.getLevel();
+        final WorldAccess world = event.getLevel();
 
-		if (world == null || world.isClientSide()) {
+		if (world == null || world.isClient()) {
 			return;
 		}
 
@@ -44,20 +44,20 @@ public class PoissonDiscEventHandler {
         final UniversalPoissonDiscProvider discProvider = TreeGenerator.getTreeGenerator().getCircleProvider();
 
         final ChunkPos chunkPos = event.getChunk().getPos();
-        discProvider.setChunkPoissonData((ServerLevel) world, chunkPos, circleData);
+        discProvider.setChunkPoissonData((ServerWorld) world, chunkPos, circleData);
     }
 
     @SubscribeEvent
     public void onChunkDataSave(ChunkDataEvent.Save event) {
-        final ServerLevel world = (ServerLevel) event.getLevel();
+        final ServerWorld world = (ServerWorld) event.getLevel();
         final UniversalPoissonDiscProvider discProvider = TreeGenerator.getTreeGenerator().getCircleProvider();
-        final ChunkAccess chunk = event.getChunk();
+        final Chunk chunk = event.getChunk();
         final ChunkPos chunkPos = chunk.getPos();
 
         final byte[] circleData = discProvider.getChunkPoissonData(world, chunkPos);
         event.getData().putByteArray(CIRCLE_DATA_ID, circleData); // Set circle data.
 
-		if (chunk instanceof LevelChunk && !((LevelChunk) chunk).loaded) {
+		if (chunk instanceof WorldChunk && !((WorldChunk) chunk).loadedToWorld) {
 			discProvider.unloadChunkPoissonData(world, chunkPos);
 		}
     }

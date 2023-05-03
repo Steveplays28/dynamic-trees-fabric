@@ -1,12 +1,12 @@
 package io.github.steveplays28.dynamictreesfabric.util;
 
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.WorldGenLevel;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraft.block.BlockState;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.math.Direction;
+import net.minecraft.world.StructureWorldAccess;
+import net.minecraft.world.WorldAccess;
+import net.minecraft.world.chunk.ChunkStatus;
 
 public class SafeChunkBounds {
 
@@ -47,12 +47,12 @@ public class SafeChunkBounds {
         center = null;
     }
 
-    public SafeChunkBounds(WorldGenLevel world, ChunkPos pos) {
+    public SafeChunkBounds(StructureWorldAccess world, ChunkPos pos) {
         this.center = pos;
 
         for (final Tile tile : TILES) {
             ChunkPos cp = new ChunkPos(pos.x + tile.pos.x, pos.z + tile.pos.z);
-            final boolean loaded = world.getChunkSource().getChunk(cp.x, cp.z, ChunkStatus.EMPTY, false) != null;
+            final boolean loaded = world.getChunkManager().getChunk(cp.x, cp.z, ChunkStatus.EMPTY, false) != null;
             this.chunkBounds[tile.index] = loaded ? new BlockBounds(world, cp) : BlockBounds.INVALID;
         }
 
@@ -61,8 +61,8 @@ public class SafeChunkBounds {
             if (curr != BlockBounds.INVALID) {
                 for (final Direction dir : CoordUtils.HORIZONTALS) {
                     boolean validDir = false;
-                    if ((tile.borders & (1 << dir.get3DDataValue())) != 0) {
-                        final BlockBounds adjTile = this.chunkBounds[tile.index + dir.getStepX() + dir.getStepZ() * 4];
+                    if ((tile.borders & (1 << dir.getId())) != 0) {
+                        final BlockBounds adjTile = this.chunkBounds[tile.index + dir.getOffsetX() + dir.getOffsetZ() * 4];
                         validDir = adjTile != BlockBounds.INVALID;
                     }
                     if (!validDir) {
@@ -103,13 +103,13 @@ public class SafeChunkBounds {
                 this.inBounds(new BlockPos(max.getX(), 0, min.getZ()), gap);
     }
 
-    public void setBlockState(LevelAccessor world, BlockPos pos, BlockState state, boolean gap) {
+    public void setBlockState(WorldAccess world, BlockPos pos, BlockState state, boolean gap) {
         this.setBlockState(world, pos, state, 3, gap);
     }
 
-    public void setBlockState(LevelAccessor world, BlockPos pos, BlockState state, int flags, boolean gap) {
+    public void setBlockState(WorldAccess world, BlockPos pos, BlockState state, int flags, boolean gap) {
         if (this.inBounds(pos, gap)) {
-            world.setBlock(pos, state, flags);
+            world.setBlockState(pos, state, flags);
         }
     }
 

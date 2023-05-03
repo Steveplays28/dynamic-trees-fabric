@@ -3,12 +3,11 @@ package io.github.steveplays28.dynamictreesfabric.systems.nodemappers;
 import io.github.steveplays28.dynamictreesfabric.api.network.NodeInspector;
 import io.github.steveplays28.dynamictreesfabric.systems.BranchConnectables;
 import io.github.steveplays28.dynamictreesfabric.worldgen.JoCode;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.block.state.BlockState;
-
 import java.util.ArrayList;
+import net.minecraft.block.BlockState;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
+import net.minecraft.world.WorldAccess;
 
 public class CoderNode implements NodeInspector {
 
@@ -30,7 +29,7 @@ public class CoderNode implements NodeInspector {
     }
 
     @Override
-    public boolean run(BlockState blockState, LevelAccessor world, BlockPos pos, Direction fromDir) {
+    public boolean run(BlockState blockState, WorldAccess world, BlockPos pos, Direction fromDir) {
         //Branch connectables should not be mapped
         if (BranchConnectables.isBlockConnectable(world.getBlockState(pos).getBlock())) {
             return false;
@@ -41,9 +40,9 @@ public class CoderNode implements NodeInspector {
         //We've reached the end of a branch and we're starting again.
         for (int i = links.size() - 1; i >= 0; i--) {//We start at the end because that's the most likely place we came from
             Link l = links.get(i);
-            if (pos.getX() + fromDir.getStepX() == l.pos.getX() &&
-                    pos.getY() + fromDir.getStepY() == l.pos.getY() &&
-                    pos.getZ() + fromDir.getStepZ() == l.pos.getZ()) {
+            if (pos.getX() + fromDir.getOffsetX() == l.pos.getX() &&
+                    pos.getY() + fromDir.getOffsetY() == l.pos.getY() &&
+                    pos.getZ() + fromDir.getOffsetZ() == l.pos.getZ()) {
                 //Create linkage
                 l.links[fromDir.getOpposite().ordinal()] = link;
                 link.links[fromDir.ordinal()] = l;
@@ -58,7 +57,7 @@ public class CoderNode implements NodeInspector {
     }
 
     @Override
-    public boolean returnRun(BlockState blockState, LevelAccessor world, BlockPos pos, Direction fromDir) {
+    public boolean returnRun(BlockState blockState, WorldAccess world, BlockPos pos, Direction fromDir) {
         return false;
     }
 

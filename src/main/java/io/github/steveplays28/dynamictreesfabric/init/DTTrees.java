@@ -22,14 +22,14 @@ import io.github.steveplays28.dynamictreesfabric.trees.families.NetherFungusFami
 import io.github.steveplays28.dynamictreesfabric.trees.species.NetherFungusSpecies;
 import io.github.steveplays28.dynamictreesfabric.trees.species.PalmSpecies;
 import io.github.steveplays28.dynamictreesfabric.trees.species.SwampOakSpecies;
-import net.minecraft.data.worldgen.features.NetherFeatures;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.random.WeightedEntry;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.feature.configurations.NetherForestVegetationConfig;
-import net.minecraft.world.level.levelgen.feature.stateproviders.WeightedStateProvider;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.collection.Weighted;
+import net.minecraft.world.gen.feature.NetherConfiguredFeatures;
+import net.minecraft.world.gen.feature.NetherForestVegetationFeatureConfig;
+import net.minecraft.world.gen.stateprovider.WeightedBlockStateProvider;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -42,16 +42,16 @@ import java.util.stream.Collectors;
 @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
 public class DTTrees {
 
-    public static final ResourceLocation NULL = io.github.steveplays28.dynamictreesfabric.DynamicTreesFabric.resLoc("null");
+    public static final Identifier NULL = io.github.steveplays28.dynamictreesfabric.DynamicTreesFabric.resLoc("null");
 
-    public static final ResourceLocation OAK = io.github.steveplays28.dynamictreesfabric.DynamicTreesFabric.resLoc("oak");
-    public static final ResourceLocation BIRCH = io.github.steveplays28.dynamictreesfabric.DynamicTreesFabric.resLoc("birch");
-    public static final ResourceLocation SPRUCE = io.github.steveplays28.dynamictreesfabric.DynamicTreesFabric.resLoc("spruce");
-    public static final ResourceLocation JUNGLE = io.github.steveplays28.dynamictreesfabric.DynamicTreesFabric.resLoc("jungle");
-    public static final ResourceLocation DARK_OAK = io.github.steveplays28.dynamictreesfabric.DynamicTreesFabric.resLoc("dark_oak");
-    public static final ResourceLocation ACACIA = io.github.steveplays28.dynamictreesfabric.DynamicTreesFabric.resLoc("acacia");
-    public static final ResourceLocation CRIMSON = io.github.steveplays28.dynamictreesfabric.DynamicTreesFabric.resLoc("crimson");
-    public static final ResourceLocation WARPED = io.github.steveplays28.dynamictreesfabric.DynamicTreesFabric.resLoc("warped");
+    public static final Identifier OAK = io.github.steveplays28.dynamictreesfabric.DynamicTreesFabric.resLoc("oak");
+    public static final Identifier BIRCH = io.github.steveplays28.dynamictreesfabric.DynamicTreesFabric.resLoc("birch");
+    public static final Identifier SPRUCE = io.github.steveplays28.dynamictreesfabric.DynamicTreesFabric.resLoc("spruce");
+    public static final Identifier JUNGLE = io.github.steveplays28.dynamictreesfabric.DynamicTreesFabric.resLoc("jungle");
+    public static final Identifier DARK_OAK = io.github.steveplays28.dynamictreesfabric.DynamicTreesFabric.resLoc("dark_oak");
+    public static final Identifier ACACIA = io.github.steveplays28.dynamictreesfabric.DynamicTreesFabric.resLoc("acacia");
+    public static final Identifier CRIMSON = io.github.steveplays28.dynamictreesfabric.DynamicTreesFabric.resLoc("crimson");
+    public static final Identifier WARPED = io.github.steveplays28.dynamictreesfabric.DynamicTreesFabric.resLoc("warped");
 
     @SubscribeEvent
     public static void registerSpecies(final io.github.steveplays28.dynamictreesfabric.api.registry.RegistryEvent<Species> event) {
@@ -129,19 +129,19 @@ public class DTTrees {
     public static void replaceNyliumFungiFeatures() {
         TreeRegistry.findSpecies(CRIMSON).getSapling().ifPresent(crimsonSapling ->
                 TreeRegistry.findSpecies(WARPED).getSapling().ifPresent(warpedSapling -> {
-                    replaceFeatureConfigs(((WeightedStateProvider) new NetherForestVegetationConfig(NetherFeatures.CRIMSON_VEGETATION_PROVIDER, 8, 4).stateProvider), crimsonSapling, warpedSapling);
-                    replaceFeatureConfigs(((WeightedStateProvider) new NetherForestVegetationConfig(NetherFeatures.WARPED_VEGETATION_PROVIDER, 8, 4).stateProvider), crimsonSapling, warpedSapling);
+                    replaceFeatureConfigs(((WeightedBlockStateProvider) new NetherForestVegetationFeatureConfig(NetherConfiguredFeatures.CRIMSON_VEGETATION_PROVIDER, 8, 4).stateProvider), crimsonSapling, warpedSapling);
+                    replaceFeatureConfigs(((WeightedBlockStateProvider) new NetherForestVegetationFeatureConfig(NetherConfiguredFeatures.WARPED_VEGETATION_PROVIDER, 8, 4).stateProvider), crimsonSapling, warpedSapling);
                 })
         );
     }
 
-    private static void replaceFeatureConfigs(WeightedStateProvider featureConfig, Block crimsonSapling, Block warpedSapling) {
-        for (final WeightedEntry.Wrapper<BlockState> entry : featureConfig.weightedList.items) {
+    private static void replaceFeatureConfigs(WeightedBlockStateProvider featureConfig, Block crimsonSapling, Block warpedSapling) {
+        for (final Weighted.Present<BlockState> entry : featureConfig.weightedList.items) {
 			if (entry.getData().getBlock() == Blocks.CRIMSON_FUNGUS) {
-                entry.data = crimsonSapling.defaultBlockState();
+                entry.data = crimsonSapling.getDefaultState();
             }
 			if (entry.data.getBlock() == Blocks.WARPED_FUNGUS) {
-				entry.data = warpedSapling.defaultBlockState();
+				entry.data = warpedSapling.getDefaultState();
 			}
         }
     }

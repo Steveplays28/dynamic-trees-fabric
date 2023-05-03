@@ -1,7 +1,7 @@
 package io.github.steveplays28.dynamictreesfabric.models;
 
 import io.github.steveplays28.dynamictreesfabric.entities.FallingTreeEntity;
-import net.minecraft.world.level.Level;
+import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -19,14 +19,14 @@ public class FallingTreeEntityModelTrackerCache {
         return models.computeIfAbsent(entity.getId(), e -> new FallingTreeEntityModel(entity));
     }
 
-    public static void cleanupModels(Level world, FallingTreeEntity entity) {
+    public static void cleanupModels(World world, FallingTreeEntity entity) {
         models.remove(entity.getId());
         cleanupModels(world);
     }
 
-    public static void cleanupModels(Level world) {
+    public static void cleanupModels(World world) {
         models = models.entrySet().stream()
-                .filter(map -> world.getEntity(map.getKey()) != null)
+                .filter(map -> world.getEntityById(map.getKey()) != null)
                 .collect(Collectors.toConcurrentMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 }

@@ -2,14 +2,14 @@ package io.github.steveplays28.dynamictreesfabric.api.registry;
 
 import io.github.steveplays28.dynamictreesfabric.data.provider.DTBlockStateProvider;
 import io.github.steveplays28.dynamictreesfabric.data.provider.DTItemModelProvider;
-import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.ClickEvent;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.HoverEvent;
-import net.minecraft.resources.ResourceLocation;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.function.Consumer;
+import net.minecraft.text.ClickEvent;
+import net.minecraft.text.HoverEvent;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
+import net.minecraft.util.Identifier;
 
 /**
  * Holds an entry for a {@link SimpleRegistry}.
@@ -18,14 +18,14 @@ import java.util.function.Consumer;
  */
 public abstract class RegistryEntry<T extends RegistryEntry<T>> {
 
-    private ResourceLocation registryName;
+    private Identifier registryName;
     private boolean valid = true;
     private boolean generateData;
 
     protected RegistryEntry() {
     }
 
-    protected RegistryEntry(ResourceLocation registryName) {
+    protected RegistryEntry(Identifier registryName) {
         this.registryName = registryName;
     }
 
@@ -120,24 +120,24 @@ public abstract class RegistryEntry<T extends RegistryEntry<T>> {
     public void generateItemModelData(DTItemModelProvider provider) {
     }
 
-    public final ResourceLocation getRegistryName() {
+    public final Identifier getRegistryName() {
         return this.registryName;
     }
 
-    public Component getTextComponent() {
-        return this.formatComponent(Component.literal(this.getRegistryName().toString()), ChatFormatting.AQUA);
+    public Text getTextComponent() {
+        return this.formatComponent(Text.literal(this.getRegistryName().toString()), Formatting.AQUA);
     }
 
-    protected Component formatComponent(final Component component, final ChatFormatting colour) {
-        return component.copy().withStyle(style -> style.withColor(colour)
+    protected Text formatComponent(final Text component, final Formatting colour) {
+        return component.copy().styled(style -> style.withColor(colour)
                 .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                        Component.translatable("chat.registry_name", this.getRegistryName())))
+                        Text.translatable("chat.registry_name", this.getRegistryName())))
                 .withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD,
                         this.getRegistryName().toString())));
     }
 
     @SuppressWarnings("unchecked")
-    public final T setRegistryName(final ResourceLocation registryName) {
+    public final T setRegistryName(final Identifier registryName) {
         this.registryName = registryName;
         return (T) this;
     }

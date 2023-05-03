@@ -1,17 +1,17 @@
 package io.github.steveplays28.dynamictreesfabric.util;
 
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.levelgen.LegacyRandomSource;
-import net.minecraft.world.level.levelgen.RandomSupport;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.random.CheckedRandom;
+import net.minecraft.util.math.random.RandomSeed;
 
-public class RandomXOR extends LegacyRandomSource {
+public class RandomXOR extends CheckedRandom {
 
     private static final long serialVersionUID = -3477272122511092632L;
 
     private int xor = 0;
 
     public RandomXOR() {
-        this(RandomSupport.generateUniqueSeed());
+        this(RandomSeed.getSeed());
     }
 
     public RandomXOR(long seed) {

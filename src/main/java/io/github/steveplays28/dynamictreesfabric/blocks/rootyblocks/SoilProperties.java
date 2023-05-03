@@ -14,16 +14,15 @@ import io.github.steveplays28.dynamictreesfabric.util.MutableLazyValue;
 import io.github.steveplays28.dynamictreesfabric.util.Optionals;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.SoundType;
-import net.minecraft.world.level.block.state.BlockBehaviour;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.Material;
-import net.minecraft.world.level.material.MaterialColor;
-
 import javax.annotation.Nullable;
+import net.minecraft.block.AbstractBlock;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.MapColor;
+import net.minecraft.block.Material;
+import net.minecraft.sound.BlockSoundGroup;
+import net.minecraft.util.Identifier;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -35,7 +34,7 @@ import static io.github.steveplays28.dynamictreesfabric.util.ResourceLocationUti
 public class SoilProperties extends RegistryEntry<SoilProperties> implements Resettable<SoilProperties> {
 
     public static final Codec<SoilProperties> CODEC = RecordCodecBuilder.create(instance -> instance
-            .group(ResourceLocation.CODEC.fieldOf(Resources.RESOURCE_LOCATION.toString()).forGetter(SoilProperties::getRegistryName))
+            .group(Identifier.CODEC.fieldOf(Resources.RESOURCE_LOCATION.toString()).forGetter(SoilProperties::getRegistryName))
             .apply(instance, SoilProperties::new));
 
     public static final SoilProperties NULL_SOIL_PROPERTIES = new SoilProperties() {
@@ -55,7 +54,7 @@ public class SoilProperties extends RegistryEntry<SoilProperties> implements Res
         }
 
         @Override
-        public void generateBlock(BlockBehaviour.Properties properties) {
+        public void generateBlock(AbstractBlock.Settings properties) {
         }
     }.setRegistryName(DTTrees.NULL).setBlockRegistryName(DTTrees.NULL);
 
@@ -67,7 +66,7 @@ public class SoilProperties extends RegistryEntry<SoilProperties> implements Res
     protected Block primitiveSoilBlock;
     protected Supplier<RootyBlock> block;
     protected Integer soilFlags = 0;
-    private ResourceLocation blockRegistryName;
+    private Identifier blockRegistryName;
     protected boolean hasSubstitute;
     protected boolean worldGenOnly;
 
@@ -76,19 +75,19 @@ public class SoilProperties extends RegistryEntry<SoilProperties> implements Res
     }
 
     //used for Dirt Helper registrations only
-    protected SoilProperties(final Block primitiveBlock, ResourceLocation name, Integer soilFlags, boolean generate) {
+    protected SoilProperties(final Block primitiveBlock, Identifier name, Integer soilFlags, boolean generate) {
         this(primitiveBlock, name);
         this.soilFlags = soilFlags;
         if (generate) {
-            generateBlock(BlockBehaviour.Properties.copy(primitiveBlock));
+            generateBlock(AbstractBlock.Settings.copy(primitiveBlock));
         }
     }
 
-    public SoilProperties(final ResourceLocation registryName) {
+    public SoilProperties(final Identifier registryName) {
         this(null, registryName);
     }
 
-    public SoilProperties(@Nullable final Block primitiveBlock, final ResourceLocation registryName) {
+    public SoilProperties(@Nullable final Block primitiveBlock, final Identifier registryName) {
         super(registryName);
         this.primitiveSoilBlock = primitiveBlock != null ? primitiveBlock : Blocks.AIR;
     }
@@ -124,14 +123,14 @@ public class SoilProperties extends RegistryEntry<SoilProperties> implements Res
      * @return the BlockState of the rooty soil.
      */
     public BlockState getSoilState (BlockState primitiveSoilState, int fertility, boolean requireTileEntity){
-        return block.get().defaultBlockState().setValue(RootyBlock.FERTILITY, fertility).setValue(RootyBlock.IS_VARIANT, requireTileEntity);
+        return block.get().getDefaultState().with(RootyBlock.FERTILITY, fertility).with(RootyBlock.IS_VARIANT, requireTileEntity);
     }
 
     /**
      * @return the BlockState of the primitive soil that is set when it is no longer supporting a tree.
      */
     public BlockState getPrimitiveSoilState (BlockState currentSoilState){
-        return primitiveSoilBlock.defaultBlockState();
+        return primitiveSoilBlock.getDefaultState();
     }
 
     public void setWorldGenOnly(boolean worldGenOnly) {
@@ -150,11 +149,11 @@ public class SoilProperties extends RegistryEntry<SoilProperties> implements Res
         return "rooty_";
     }
 
-    public ResourceLocation getBlockRegistryName() {
+    public Identifier getBlockRegistryName() {
         return this.blockRegistryName;
     }
 
-    public SoilProperties setBlockRegistryName(ResourceLocation blockRegistryName) {
+    public SoilProperties setBlockRegistryName(Identifier blockRegistryName) {
         this.blockRegistryName = blockRegistryName;
         return this;
     }
@@ -173,12 +172,12 @@ public class SoilProperties extends RegistryEntry<SoilProperties> implements Res
         return Optional.ofNullable(this.block == Blocks.AIR ? null : this.block.get());
     }
 
-    public void generateBlock(BlockBehaviour.Properties blockProperties) {
+    public void generateBlock(AbstractBlock.Settings blockProperties) {
         setBlockRegistryNameIfNull();
         this.block = RegistryHandler.addBlock(this.blockRegistryName, () -> this.createBlock(blockProperties));
     }
 
-    protected RootyBlock createBlock(BlockBehaviour.Properties blockProperties) {
+    protected RootyBlock createBlock(AbstractBlock.Settings blockProperties) {
         return new RootyBlock(this, blockProperties);
     }
 
@@ -199,11 +198,11 @@ public class SoilProperties extends RegistryEntry<SoilProperties> implements Res
     ///////////////////////////////////////////
 
     public Material getDefaultMaterial() {
-        return Material.DIRT;
+        return Material.SOIL;
     }
 
-    public BlockBehaviour.Properties getDefaultBlockProperties(final Material material, final MaterialColor materialColor) {
-        return BlockBehaviour.Properties.of(material, materialColor).strength(0.5F).sound(SoundType.GRAVEL);
+    public AbstractBlock.Settings getDefaultBlockProperties(final Material material, final MapColor materialColor) {
+        return AbstractBlock.Settings.of(material, materialColor).strength(0.5F).sounds(BlockSoundGroup.GRAVEL);
     }
 
     ///////////////////////////////////////////
@@ -237,7 +236,7 @@ public class SoilProperties extends RegistryEntry<SoilProperties> implements Res
         this.soilStateGenerator.get().generate(provider, this);
     }
 
-    public ResourceLocation getRootsOverlayLocation() {
+    public Identifier getRootsOverlayLocation() {
         return io.github.steveplays28.dynamictreesfabric.DynamicTreesFabric.resLoc("block/roots");
     }
 

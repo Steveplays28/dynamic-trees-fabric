@@ -9,25 +9,24 @@ import io.github.steveplays28.dynamictreesfabric.systems.genfeatures.context.Pos
 import io.github.steveplays28.dynamictreesfabric.systems.nodemappers.FindEndsNode;
 import io.github.steveplays28.dynamictreesfabric.util.BlockStates;
 import io.github.steveplays28.dynamictreesfabric.util.CoordUtils;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.RandomSource;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LightLayer;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.DoublePlantBlock;
-import net.minecraft.world.level.block.FlowerBlock;
-import net.minecraft.world.level.block.LeavesBlock;
-import net.minecraft.world.level.block.MushroomBlock;
-import net.minecraft.world.level.block.TallGrassBlock;
-
 import java.util.List;
+import net.minecraft.block.Block;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.FernBlock;
+import net.minecraft.block.FlowerBlock;
+import net.minecraft.block.LeavesBlock;
+import net.minecraft.block.MushroomPlantBlock;
+import net.minecraft.block.TallPlantBlock;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.random.Random;
+import net.minecraft.world.LightType;
+import net.minecraft.world.World;
 
 public class PodzolGenFeature extends GenFeature {
 
-    public PodzolGenFeature(ResourceLocation registryName) {
+    public PodzolGenFeature(Identifier registryName) {
         super(registryName);
     }
 
@@ -41,7 +40,7 @@ public class PodzolGenFeature extends GenFeature {
             return false;
         }
 
-        final Level world = context.world();
+        final World world = context.world();
         final FindEndsNode endFinder = new FindEndsNode();
         TreeHelper.startAnalysisFromRoot(world, context.pos(), new MapSignal(endFinder));
         final List<BlockPos> endPoints = endFinder.getEnds();
@@ -50,7 +49,7 @@ public class PodzolGenFeature extends GenFeature {
             return false;
         }
 
-        final RandomSource random = context.random();
+        final Random random = context.random();
         final BlockPos pos = endPoints.get(random.nextInt(endPoints.size()));
 
         final int x = pos.getX() + random.nextInt(5) - 2;
@@ -61,22 +60,22 @@ public class PodzolGenFeature extends GenFeature {
         for (int i = 0; i < 32; i++) {
             final BlockPos offPos = new BlockPos(x, pos.getY() - 1 - i, z);
 
-            if (!world.isEmptyBlock(offPos)) {
+            if (!world.isAir(offPos)) {
                 final Block block = world.getBlockState(offPos).getBlock();
 
                 // Skip past Mushrooms and branches on the way down.
-                if (block instanceof BranchBlock || block instanceof MushroomBlock || block instanceof LeavesBlock) {
+                if (block instanceof BranchBlock || block instanceof MushroomPlantBlock || block instanceof LeavesBlock) {
                     continue;
-                } else if (block instanceof FlowerBlock || block instanceof TallGrassBlock || block instanceof DoublePlantBlock) {
+                } else if (block instanceof FlowerBlock || block instanceof FernBlock || block instanceof TallPlantBlock) {
                     // Kill plants.
-                    if (world.getBrightness(LightLayer.SKY, offPos) <= darkThreshold) {
-                        world.setBlockAndUpdate(pos, Blocks.AIR.defaultBlockState());
+                    if (world.getLightLevel(LightType.SKY, offPos) <= darkThreshold) {
+                        world.setBlockState(pos, Blocks.AIR.getDefaultState());
                     }
                     continue;
                 } else if (block == Blocks.DIRT || block == Blocks.GRASS) {
                     // Convert grass or dirt to podzol.
-                    if (world.getBrightness(LightLayer.SKY, offPos.above()) <= darkThreshold) {
-                        world.setBlockAndUpdate(offPos, BlockStates.PODZOL);
+                    if (world.getLightLevel(LightType.SKY, offPos.up()) <= darkThreshold) {
+                        world.setBlockState(offPos, BlockStates.PODZOL);
                     } else {
                         spreadPodzol(world, pos);
                     }
@@ -87,16 +86,16 @@ public class PodzolGenFeature extends GenFeature {
         return true;
     }
 
-    public static void spreadPodzol(Level world, BlockPos pos) {
+    public static void spreadPodzol(World world, BlockPos pos) {
         int podzolish = 0;
 
         for (Direction dir : CoordUtils.HORIZONTALS) {
-            BlockPos deltaPos = pos.relative(dir);
+            BlockPos deltaPos = pos.offset(dir);
             Block testBlock = world.getBlockState(deltaPos).getBlock();
             podzolish += (testBlock == Blocks.PODZOL) ? 1 : 0;
             podzolish += testBlock instanceof RootyBlock ? 1 : 0;
             if (podzolish >= 3) {
-                world.setBlockAndUpdate(pos, BlockStates.PODZOL);
+                world.setBlockState(pos, BlockStates.PODZOL);
                 break;
             }
         }

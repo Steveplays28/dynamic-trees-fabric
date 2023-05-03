@@ -8,15 +8,20 @@ import io.github.steveplays28.dynamictreesfabric.init.DTRegistries;
 import io.github.steveplays28.dynamictreesfabric.systems.substances.*;
 import io.github.steveplays28.dynamictreesfabric.trees.Species;
 import io.github.steveplays28.dynamictreesfabric.util.DendroBrewingRecipe;
-import net.minecraft.ChatFormatting;
-import net.minecraft.core.NonNullList;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.Component;
+import net.minecraft.block.Block;
+import net.minecraft.client.item.TooltipContext;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemGroup;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.potion.Potion;
+import net.minecraft.potion.PotionUtil;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
+import net.minecraft.util.collection.DefaultedList;
+import net.minecraft.world.World;
 import net.minecraft.world.item.*;
-import net.minecraft.world.item.alchemy.Potion;
-import net.minecraft.world.item.alchemy.PotionUtils;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
 import net.minecraftforge.common.brewing.BrewingRecipeRegistry;
 
 import javax.annotation.Nullable;
@@ -81,10 +86,10 @@ public class DendroPotion extends Item implements SubstanceEffectProvider, Empti
             return this.ingredient;
         }
 
-        public Component getDescription() {
-            return Component.translatable("potion." + this.name +
+        public Text getDescription() {
+            return Text.translatable("potion." + this.name +
                     ".description" + (this == TRANSFORM ? ".empty" : ""))
-                    .withStyle(style -> style.withColor(ChatFormatting.GRAY));
+                    .styled(style -> style.withColor(Formatting.GRAY));
         }
 
         public DendroPotionType getBasePotionType() {
@@ -93,16 +98,16 @@ public class DendroPotion extends Item implements SubstanceEffectProvider, Empti
     }
 
     public DendroPotion() {
-        super(new Item.Properties().tab(DTRegistries.ITEM_GROUP).stacksTo(1));
+        super(new Item.Settings().tab(DTRegistries.ITEM_GROUP).maxCount(1));
     }
 
     public ItemStack applyIndexTag(final ItemStack potionStack, final int potionIndex) {
-        potionStack.getOrCreateTag().putInt(INDEX_TAG_KEY, potionIndex);
+        potionStack.getOrCreateNbt().putInt(INDEX_TAG_KEY, potionIndex);
         return potionStack;
     }
 
     @Override
-    public void fillItemCategory(final CreativeModeTab group, final NonNullList<ItemStack> items) {
+    public void fillItemCategory(final ItemGroup group, final DefaultedList<ItemStack> items) {
         if (this.allowedIn(group)) {
             for (final DendroPotionType potion : DendroPotionType.values()) {
                 if (potion.isActive()) {
@@ -113,7 +118,7 @@ public class DendroPotion extends Item implements SubstanceEffectProvider, Empti
     }
 
     public static DendroPotionType getPotionType(ItemStack stack) {
-        return DendroPotionType.values()[stack.getOrCreateTag().getInt(INDEX_TAG_KEY)];
+        return DendroPotionType.values()[stack.getOrCreateNbt().getInt(INDEX_TAG_KEY)];
     }
 
     @Nullable
@@ -143,7 +148,7 @@ public class DendroPotion extends Item implements SubstanceEffectProvider, Empti
     }
 
     public Species getTargetSpecies(ItemStack itemStack) {
-        final CompoundTag nbtTag = itemStack.getOrCreateTag();
+        final NbtCompound nbtTag = itemStack.getOrCreateNbt();
 
         return nbtTag.contains(TREE_TAG_KEY) ?
                 TreeRegistry.findSpecies(nbtTag.getString(TREE_TAG_KEY)) :
@@ -151,12 +156,12 @@ public class DendroPotion extends Item implements SubstanceEffectProvider, Empti
     }
 
     public ItemStack setTargetSpecies(ItemStack itemStack, Species species) {
-        itemStack.getOrCreateTag().putString(TREE_TAG_KEY, species.getRegistryName().toString());
+        itemStack.getOrCreateNbt().putString(TREE_TAG_KEY, species.getRegistryName().toString());
         return itemStack;
     }
 
     public void registerRecipes() {
-        final ItemStack awkwardStack = PotionUtils.setPotion(new ItemStack(Items.POTION), Potion.byName("awkward"));
+        final ItemStack awkwardStack = PotionUtil.setPotion(new ItemStack(Items.POTION), Potion.byId("awkward"));
 
         brewingRecipes.add(this.getRecipe(awkwardStack, new ItemStack(Items.CHARCOAL), this.getPotionStack(DendroPotionType.BIOCHAR)));
 
@@ -203,12 +208,12 @@ public class DendroPotion extends Item implements SubstanceEffectProvider, Empti
     }
 
     @Override
-    public String getDescriptionId(ItemStack stack) {
-        return this.getDescriptionId() + "." + getPotionType(stack).getName();
+    public String getTranslationKey(ItemStack stack) {
+        return this.getTranslationKey() + "." + getPotionType(stack).getName();
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn) {
+    public void appendTooltip(ItemStack stack, @Nullable World worldIn, List<Text> tooltip, TooltipContext flagIn) {
         final DendroPotionType potionType = getPotionType(stack);
 
         if (potionType != DendroPotionType.TRANSFORM || !this.getTargetSpecies(stack).isValid()) {
@@ -217,8 +222,8 @@ public class DendroPotion extends Item implements SubstanceEffectProvider, Empti
         }
 
         final Species species = this.getTargetSpecies(stack);
-        tooltip.add(Component.translatable("potion.transform.description", species.getTextComponent())
-                .withStyle(style -> style.withColor(ChatFormatting.GRAY)));
+        tooltip.add(Text.translatable("potion.transform.description", species.getTextComponent())
+                .styled(style -> style.withColor(Formatting.GRAY)));
     }
 
     public int getColor(ItemStack stack, int tint) {

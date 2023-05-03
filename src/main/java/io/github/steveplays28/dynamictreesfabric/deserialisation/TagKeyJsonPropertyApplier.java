@@ -4,27 +4,27 @@ import io.github.steveplays28.dynamictreesfabric.api.treepacks.Applier;
 import io.github.steveplays28.dynamictreesfabric.api.treepacks.PropertyApplier;
 import io.github.steveplays28.dynamictreesfabric.api.treepacks.PropertyApplierResult;
 import io.github.steveplays28.dynamictreesfabric.util.function.TriFunction;
+import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.tag.TagKey;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.InvalidIdentifierException;
 import com.google.gson.JsonElement;
-import net.minecraft.ResourceLocationException;
-import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagKey;
 import org.apache.logging.log4j.util.TriConsumer;
 import org.jetbrains.annotations.Nullable;
 
 public class TagKeyJsonPropertyApplier<K, O, V> extends PropertyApplier<O, V, JsonElement> {
     protected final TriFunction<TagKey<K>, O, V, PropertyApplierResult> tagKeyFunction;
-    protected final ResourceKey<? extends Registry<K>> registryKey;
+    protected final RegistryKey<? extends Registry<K>> registryKey;
 
-    public TagKeyJsonPropertyApplier(ResourceKey<? extends Registry<K>> registryKey, Class<O> objectClass, Class<V> valueClass, TriConsumer<TagKey<K>, O, V> tagKeyConsumer) {
+    public TagKeyJsonPropertyApplier(RegistryKey<? extends Registry<K>> registryKey, Class<O> objectClass, Class<V> valueClass, TriConsumer<TagKey<K>, O, V> tagKeyConsumer) {
         this(registryKey, objectClass, valueClass, (tagKey, o, v) -> {
             tagKeyConsumer.accept(tagKey, o, v);
             return PropertyApplierResult.success();
         });
     }
 
-    public TagKeyJsonPropertyApplier(ResourceKey<? extends Registry<K>> registryKey, Class<O> objectClass, Class<V> valueClass, TriFunction<TagKey<K>, O, V, PropertyApplierResult> tagKeyFunction) {
+    public TagKeyJsonPropertyApplier(RegistryKey<? extends Registry<K>> registryKey, Class<O> objectClass, Class<V> valueClass, TriFunction<TagKey<K>, O, V, PropertyApplierResult> tagKeyFunction) {
         super("none", objectClass, valueClass, (o, v) -> {});
         this.tagKeyFunction = tagKeyFunction;
         this.registryKey = registryKey;
@@ -38,14 +38,14 @@ public class TagKeyJsonPropertyApplier<K, O, V> extends PropertyApplier<O, V, Js
             return null;
 
         try {
-            TagKey<K> tagKey = TagKey.create(this.registryKey, new ResourceLocation(key.charAt(0) == '#' ? key.substring(1) : key));
+            TagKey<K> tagKey = TagKey.of(this.registryKey, new Identifier(key.charAt(0) == '#' ? key.substring(1) : key));
             return JsonDeserialisers.getOrThrow(this.valueClass).deserialise(input).map(value -> this.tagKeyFunction.apply(tagKey, (O) object, value))
                     .orElseApply(
                             PropertyApplierResult::failure,
                             PropertyApplierResult::addWarnings,
                             null
                     );
-        } catch (ResourceLocationException e) {
+        } catch (InvalidIdentifierException e) {
             return PropertyApplierResult.failure(e.getMessage());
         }
     }

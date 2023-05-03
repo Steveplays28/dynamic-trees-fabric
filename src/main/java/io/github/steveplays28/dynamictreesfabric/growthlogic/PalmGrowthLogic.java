@@ -3,12 +3,12 @@ package io.github.steveplays28.dynamictreesfabric.growthlogic;
 import io.github.steveplays28.dynamictreesfabric.growthlogic.context.DirectionManipulationContext;
 import io.github.steveplays28.dynamictreesfabric.growthlogic.context.PositionalSpeciesContext;
 import io.github.steveplays28.dynamictreesfabric.util.CoordUtils;
-import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.math.Direction;
 
 public class PalmGrowthLogic extends GrowthLogicKit {
 
-    public PalmGrowthLogic(ResourceLocation registryName) {
+    public PalmGrowthLogic(Identifier registryName) {
         super(registryName);
     }
 
@@ -29,11 +29,11 @@ public class PalmGrowthLogic extends GrowthLogicKit {
 
     @Override
     public float getEnergy(GrowthLogicKitConfiguration configuration, PositionalSpeciesContext context) {
-        long day = context.world().getGameTime() / 24000L;
+        long day = context.world().getTime() / 24000L;
         int month = (int) day / 30; // Change the hashs every in-game month
         return super.getEnergy(configuration, context) *
                 context.species().biomeSuitability(context.world(), context.pos()) +
-                (CoordUtils.coordHashCode(context.pos().above(month), 3) %
+                (CoordUtils.coordHashCode(context.pos().up(month), 3) %
                         3); // Vary the height energy by a psuedorandom hash function
 
     }

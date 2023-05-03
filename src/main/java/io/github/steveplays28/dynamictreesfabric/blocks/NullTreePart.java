@@ -9,12 +9,12 @@ import io.github.steveplays28.dynamictreesfabric.blocks.leaves.LeavesProperties;
 import io.github.steveplays28.dynamictreesfabric.systems.BranchConnectables;
 import io.github.steveplays28.dynamictreesfabric.systems.GrowSignal;
 import io.github.steveplays28.dynamictreesfabric.trees.Family;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.block.BlockState;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
+import net.minecraft.world.BlockView;
+import net.minecraft.world.World;
+import net.minecraft.world.WorldAccess;
 
 public class NullTreePart implements TreePart {
 
@@ -22,17 +22,17 @@ public class NullTreePart implements TreePart {
     //Handles some vanilla blocks
 
     @Override
-    public Cell getHydrationCell(BlockGetter reader, BlockPos pos, BlockState state, Direction dir, LeavesProperties leavesTree) {
+    public Cell getHydrationCell(BlockView reader, BlockPos pos, BlockState state, Direction dir, LeavesProperties leavesTree) {
         return CellNull.NULL_CELL;
     }
 
     @Override
-    public GrowSignal growSignal(Level world, BlockPos pos, GrowSignal signal) {
+    public GrowSignal growSignal(World world, BlockPos pos, GrowSignal signal) {
         return signal;
     }
 
     @Override
-    public int getRadiusForConnection(BlockState state, BlockGetter reader, BlockPos pos, BranchBlock from, Direction side, int fromRadius) {
+    public int getRadiusForConnection(BlockState state, BlockView reader, BlockPos pos, BranchBlock from, Direction side, int fromRadius) {
         // Connectable blocks such as bee nests and shroomlight will be handled here.
         if (BranchConnectables.isBlockConnectable(state.getBlock())) {
             int rad = BranchConnectables.getConnectionRadiusForBlock(state, reader, pos, side);
@@ -45,7 +45,7 @@ public class NullTreePart implements TreePart {
     }
 
     @Override
-    public int probabilityForBlock(BlockState state, BlockGetter reader, BlockPos pos, BranchBlock from) {
+    public int probabilityForBlock(BlockState state, BlockView reader, BlockPos pos, BranchBlock from) {
         return state.isAir() ? 1 : 0;
     }
 
@@ -55,23 +55,23 @@ public class NullTreePart implements TreePart {
     }
 
     @Override
-    public boolean shouldAnalyse(BlockState state, BlockGetter reader, BlockPos pos) {
+    public boolean shouldAnalyse(BlockState state, BlockView reader, BlockPos pos) {
         return BranchConnectables.isBlockConnectable(state.getBlock());
     }
 
     @Override
-    public MapSignal analyse(BlockState state, LevelAccessor world, BlockPos pos, Direction fromDir, MapSignal signal) {
+    public MapSignal analyse(BlockState state, WorldAccess world, BlockPos pos, Direction fromDir, MapSignal signal) {
         signal.run(state, world, pos, fromDir);
         return signal;
     }
 
     @Override
-    public int branchSupport(BlockState state, BlockGetter reader, BranchBlock branch, BlockPos pos, Direction dir, int radius) {
+    public int branchSupport(BlockState state, BlockView reader, BranchBlock branch, BlockPos pos, Direction dir, int radius) {
         return 0;
     }
 
     @Override
-    public Family getFamily(BlockState state, BlockGetter reader, BlockPos pos) {
+    public Family getFamily(BlockState state, BlockView reader, BlockPos pos) {
         return Family.NULL_FAMILY;
     }
 

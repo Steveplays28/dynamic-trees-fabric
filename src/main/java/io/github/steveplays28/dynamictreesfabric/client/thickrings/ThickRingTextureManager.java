@@ -2,12 +2,11 @@ package io.github.steveplays28.dynamictreesfabric.client.thickrings;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-import net.minecraft.client.renderer.texture.TextureAtlas;
-import net.minecraft.resources.ResourceLocation;
-
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import net.minecraft.client.texture.SpriteAtlasTexture;
+import net.minecraft.util.Identifier;
 
 public class ThickRingTextureManager {
 
@@ -15,35 +14,35 @@ public class ThickRingTextureManager {
      * THIS IS STILL WIP. THICK RINGS ARE NOT YET STITCHED AUTOMATICALLY
      */
 
-    public static final ResourceLocation LOCATION_THICKRINGS_TEXTURE = new ResourceLocation(io.github.steveplays28.dynamictreesfabric.DynamicTreesFabric.MOD_ID, "textures/atlas/thick_rings.png");
+    public static final Identifier LOCATION_THICKRINGS_TEXTURE = new Identifier(io.github.steveplays28.dynamictreesfabric.DynamicTreesFabric.MOD_ID, "textures/atlas/thick_rings.png");
 
     public static ThickRingAtlasTexture textureAtlas;
-    public static TextureAtlas.Preparations thickRingData;
+    public static SpriteAtlasTexture.Preparations thickRingData;
 
 //	protected static final RenderState.TextureState BRANCHES_SHEET_MIPPED = new RenderState.TextureState(LOCATION_THICKRINGS_TEXTURE, false, true);
 //	public static final RenderType BRANCH_SOLID = RenderType.makeType("dynamic_trees_branch_solid", DefaultVertexFormats.BLOCK, 7, 2097152, true, false, RenderType.State.getBuilder().shadeModel(new RenderState.ShadeModelState(true)).lightmap(new RenderState.LightmapState(true)).texture(BRANCHES_SHEET_MIPPED).build(true));
 
-    private static final BiMap<ResourceLocation, ResourceLocation> thickRingTextures = HashBiMap.create();
+    private static final BiMap<Identifier, Identifier> thickRingTextures = HashBiMap.create();
 
-    public static ResourceLocation addRingTextureLocation(ResourceLocation ringsRes) {
-        ResourceLocation thickRingSet = new ResourceLocation(ringsRes.getNamespace(), ringsRes.getPath() + "_thick");
+    public static Identifier addRingTextureLocation(Identifier ringsRes) {
+        Identifier thickRingSet = new Identifier(ringsRes.getNamespace(), ringsRes.getPath() + "_thick");
         thickRingTextures.put(ringsRes, thickRingSet);
         return thickRingSet;
     }
 
-    public static Set<ResourceLocation> getThickRingResourceLocations() {
+    public static Set<Identifier> getThickRingResourceLocations() {
         return new HashSet<>(thickRingTextures.values());
     }
 
-    public static Set<Map.Entry<ResourceLocation, ResourceLocation>> getThickRingEntrySet() {
+    public static Set<Map.Entry<Identifier, Identifier>> getThickRingEntrySet() {
         return thickRingTextures.entrySet();
     }
 
-    public static ResourceLocation getThickRingFromBaseRing(ResourceLocation baseRing) {
+    public static Identifier getThickRingFromBaseRing(Identifier baseRing) {
         return thickRingTextures.get(baseRing);
     }
 
-    public static ResourceLocation getBaseRingFromThickRing(ResourceLocation thickRing) {
+    public static Identifier getBaseRingFromThickRing(Identifier thickRing) {
         return thickRingTextures.inverse().get(thickRing);
     }
 

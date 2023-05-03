@@ -13,12 +13,11 @@ import io.github.steveplays28.dynamictreesfabric.util.holderset.DTBiomeHolderSet
 import com.google.common.collect.Maps;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.minecraft.core.Holder;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.biome.Biome;
-
 import javax.annotation.Nullable;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.util.Identifier;
+import net.minecraft.world.biome.Biome;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -28,15 +27,15 @@ import java.util.function.IntUnaryOperator;
 public class BiomeDatabase {
 
     private final Map<DTBiomeHolderSet, Entry> jsonEntries = new LinkedHashMap<>();
-    private final Map<ResourceLocation, Entry> entries = new HashMap<>();
+    private final Map<Identifier, Entry> entries = new HashMap<>();
 
     public Entry getJsonEntry(DTBiomeHolderSet biomes) {
         return this.jsonEntries.computeIfAbsent(biomes, k -> new Entry(this, null, null));
     }
 
-    public Entry getEntry(Holder<Biome> biomeHolder) {
-        ResourceKey<Biome> biomeKey = biomeHolder.unwrapKey().orElseThrow();
-        ResourceLocation biomeRegistryName = biomeKey.location();
+    public Entry getEntry(RegistryEntry<Biome> biomeHolder) {
+        RegistryKey<Biome> biomeKey = biomeHolder.getKey().orElseThrow();
+        Identifier biomeRegistryName = biomeKey.getValue();
 
         if (this.entries.containsKey(biomeRegistryName))
             return this.entries.get(biomeRegistryName);
@@ -57,7 +56,7 @@ public class BiomeDatabase {
         return entry;
     }
 
-    public Entry getEntry(ResourceLocation biomeResLoc) {
+    public Entry getEntry(Identifier biomeResLoc) {
         return this.entries.get(biomeResLoc);
     }
 
@@ -95,7 +94,7 @@ public class BiomeDatabase {
 
     public static class Entry {
         private final BiomeDatabase database;
-        private final ResourceKey<Biome> biomeKey;
+        private final RegistryKey<Biome> biomeKey;
         private final Biome biome;
         private ChanceSelector chanceSelector;
         private DensitySelector densitySelector;
@@ -107,7 +106,7 @@ public class BiomeDatabase {
         private IntUnaryOperator multipass;
         private GroundFinder groundFinder;
 
-        public Entry(final BiomeDatabase database, final ResourceKey<Biome> biomeKey, final Biome biome) {
+        public Entry(final BiomeDatabase database, final RegistryKey<Biome> biomeKey, final Biome biome) {
             this.database = database;
             this.biomeKey = biomeKey;
             this.biome = biome;
@@ -155,7 +154,7 @@ public class BiomeDatabase {
             return database;
         }
 
-        public ResourceKey<Biome> getBiomeKey() {
+        public RegistryKey<Biome> getBiomeKey() {
             return biomeKey;
         }
 
@@ -281,23 +280,23 @@ public class BiomeDatabase {
 
     }
 
-    public SpeciesSelector getSpecies(Holder<Biome> biome) {
+    public SpeciesSelector getSpecies(RegistryEntry<Biome> biome) {
         return getEntry(biome).speciesSelector;
     }
 
-    public ChanceSelector getChance(Holder<Biome> biome) {
+    public ChanceSelector getChance(RegistryEntry<Biome> biome) {
         return getEntry(biome).chanceSelector;
     }
 
-    public DensitySelector getDensitySelector(Holder<Biome> biome) {
+    public DensitySelector getDensitySelector(RegistryEntry<Biome> biome) {
         return getEntry(biome).densitySelector;
     }
 
-    public float getForestness(Holder<Biome> biome) {
+    public float getForestness(RegistryEntry<Biome> biome) {
         return getEntry(biome).getForestness();
     }
 
-    public IntUnaryOperator getMultipass(Holder<Biome> biome) {
+    public IntUnaryOperator getMultipass(RegistryEntry<Biome> biome) {
         return getEntry(biome).getMultipass();
     }
 
@@ -385,17 +384,17 @@ public class BiomeDatabase {
         return this;
     }
 
-    public BiomeDatabase setIsSubterranean(Holder<Biome> biome, boolean is) {
+    public BiomeDatabase setIsSubterranean(RegistryEntry<Biome> biome, boolean is) {
         getEntry(biome).setSubterranean(is);
         return this;
     }
 
-    public BiomeDatabase setForestness(Holder<Biome> biome, float forestness) {
+    public BiomeDatabase setForestness(RegistryEntry<Biome> biome, float forestness) {
         getEntry(biome).setForestness((float) Math.max(forestness, DTConfigs.SEED_MIN_FORESTNESS.get()));
         return this;
     }
 
-    public BiomeDatabase setMultipass(Holder<Biome> biome, IntUnaryOperator multipass) {
+    public BiomeDatabase setMultipass(RegistryEntry<Biome> biome, IntUnaryOperator multipass) {
         getEntry(biome).setMultipass(multipass);
         return this;
     }

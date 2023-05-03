@@ -22,28 +22,28 @@ import io.github.steveplays28.dynamictreesfabric.util.Optionals;
 import io.github.steveplays28.dynamictreesfabric.util.ResourceLocationUtils;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.color.block.BlockColor;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagKey;
-import net.minecraft.util.Mth;
-import net.minecraft.util.RandomSource;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.BlockAndTintGetter;
-import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.SoundType;
-import net.minecraft.world.level.block.state.BlockBehaviour;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.Material;
-import net.minecraft.world.level.material.MaterialColor;
+import net.minecraft.block.AbstractBlock;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.MapColor;
+import net.minecraft.block.Material;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.color.block.BlockColorProvider;
+import net.minecraft.entity.EntityType;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.registry.tag.TagKey;
+import net.minecraft.sound.BlockSoundGroup;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.random.Random;
+import net.minecraft.world.BlockRenderView;
+import net.minecraft.world.BlockView;
+import net.minecraft.world.World;
+import net.minecraft.world.WorldAccess;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.apache.commons.lang3.tuple.Pair;
@@ -63,7 +63,7 @@ import java.util.Optional;
 public class LeavesProperties extends RegistryEntry<LeavesProperties> implements Resettable<LeavesProperties> {
 
     public static final Codec<LeavesProperties> CODEC = RecordCodecBuilder.create(instance -> instance
-            .group(ResourceLocation.CODEC.fieldOf(Resources.RESOURCE_LOCATION.toString()).forGetter(LeavesProperties::getRegistryName))
+            .group(Identifier.CODEC.fieldOf(Resources.RESOURCE_LOCATION.toString()).forGetter(LeavesProperties::getRegistryName))
             .apply(instance, LeavesProperties::new));
 
     public static final LeavesProperties NULL_PROPERTIES = new LeavesProperties() {
@@ -79,7 +79,7 @@ public class LeavesProperties extends RegistryEntry<LeavesProperties> implements
 
         @Override
         public BlockState getPrimitiveLeaves() {
-            return Blocks.AIR.defaultBlockState();
+            return Blocks.AIR.getDefaultState();
         }
 
         @Override
@@ -94,12 +94,12 @@ public class LeavesProperties extends RegistryEntry<LeavesProperties> implements
 
         @Override
         public BlockState getDynamicLeavesState() {
-            return Blocks.AIR.defaultBlockState();
+            return Blocks.AIR.getDefaultState();
         }
 
         @Override
         public BlockState getDynamicLeavesState(int hydro) {
-            return Blocks.AIR.defaultBlockState();
+            return Blocks.AIR.getDefaultState();
         }
 
         @Override
@@ -128,7 +128,7 @@ public class LeavesProperties extends RegistryEntry<LeavesProperties> implements
         }
 
         @Override
-        public boolean updateTick(Level worldIn, BlockPos pos, BlockState state, RandomSource rand) {
+        public boolean updateTick(World worldIn, BlockPos pos, BlockState state, Random rand) {
             return false;
         }
     }.setRegistryName(DTTrees.NULL).setBlockRegistryName(DTTrees.NULL);
@@ -166,15 +166,15 @@ public class LeavesProperties extends RegistryEntry<LeavesProperties> implements
     private LeavesProperties() {
     }
 
-    public LeavesProperties(final ResourceLocation registryName) {
+    public LeavesProperties(final Identifier registryName) {
         this(null, registryName);
     }
 
-    public LeavesProperties(@Nullable final BlockState primitiveLeaves, final ResourceLocation registryName) {
+    public LeavesProperties(@Nullable final BlockState primitiveLeaves, final Identifier registryName) {
         this(primitiveLeaves, CellKits.DECIDUOUS, registryName);
     }
 
-    public LeavesProperties(@Nullable final BlockState primitiveLeaves, final CellKit cellKit, final ResourceLocation registryName) {
+    public LeavesProperties(@Nullable final BlockState primitiveLeaves, final CellKit cellKit, final Identifier registryName) {
         this.family = Family.NULL_FAMILY;
         this.primitiveLeaves = primitiveLeaves != null ? primitiveLeaves : BlockStates.AIR;
         this.cellKit = cellKit;
@@ -201,7 +201,7 @@ public class LeavesProperties extends RegistryEntry<LeavesProperties> implements
 
     public void setPrimitiveLeaves(final Block primitiveLeaves) {
         if (this.primitiveLeaves == null || primitiveLeaves != this.primitiveLeaves.getBlock()) {
-            this.primitiveLeaves = primitiveLeaves.defaultBlockState();
+            this.primitiveLeaves = primitiveLeaves.getDefaultState();
         }
     }
 
@@ -211,7 +211,7 @@ public class LeavesProperties extends RegistryEntry<LeavesProperties> implements
      * @return The {@link ItemStack} object.
      */
     public ItemStack getPrimitiveLeavesItemStack() {
-        return new ItemStack(Item.BY_BLOCK.get(getPrimitiveLeaves().getBlock()));
+        return new ItemStack(Item.BLOCK_ITEMS.get(getPrimitiveLeaves().getBlock()));
     }
 
     ///////////////////////////////////////////
@@ -222,14 +222,14 @@ public class LeavesProperties extends RegistryEntry<LeavesProperties> implements
      * The registry name for the leaves block. This allows for built-in compatibility where the dynamic leaves may
      * otherwise share the same name as their regular leaves block.
      */
-    private ResourceLocation blockRegistryName;
+    private Identifier blockRegistryName;
 
     /**
      * Gets the {@link #blockRegistryName} for this {@link LeavesProperties} object.
      *
      * @return The {@link #blockRegistryName} for this {@link LeavesProperties} object.
      */
-    public ResourceLocation getBlockRegistryName() {
+    public Identifier getBlockRegistryName() {
         return this.blockRegistryName;
     }
 
@@ -237,10 +237,10 @@ public class LeavesProperties extends RegistryEntry<LeavesProperties> implements
      * Sets the {@link #blockRegistryName} for this {@link LeavesProperties} object to the specified {@code
      * blockRegistryName}.
      *
-     * @param blockRegistryName The new {@link ResourceLocation} object to set.
+     * @param blockRegistryName The new {@link Identifier} object to set.
      * @return This {@link LeavesProperties} object for chaining.
      */
-    public LeavesProperties setBlockRegistryName(ResourceLocation blockRegistryName) {
+    public LeavesProperties setBlockRegistryName(Identifier blockRegistryName) {
         this.blockRegistryName = blockRegistryName;
         return this;
     }
@@ -260,19 +260,19 @@ public class LeavesProperties extends RegistryEntry<LeavesProperties> implements
         return Optional.ofNullable(block instanceof DynamicLeavesBlock ? (DynamicLeavesBlock) block : null);
     }
 
-    protected DynamicLeavesBlock createDynamicLeaves(final BlockBehaviour.Properties properties) {
+    protected DynamicLeavesBlock createDynamicLeaves(final AbstractBlock.Settings properties) {
         return new DynamicLeavesBlock(this, properties);
     }
 
-    public void generateDynamicLeaves(final BlockBehaviour.Properties properties) {
+    public void generateDynamicLeaves(final AbstractBlock.Settings properties) {
         RegistryHandler.addBlock(this.blockRegistryName, () -> this.createDynamicLeaves(properties));
     }
 
     public LeavesProperties setDynamicLeavesState(BlockState state) {
         //Cache all the blockStates to speed up worldgen
-        dynamicLeavesBlockHydroStates[0] = Blocks.AIR.defaultBlockState();
+        dynamicLeavesBlockHydroStates[0] = Blocks.AIR.getDefaultState();
         for (int i = 1; i <= maxHydro; i++) {
-            dynamicLeavesBlockHydroStates[i] = state.setValue(DynamicLeavesBlock.DISTANCE, i);
+            dynamicLeavesBlockHydroStates[i] = state.with(DynamicLeavesBlock.DISTANCE, i);
         }
         return this;
     }
@@ -282,8 +282,8 @@ public class LeavesProperties extends RegistryEntry<LeavesProperties> implements
     }
 
     public BlockState getDynamicLeavesState(int hydro) {
-        return Optional.ofNullable(dynamicLeavesBlockHydroStates[Mth.clamp(hydro, 0, maxHydro)])
-                .orElse(Blocks.AIR.defaultBlockState());
+        return Optional.ofNullable(dynamicLeavesBlockHydroStates[MathHelper.clamp(hydro, 0, maxHydro)])
+                .orElse(Blocks.AIR.getDefaultState());
     }
 
     ///////////////////////////////////////////
@@ -440,16 +440,16 @@ public class LeavesProperties extends RegistryEntry<LeavesProperties> implements
         return Material.LEAVES;
     }
 
-    public BlockBehaviour.Properties getDefaultBlockProperties(final Material material, final MaterialColor materialColor) {
-        return BlockBehaviour.Properties.of(material, materialColor)
+    public AbstractBlock.Settings getDefaultBlockProperties(final Material material, final MapColor materialColor) {
+        return AbstractBlock.Settings.of(material, materialColor)
                 .strength(0.2F)
                 //.harvestTool(ToolTypes.SHEARS)
-                .randomTicks()
-                .sound(SoundType.GRASS)
-                .noOcclusion()
-                .isValidSpawn((s, r, p, e) -> e == EntityType.OCELOT || e == EntityType.PARROT)
-                .isSuffocating((s, r, p) -> false)
-                .isViewBlocking((s, r, p) -> false);
+                .ticksRandomly()
+                .sounds(BlockSoundGroup.GRASS)
+                .nonOpaque()
+                .allowsSpawning((s, r, p, e) -> e == EntityType.OCELOT || e == EntityType.PARROT)
+                .suffocates((s, r, p) -> false)
+                .blockVision((s, r, p) -> false);
     }
 
     ///////////////////////////////////////////
@@ -457,11 +457,11 @@ public class LeavesProperties extends RegistryEntry<LeavesProperties> implements
     ///////////////////////////////////////////
 
 
-    public boolean updateTick(Level worldIn, BlockPos pos, BlockState state, RandomSource rand) {
+    public boolean updateTick(World worldIn, BlockPos pos, BlockState state, Random rand) {
         return shouldAge(false, state);
     }
 
-    public int getRadiusForConnection(BlockState state, BlockGetter blockAccess, BlockPos pos, BranchBlock from, Direction side, int fromRadius) {
+    public int getRadiusForConnection(BlockState state, BlockView blockAccess, BlockPos pos, BranchBlock from, Direction side, int fromRadius) {
         final int twigRadius = from.getFamily().getPrimaryThickness();
         return (fromRadius == twigRadius || this.connectAnyRadius) && from.getFamily().isCompatibleDynamicLeaves(from.getFamily().getCommonSpecies(), blockAccess.getBlockState(pos), blockAccess, pos) ? twigRadius : 0;
     }
@@ -503,15 +503,15 @@ public class LeavesProperties extends RegistryEntry<LeavesProperties> implements
     }
 
     @OnlyIn(Dist.CLIENT)
-    private BlockColor colorMultiplier;
+    private BlockColorProvider colorMultiplier;
 
     @OnlyIn(Dist.CLIENT)
-    public int treeFallColorMultiplier(BlockState state, BlockAndTintGetter world, BlockPos pos) {
+    public int treeFallColorMultiplier(BlockState state, BlockRenderView world, BlockPos pos) {
         return this.foliageColorMultiplier(state, world, pos);
     }
 
     @OnlyIn(Dist.CLIENT)
-    public int foliageColorMultiplier(BlockState state, BlockAndTintGetter world, BlockPos pos) {
+    public int foliageColorMultiplier(BlockState state, BlockRenderView world, BlockPos pos) {
         if (colorMultiplier == null) {
             return 0x00FF00FF; //purple if broken
         }
@@ -528,11 +528,11 @@ public class LeavesProperties extends RegistryEntry<LeavesProperties> implements
             if (code.startsWith("@")) {
                 code = code.substring(1);
                 if ("biome".equals(code)) { // Built in code since we need access to super.
-                    this.colorMultiplier = (state, world, pos, t) -> ((LevelAccessor) world).getBiome(pos).value().getFoliageColor();
+                    this.colorMultiplier = (state, world, pos, t) -> ((WorldAccess) world).getBiome(pos).value().getFoliageColor();
                     return;
                 }
 
-                BlockColor blockColor = BlockColorMultipliers.find(code);
+                BlockColorProvider blockColor = BlockColorMultipliers.find(code);
                 if (blockColor != null) {
                     colorMultiplier = blockColor;
                     return;
@@ -544,7 +544,7 @@ public class LeavesProperties extends RegistryEntry<LeavesProperties> implements
             }
         }
         int c = color;
-        this.colorMultiplier = (s, w, p, t) -> c == -1 ? Minecraft.getInstance().getBlockColors().getColor(getPrimitiveLeaves(), w, p, 0) : c;
+        this.colorMultiplier = (s, w, p, t) -> c == -1 ? MinecraftClient.getInstance().getBlockColors().getColor(getPrimitiveLeaves(), w, p, 0) : c;
     }
 
     @OnlyIn(Dist.CLIENT)

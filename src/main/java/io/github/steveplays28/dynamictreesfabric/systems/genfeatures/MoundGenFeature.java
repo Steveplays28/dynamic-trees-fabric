@@ -9,12 +9,12 @@ import io.github.steveplays28.dynamictreesfabric.systems.genfeatures.context.Pre
 import io.github.steveplays28.dynamictreesfabric.util.CoordUtils.Surround;
 import io.github.steveplays28.dynamictreesfabric.util.SimpleVoxmap;
 import io.github.steveplays28.dynamictreesfabric.util.SimpleVoxmap.Cell;
-import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.Material;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Material;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.WorldAccess;
+import net.minecraft.world.biome.Biome;
 
 public class MoundGenFeature extends GenFeature {
 
@@ -27,7 +27,7 @@ public class MoundGenFeature extends GenFeature {
 
     public static final ConfigurationProperty<Integer> MOUND_CUTOFF_RADIUS = ConfigurationProperty.integer("mound_cutoff_radius");
 
-    public MoundGenFeature(ResourceLocation registryName) {
+    public MoundGenFeature(Identifier registryName) {
         super(registryName);
     }
 
@@ -52,17 +52,17 @@ public class MoundGenFeature extends GenFeature {
      */
     @Override
     protected BlockPos preGenerate(GenFeatureConfiguration configuration, PreGenerationContext context) {
-        final LevelAccessor world = context.world();
+        final WorldAccess world = context.world();
         BlockPos rootPos = context.pos();
 
         if (context.radius() >= configuration.get(MOUND_CUTOFF_RADIUS) && context.isWorldGen()) {
             BlockState initialDirtState = world.getBlockState(rootPos);
-            BlockState initialUnderState = world.getBlockState(rootPos.below());
+            BlockState initialUnderState = world.getBlockState(rootPos.down());
 
             if (initialUnderState.getMaterial() == Material.AIR ||
-                    (initialUnderState.getMaterial() != Material.DIRT && initialUnderState.getMaterial() != Material.STONE)
+                    (initialUnderState.getMaterial() != Material.SOIL && initialUnderState.getMaterial() != Material.STONE)
             ) {
-                final Biome biome = world.getUncachedNoiseBiome(
+                final Biome biome = world.getGeneratorStoredBiome(
                         rootPos.getX() >> 2,
                         rootPos.getY() >> 2,
                         rootPos.getZ() >> 2
@@ -71,11 +71,11 @@ public class MoundGenFeature extends GenFeature {
 //                initialUnderState = biome.getGenerationSettings().getSurfaceBuilderConfig().getTopMaterial();
             }
 
-            rootPos = rootPos.above();
+            rootPos = rootPos.up();
 
             for (Cell cell : moundMap.getAllNonZeroCells()) {
                 final BlockState placeState = cell.getValue() == 1 ? initialDirtState : initialUnderState;
-                world.setBlock(rootPos.offset(cell.getPos()), placeState, 3);
+                world.setBlockState(rootPos.add(cell.getPos()), placeState, 3);
             }
         }
 
@@ -94,18 +94,18 @@ public class MoundGenFeature extends GenFeature {
             return false;
         }
 
-        final LevelAccessor world = context.world();
+        final WorldAccess world = context.world();
         final BlockPos rootPos = context.pos();
-        final BlockPos treePos = rootPos.above();
-        final BlockState belowState = world.getBlockState(rootPos.below());
+        final BlockPos treePos = rootPos.up();
+        final BlockState belowState = world.getBlockState(rootPos.down());
 
         // Place dirt blocks around rooty dirt block if tree has a > 8 radius.
         final BlockState branchState = world.getBlockState(treePos);
         if (TreeHelper.getTreePart(branchState).getRadius(branchState) > BranchBlock.MAX_RADIUS) {
             for (Surround dir : Surround.values()) {
-                BlockPos dPos = rootPos.offset(dir.getOffset());
-                world.setBlock(dPos, context.initialDirtState(), 3);
-                world.setBlock(dPos.below(), belowState, 3);
+                BlockPos dPos = rootPos.add(dir.getOffset());
+                world.setBlockState(dPos, context.initialDirtState(), 3);
+                world.setBlockState(dPos.down(), belowState, 3);
             }
             return true;
         }

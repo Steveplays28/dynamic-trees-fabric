@@ -3,7 +3,7 @@ package io.github.steveplays28.dynamictreesfabric.api.data;
 import io.github.steveplays28.dynamictreesfabric.blocks.leaves.DynamicLeavesBlock;
 import io.github.steveplays28.dynamictreesfabric.blocks.leaves.LeavesProperties;
 import io.github.steveplays28.dynamictreesfabric.data.provider.DTBlockStateProvider;
-import net.minecraft.world.level.block.Block;
+import net.minecraft.block.Block;
 import net.minecraftforge.registries.ForgeRegistries;
 
 /**

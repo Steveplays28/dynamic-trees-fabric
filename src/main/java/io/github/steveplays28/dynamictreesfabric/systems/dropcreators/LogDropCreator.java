@@ -6,8 +6,8 @@ import io.github.steveplays28.dynamictreesfabric.systems.dropcreators.context.Lo
 import io.github.steveplays28.dynamictreesfabric.systems.nodemappers.NetVolumeNode;
 import io.github.steveplays28.dynamictreesfabric.trees.Species;
 import io.github.steveplays28.dynamictreesfabric.trees.Species.LogsAndSticks;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.Identifier;
 
 public class LogDropCreator extends DropCreator {
 
@@ -17,7 +17,7 @@ public class LogDropCreator extends DropCreator {
      */
     public static final ConfigurationProperty<Float> MULTIPLIER = ConfigurationProperty.floatProperty("multiplier");
 
-    public LogDropCreator(ResourceLocation registryName) {
+    public LogDropCreator(Identifier registryName) {
         super(registryName);
     }
 
@@ -49,9 +49,9 @@ public class LogDropCreator extends DropCreator {
             final ItemStack stack = species.getFamily().getStick(numSticks);
             while (numSticks > 0) {
                 ItemStack drop = stack.copy();
-                drop.setCount(Math.min(numSticks, stack.getMaxStackSize()));
+                drop.setCount(Math.min(numSticks, stack.getMaxCount()));
                 context.drops().add(drop);
-                numSticks -= stack.getMaxStackSize();
+                numSticks -= stack.getMaxCount();
             }
         }
     }

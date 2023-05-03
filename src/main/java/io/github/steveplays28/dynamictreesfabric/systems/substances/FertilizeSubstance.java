@@ -3,11 +3,10 @@ package io.github.steveplays28.dynamictreesfabric.systems.substances;
 import io.github.steveplays28.dynamictreesfabric.api.TreeHelper;
 import io.github.steveplays28.dynamictreesfabric.api.substances.SubstanceEffect;
 import io.github.steveplays28.dynamictreesfabric.blocks.rootyblocks.RootyBlock;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.world.level.Level;
-
 import java.util.function.Supplier;
+import net.minecraft.particle.ParticleTypes;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 
 public class FertilizeSubstance implements SubstanceEffect {
 
@@ -17,11 +16,11 @@ public class FertilizeSubstance implements SubstanceEffect {
     private Supplier<Integer> pulses = () -> 1;
 
     @Override
-    public boolean apply(Level world, BlockPos rootPos) {
+    public boolean apply(World world, BlockPos rootPos) {
         final RootyBlock dirt = TreeHelper.getRooty(world.getBlockState(rootPos));
 
         if (dirt != null && dirt.fertilize(world, rootPos, this.amount) || this.grow) {
-            if (displayParticles && world.isClientSide) {
+            if (displayParticles && world.isClient) {
                 TreeHelper.treeParticles(world, rootPos, ParticleTypes.HAPPY_VILLAGER, 8);
             } else {
                 if (this.grow) {

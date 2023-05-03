@@ -1,10 +1,9 @@
 package io.github.steveplays28.dynamictreesfabric.api.configurations;
 
 import io.github.steveplays28.dynamictreesfabric.api.registry.RegistryEntry;
-import net.minecraft.CrashReport;
-import net.minecraft.ReportedException;
-
 import javax.annotation.Nonnull;
+import net.minecraft.util.crash.CrashException;
+import net.minecraft.util.crash.CrashReport;
 import java.util.Optional;
 import java.util.function.Predicate;
 
@@ -31,16 +30,16 @@ public abstract class Configuration<T extends Configuration<T, C>, C extends Con
      * @param value    The value to register.
      * @param <V>      The type of value to register.
      * @return This {@link Configuration} after adding the property.
-     * @throws ReportedException If the property given is not registered to the {@link Configurable}.
+     * @throws CrashException If the property given is not registered to the {@link Configurable}.
      */
     @SuppressWarnings("unchecked")
     public <V> T with(ConfigurationProperty<V> property, V value) {
         if (!this.configurable.isPropertyRegistered(property)) {
-            final CrashReport crashReport = CrashReport.forThrowable(new IllegalArgumentException(), "Tried to add " +
+            final CrashReport crashReport = CrashReport.create(new IllegalArgumentException(), "Tried to add " +
                     "unregistered property with identifier '" + property.getKey() + "' and type '" +
                     property.getType() + "' configurable '" + this.configurable + "'.");
-            crashReport.addCategory("Adding property to a gen feature.");
-            throw new ReportedException(crashReport);
+            crashReport.addElement("Adding property to a gen feature.");
+            throw new CrashException(crashReport);
         }
 
         this.properties.put(property, value);
@@ -71,7 +70,7 @@ public abstract class Configuration<T extends Configuration<T, C>, C extends Con
      * @param property The {@link ConfigurationProperty} to get.
      * @param <V>      The type of the property's value.
      * @return The property's value.
-     * @throws ReportedException If the property is null. If a property is optional. {@link
+     * @throws CrashException If the property is null. If a property is optional. {@link
      *                           #getAsOptional(ConfigurationProperty)} should be called instead.
      */
     @Nonnull
@@ -81,10 +80,10 @@ public abstract class Configuration<T extends Configuration<T, C>, C extends Con
         if (optionalProperty.isPresent())
             return optionalProperty.get();
          else {
-            final CrashReport crashReport = CrashReport.forThrowable(new IllegalStateException(),
+            final CrashReport crashReport = CrashReport.create(new IllegalStateException(),
                     "Property '" + property.getKey() + "' from '" + this.configurable + "' is Null.");
-            crashReport.addCategory("Getting property from a configuration");
-            throw new ReportedException(crashReport);
+            crashReport.addElement("Getting property from a configuration");
+            throw new CrashException(crashReport);
         }
 
     }
@@ -94,14 +93,14 @@ public abstract class Configuration<T extends Configuration<T, C>, C extends Con
      * @param property The {@link ConfigurationProperty} to get.
      * @param <V>      The type of the property's value.
      * @return An Optional with the property's value.
-     * @throws ReportedException If the property did not exist.
+     * @throws CrashException If the property did not exist.
      */
     public <V> Optional<V> getAsOptional(ConfigurationProperty<V> property) {
         if (!this.has(property)) {
-            final CrashReport crashReport = CrashReport.forThrowable(new IllegalStateException(), "Tried to obtain " +
+            final CrashReport crashReport = CrashReport.create(new IllegalStateException(), "Tried to obtain " +
                     "property '" + property.getKey() + "' from '" + this.configurable + "' that did not exist.");
-            crashReport.addCategory("Getting property from a configuration");
-            throw new ReportedException(crashReport);
+            crashReport.addElement("Getting property from a configuration");
+            throw new CrashException(crashReport);
         }
 
         return Optional.ofNullable(this.properties.get(property));
