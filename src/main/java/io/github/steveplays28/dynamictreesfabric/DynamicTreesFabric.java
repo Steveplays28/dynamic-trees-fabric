@@ -19,13 +19,15 @@ import net.minecraftforge.data.event.GatherDataEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Identifier;
 
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 
 public final class DynamicTreesFabric implements ModInitializer {
 
@@ -52,10 +54,10 @@ public final class DynamicTreesFabric implements ModInitializer {
 
 		DTRegistries.setup();
 
-		modEventBus.addListener(this::clientSetup);
-		modEventBus.addListener(this::onCommonSetup);
+		ClientLifecycleEvents.CLIENT_STARTED.register(this::clientSetup);
+		ServerLifecycleEvents.SERVER_STARTED.register(this::onCommonSetup);
 		modEventBus.addListener(this::gatherData);
-		modEventBus.addListener(CommonSetup::onCommonSetup);
+		ServerLifecycleEvents.SERVER_STARTED.register(CommonSetup::onCommonSetup);
 
 		EventHandlers.registerCommon();
 		DTArgumentTypes.ARGUMENT_TYPES.register(modEventBus);
@@ -65,11 +67,11 @@ public final class DynamicTreesFabric implements ModInitializer {
 		return new Identifier(MOD_ID, path);
 	}
 
-	private void clientSetup(final FMLClientSetupEvent event) {
+	private void clientSetup(MinecraftClient client) {
 		DTClient.setup();
 	}
 
-	private void onCommonSetup(final FMLCommonSetupEvent event) {
+	private void onCommonSetup(MinecraftServer server) {
 		// Clears and locks registry handlers to free them from memory.
 		RegistryHandler.REGISTRY.clear();
 

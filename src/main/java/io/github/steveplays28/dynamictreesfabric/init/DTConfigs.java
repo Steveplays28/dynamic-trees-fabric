@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.github.steveplays28.dynamictreesfabric.DynamicTreesFabric;
 import io.github.steveplays28.dynamictreesfabric.blocks.branches.ThickBranchBlock;
 import io.github.steveplays28.dynamictreesfabric.compat.CompatHandler;
 import io.github.steveplays28.dynamictreesfabric.event.handlers.EventHandlers;
@@ -24,57 +25,57 @@ public class DTConfigs {
 	public static final ForgeConfigSpec COMMON_CONFIG;
 	public static final ForgeConfigSpec CLIENT_CONFIG;
 
-	public static final ForgeConfigSpec.DoubleValue SEED_DROP_RATE;
-	public static final ForgeConfigSpec.DoubleValue SEED_PLANT_RATE;
-	public static final ForgeConfigSpec.IntValue SEED_TIME_TO_LIVE;
-	public static final ForgeConfigSpec.BooleanValue SEED_ONLY_FOREST;
-	public static final ForgeConfigSpec.DoubleValue SEED_MIN_FORESTNESS;
+	public static final Double SEED_DROP_RATE;
+	public static final Double SEED_PLANT_RATE;
+	public static final int SEED_TIME_TO_LIVE;
+	public static final boolean SEED_ONLY_FOREST;
+	public static final Double SEED_MIN_FORESTNESS;
 
-	public static final ForgeConfigSpec.DoubleValue TREE_GROWTH_MULTIPLIER;
-	public static final ForgeConfigSpec.DoubleValue TREE_HARVEST_MULTIPLIER;
-	public static final ForgeConfigSpec.DoubleValue MAX_TREE_HARDNESS;
-	public static final ForgeConfigSpec.IntValue TREE_GROWTH_FOLDING;
-	public static final ForgeConfigSpec.BooleanValue DROP_STICKS;
-	public static final ForgeConfigSpec.DoubleValue SCALE_BIOME_GROWTH_RATE;
-	public static final ForgeConfigSpec.DoubleValue DISEASE_CHANCE;
-	public static final ForgeConfigSpec.IntValue MAX_BRANCH_ROT_RADIUS;
-	public static final ForgeConfigSpec.DoubleValue ROOTY_BLOCK_HARDNESS_MULTIPLIER;
-	public static final ForgeConfigSpec.EnumValue<io.github.steveplays28.dynamictreesfabric.DynamicTreesFabric.SwampOakWaterState> SWAMP_OAKS_IN_WATER;
-	public static final ForgeConfigSpec.IntValue BONE_MEAL_GROWTH_PULSES;
+	public static final Double TREE_GROWTH_MULTIPLIER;
+	public static final Double TREE_HARVEST_MULTIPLIER;
+	public static final Double MAX_TREE_HARDNESS;
+	public static final int TREE_GROWTH_FOLDING;
+	public static final boolean DROP_STICKS;
+	public static final Double SCALE_BIOME_GROWTH_RATE;
+	public static final Double DISEASE_CHANCE;
+	public static final int MAX_BRANCH_ROT_RADIUS;
+	public static final Double ROOTY_BLOCK_HARDNESS_MULTIPLIER;
+	public static final DynamicTreesFabric.SwampOakWaterState SWAMP_OAKS_IN_WATER;
+	public static final int BONE_MEAL_GROWTH_PULSES;
 
-	public static final ForgeConfigSpec.BooleanValue IS_LEAVES_PASSABLE;
-	public static final ForgeConfigSpec.BooleanValue VANILLA_LEAVES_COLLISION;
-	public static final ForgeConfigSpec.BooleanValue ENABLE_BRANCH_CLIMBING;
-	public static final ForgeConfigSpec.BooleanValue CANOPY_CRASH;
-	public static final ForgeConfigSpec.EnumValue<io.github.steveplays28.dynamictreesfabric.DynamicTreesFabric.AxeDamage> AXE_DAMAGE_MODE;
-	public static final ForgeConfigSpec.BooleanValue ENABLE_FALLING_TREES;
-	public static final ForgeConfigSpec.BooleanValue ENABLE_FALLING_TREE_DAMAGE;
-	public static final ForgeConfigSpec.DoubleValue FALLING_TREE_DAMAGE_MULTIPLIER;
-	public static final ForgeConfigSpec.BooleanValue DIRT_BUCKET_PLACES_DIRT;
-	public static final ForgeConfigSpec.BooleanValue SLOPPY_BREAK_DROPS;
-	public static final ForgeConfigSpec.IntValue MIN_RADIUS_FOR_STRIP;
-	public static final ForgeConfigSpec.BooleanValue ENABLE_STRIP_RADIUS_REDUCTION;
-	public static final ForgeConfigSpec.BooleanValue CAN_BONE_MEAL_APPLE;
-	public static final ForgeConfigSpec.BooleanValue DYNAMIC_SAPLING_DROPS;
+	public static final boolean IS_LEAVES_PASSABLE;
+	public static final boolean VANILLA_LEAVES_COLLISION;
+	public static final boolean ENABLE_BRANCH_CLIMBING;
+	public static final boolean CANOPY_CRASH;
+	public static final DynamicTreesFabric.AxeDamage AXE_DAMAGE_MODE;
+	public static final boolean ENABLE_FALLING_TREES;
+	public static final boolean ENABLE_FALLING_TREE_DAMAGE;
+	public static final Double FALLING_TREE_DAMAGE_MULTIPLIER;
+	public static final boolean DIRT_BUCKET_PLACES_DIRT;
+	public static final boolean SLOPPY_BREAK_DROPS;
+	public static final int MIN_RADIUS_FOR_STRIP;
+	public static final boolean ENABLE_STRIP_RADIUS_REDUCTION;
+	public static final boolean CAN_BONE_MEAL_APPLE;
+	public static final boolean DYNAMIC_SAPLING_DROPS;
 
-	public static final ForgeConfigSpec.BooleanValue REPLACE_VANILLA_SAPLING;
-	public static final ForgeConfigSpec.BooleanValue REPLACE_NYLIUM_FUNGI;
+	public static final boolean REPLACE_VANILLA_SAPLING;
+	public static final boolean REPLACE_NYLIUM_FUNGI;
 
-	public static final ForgeConfigSpec.BooleanValue PODZOL_GEN;
+	public static final boolean PODZOL_GEN;
 
-	public static final ForgeConfigSpec.BooleanValue GENERATE_DIRT_BUCKET_RECIPES;
+	public static final boolean GENERATE_DIRT_BUCKET_RECIPES;
 
-	public static final ForgeConfigSpec.BooleanValue WORLD_GEN;
-	public static final ForgeConfigSpec.ConfigValue<List<String>> DIMENSION_BLACKLIST;
+	public static final boolean WORLD_GEN;
+	public static final List<String> DIMENSION_BLACKLIST;
 
-	//public static final ForgeConfigSpec.BooleanValue fancyThickRings;
+	//public static final boolean fancyThickRings;
 
-	public static final ForgeConfigSpec.BooleanValue WORLD_GEN_DEBUG;
+	public static final boolean WORLD_GEN_DEBUG;
 
-	public static final ForgeConfigSpec.ConfigValue<String> PREFERRED_SEASON_MOD;
-	public static final ForgeConfigSpec.BooleanValue ENABLE_SEASONAL_SEED_DROP_FACTOR;
-	public static final ForgeConfigSpec.BooleanValue ENABLE_SEASONAL_GROWTH_FACTOR;
-	public static final ForgeConfigSpec.BooleanValue ENABLE_SEASONAL_FRUIT_PRODUCTION_FACTOR;
+	public static final String PREFERRED_SEASON_MOD;
+	public static final boolean ENABLE_SEASONAL_SEED_DROP_FACTOR;
+	public static final boolean ENABLE_SEASONAL_GROWTH_FACTOR;
+	public static final boolean ENABLE_SEASONAL_FRUIT_PRODUCTION_FACTOR;
 
 	static {
 		CONFIG_DIRECTORY = new File(FMLPaths.CONFIGDIR.get().toUri());

@@ -1,6 +1,15 @@
 package io.github.steveplays28.dynamictreesfabric.resources;
 
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+
 import com.google.common.collect.ImmutableMap;
+import io.github.steveplays28.dynamictreesfabric.DynamicTreesFabric;
 import io.github.steveplays28.dynamictreesfabric.api.configurations.ConfigurationTemplateResourceLoader;
 import io.github.steveplays28.dynamictreesfabric.api.event.Hooks;
 import io.github.steveplays28.dynamictreesfabric.api.resource.TreeResourceManager;
@@ -8,19 +17,19 @@ import io.github.steveplays28.dynamictreesfabric.data.DTRecipes;
 import io.github.steveplays28.dynamictreesfabric.growthlogic.GrowthLogicKit;
 import io.github.steveplays28.dynamictreesfabric.growthlogic.GrowthLogicKitConfiguration;
 import io.github.steveplays28.dynamictreesfabric.init.DTConfigs;
-import io.github.steveplays28.dynamictreesfabric.resources.loader.*;
+import io.github.steveplays28.dynamictreesfabric.resources.loader.BiomeDatabaseResourceLoader;
+import io.github.steveplays28.dynamictreesfabric.resources.loader.FamilyResourceLoader;
+import io.github.steveplays28.dynamictreesfabric.resources.loader.GlobalDropCreatorResourceLoader;
+import io.github.steveplays28.dynamictreesfabric.resources.loader.JoCodeResourceLoader;
+import io.github.steveplays28.dynamictreesfabric.resources.loader.LeavesPropertiesResourceLoader;
+import io.github.steveplays28.dynamictreesfabric.resources.loader.SoilPropertiesResourceLoader;
+import io.github.steveplays28.dynamictreesfabric.resources.loader.SpeciesResourceLoader;
 import io.github.steveplays28.dynamictreesfabric.systems.dropcreators.DropCreator;
 import io.github.steveplays28.dynamictreesfabric.systems.dropcreators.DropCreatorConfiguration;
 import io.github.steveplays28.dynamictreesfabric.systems.genfeatures.GenFeature;
 import io.github.steveplays28.dynamictreesfabric.systems.genfeatures.GenFeatureConfiguration;
 
-import net.minecraft.recipe.Recipe;
-import net.minecraft.recipe.RecipeType;
-import net.minecraft.resource.ResourceManager;
-import net.minecraft.resource.ResourceReloader;
-import net.minecraft.server.DataPackContents;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.profiler.Profiler;
+import net.fabricmc.loader.api.ModContainer;
 
 import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -30,21 +39,22 @@ import net.minecraftforge.forgespi.language.IModInfo;
 import net.minecraftforge.forgespi.locating.IModFile;
 import org.apache.logging.log4j.LogManager;
 
-import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
+import net.minecraft.recipe.Recipe;
+import net.minecraft.recipe.RecipeType;
+import net.minecraft.resource.ResourceManager;
+import net.minecraft.resource.ResourceReloader;
+import net.minecraft.server.DataPackContents;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.profiler.Profiler;
+
+import net.fabricmc.loader.api.FabricLoader;
 
 /**
  * @author Harley O'Connor
  */
 @Mod.EventBusSubscriber(modid = io.github.steveplays28.dynamictreesfabric.DynamicTreesFabric.MOD_ID)
 public final class Resources {
-
-	public static final Identifier RESOURCE_LOCATION = io.github.steveplays28.dynamictreesfabric.DynamicTreesFabric.resLoc("registry_name");
+	public static final Identifier RESOURCE_LOCATION = DynamicTreesFabric.resLoc("registry_name");
 
 	public static final String TREES = "trees";
 
@@ -112,11 +122,10 @@ public final class Resources {
 	private static void registerModTreePacks() {
 		// Register all mod tree packs. Gets the mods in an ordered list so that add-ons will come after DT.
 		// This means that add-ons will take priority over DT.
-		ModList.get().getMods().forEach(Resources::addModResourcePack);
+		FabricLoader.getInstance().getAllMods().forEach(Resources::addModResourcePack);
 	}
 
-
-	private static void addModResourcePack(IModInfo modInfo) {
+	private static void addModResourcePack(ModContainer modContainer) {
 		final IModFile modFile = ModList.get().getModFileById(modInfo.getModId()).getFile();
 		if (modFile.getProvider().isValid(modFile)) {
 			addModResourcePack(modFile);
@@ -184,6 +193,7 @@ public final class Resources {
 
 			final Map<RecipeType<?>, Map<Identifier, Recipe<?>>> recipes = new HashMap<>();
 
+			// TODO: FABRIC PORT: Fix access widener for RecipeManager recipes
 			// Put the recipes into the new map and make each type's recipes mutable.
 			this.dataPackRegistries.getRecipeManager().recipes.forEach(((recipeType, currentRecipes) ->
 					recipes.put(recipeType, new HashMap<>(currentRecipes))));
@@ -199,5 +209,4 @@ public final class Resources {
 			dataPackRegistries.getRecipeManager().recipes = ImmutableMap.copyOf(recipes);
 		}
 	}
-
 }
