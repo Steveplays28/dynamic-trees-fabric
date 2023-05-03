@@ -2,7 +2,7 @@ package io.github.steveplays28.dynamictreesfabric.api.configurations;
 
 import com.google.common.collect.Maps;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 

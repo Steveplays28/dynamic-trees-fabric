@@ -1,6 +1,6 @@
 package io.github.steveplays28.dynamictreesfabric.api.treepacks;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 import com.google.gson.JsonElement;
 

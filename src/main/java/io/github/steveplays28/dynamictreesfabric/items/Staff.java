@@ -2,7 +2,7 @@ package io.github.steveplays28.dynamictreesfabric.items;
 
 import java.util.List;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;

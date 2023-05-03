@@ -1,6 +1,6 @@
 package io.github.steveplays28.dynamictreesfabric.items;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 import io.github.steveplays28.dynamictreesfabric.init.DTConfigs;
 import io.github.steveplays28.dynamictreesfabric.init.DTRegistries;

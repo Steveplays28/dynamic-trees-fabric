@@ -3,7 +3,7 @@ package io.github.steveplays28.dynamictreesfabric.deserialisation;
 import java.util.function.Consumer;
 import java.util.stream.StreamSupport;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;

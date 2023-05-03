@@ -1,6 +1,6 @@
 package io.github.steveplays28.dynamictreesfabric.api.configurations;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * @author Harley O'Connor

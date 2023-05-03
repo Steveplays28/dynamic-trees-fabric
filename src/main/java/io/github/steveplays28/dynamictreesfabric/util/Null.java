@@ -3,7 +3,7 @@ package io.github.steveplays28.dynamictreesfabric.util;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Contains utility classes for operations relating to {@code null}.

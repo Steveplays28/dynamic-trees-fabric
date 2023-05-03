@@ -26,7 +26,7 @@ import net.minecraft.world.item.*;
 
 import net.minecraftforge.common.brewing.BrewingRecipeRegistry;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;

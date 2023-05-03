@@ -11,7 +11,7 @@ import java.util.Set;
 import java.util.function.Supplier;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 import io.github.steveplays28.dynamictreesfabric.compat.seasons.SeasonHelper;
 import io.github.steveplays28.dynamictreesfabric.trees.Species;

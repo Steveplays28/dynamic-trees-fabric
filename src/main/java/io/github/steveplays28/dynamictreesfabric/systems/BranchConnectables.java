@@ -3,7 +3,7 @@ package io.github.steveplays28.dynamictreesfabric.systems;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 import io.github.steveplays28.dynamictreesfabric.util.function.TetraFunction;
 

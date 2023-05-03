@@ -5,7 +5,7 @@ import static io.github.steveplays28.dynamictreesfabric.util.ResourceLocationUti
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;

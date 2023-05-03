@@ -3,7 +3,7 @@ package io.github.steveplays28.dynamictreesfabric.systems.nodemappers;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 import io.github.steveplays28.dynamictreesfabric.api.TreeHelper;
 import io.github.steveplays28.dynamictreesfabric.api.network.NodeInspector;

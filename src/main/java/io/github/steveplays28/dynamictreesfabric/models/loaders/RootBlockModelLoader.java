@@ -5,12 +5,14 @@ import com.google.gson.JsonObject;
 import io.github.steveplays28.dynamictreesfabric.models.geometry.BranchBlockModelGeometry;
 import io.github.steveplays28.dynamictreesfabric.models.geometry.RootBlockModelGeometry;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+
 /**
  * @author Harley O'Connor
  */
 @Environment(EnvType.CLIENT)
 public class RootBlockModelLoader extends BranchBlockModelLoader {
-
 	@Override
 	public BranchBlockModelGeometry read(JsonObject modelObject, JsonDeserializationContext deserializationContext) {
 		final JsonObject textures = this.getTexturesObject(modelObject);
@@ -21,5 +23,4 @@ public class RootBlockModelLoader extends BranchBlockModelLoader {
 	protected String getModelTypeName() {
 		return "Surface Root";
 	}
-
 }

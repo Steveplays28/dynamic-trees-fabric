@@ -9,7 +9,7 @@ import io.github.steveplays28.dynamictreesfabric.deserialisation.JsonDeserialise
 import io.github.steveplays28.dynamictreesfabric.deserialisation.result.JsonResult;
 import io.github.steveplays28.dynamictreesfabric.deserialisation.result.Result;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -3,13 +3,11 @@ package io.github.steveplays28.dynamictreesfabric.models.modeldata;
 import io.github.steveplays28.dynamictreesfabric.blocks.branches.BranchBlock;
 import io.github.steveplays28.dynamictreesfabric.trees.Family;
 import io.github.steveplays28.dynamictreesfabric.util.Connections;
-
-import net.minecraft.util.math.Direction;
-
 import net.minecraftforge.client.model.data.ModelData;
 import net.minecraftforge.client.model.data.ModelProperty;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
+import net.minecraft.util.math.Direction;
 
 /**
  * Extension of {@link Connections} for storing and transferring model data to baked models.

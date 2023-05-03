@@ -1,6 +1,6 @@
 package io.github.steveplays28.dynamictreesfabric.util;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * A simple bitmap that favors speed over safety.  Consider yourself disclaimed.

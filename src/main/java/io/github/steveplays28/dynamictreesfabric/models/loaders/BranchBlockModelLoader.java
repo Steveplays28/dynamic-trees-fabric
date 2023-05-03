@@ -1,7 +1,5 @@
 package io.github.steveplays28.dynamictreesfabric.models.loaders;
 
-import javax.annotation.Nullable;
-
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
@@ -10,6 +8,7 @@ import io.github.steveplays28.dynamictreesfabric.models.geometry.BranchBlockMode
 import net.minecraftforge.client.model.geometry.IGeometryLoader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.client.texture.MissingSprite;
 import net.minecraft.util.Identifier;

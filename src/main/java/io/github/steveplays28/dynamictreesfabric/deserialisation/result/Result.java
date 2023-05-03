@@ -9,7 +9,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 import io.github.steveplays28.dynamictreesfabric.deserialisation.DeserialisationException;
 import io.github.steveplays28.dynamictreesfabric.deserialisation.NoSuchDeserialiserException;

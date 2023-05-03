@@ -1,7 +1,7 @@
 package io.github.steveplays28.dynamictreesfabric.blocks.branches;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 import io.github.steveplays28.dynamictreesfabric.api.TreeHelper;
 import io.github.steveplays28.dynamictreesfabric.api.cells.Cell;

@@ -6,7 +6,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 import com.mojang.datafixers.util.Pair;
 import io.github.steveplays28.dynamictreesfabric.client.thickrings.ThickRingTextureManager;

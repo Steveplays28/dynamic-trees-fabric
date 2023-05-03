@@ -10,7 +10,7 @@ import net.minecraft.resource.Resource;
 import net.minecraft.util.Identifier;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.Reader;

@@ -2,7 +2,7 @@ package io.github.steveplays28.dynamictreesfabric.items;
 
 import java.util.List;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 import io.github.steveplays28.dynamictreesfabric.blocks.PottedSaplingBlock;
 import io.github.steveplays28.dynamictreesfabric.event.SeedVoluntaryPlantEvent;

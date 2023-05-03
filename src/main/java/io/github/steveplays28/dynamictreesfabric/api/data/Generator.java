@@ -4,7 +4,7 @@ import io.github.steveplays28.dynamictreesfabric.data.provider.DTDataProvider;
 
 import net.minecraft.data.DataProvider;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;

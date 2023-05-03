@@ -3,7 +3,7 @@ package io.github.steveplays28.dynamictreesfabric.deserialisation.result;
 import java.util.List;
 import java.util.function.Predicate;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 import com.google.gson.JsonElement;
 import io.github.steveplays28.dynamictreesfabric.deserialisation.NoSuchDeserialiserException;

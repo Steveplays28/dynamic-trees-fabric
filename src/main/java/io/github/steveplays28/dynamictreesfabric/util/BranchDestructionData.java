@@ -9,7 +9,7 @@ import java.util.Map.Entry;
 import java.util.function.Function;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 import com.google.common.collect.AbstractIterator;
 import io.github.steveplays28.dynamictreesfabric.api.TreeRegistry;

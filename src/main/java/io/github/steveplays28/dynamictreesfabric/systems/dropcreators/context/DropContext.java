@@ -2,7 +2,7 @@ package io.github.steveplays28.dynamictreesfabric.systems.dropcreators.context;
 
 import java.util.List;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 import io.github.steveplays28.dynamictreesfabric.trees.Species;
 
