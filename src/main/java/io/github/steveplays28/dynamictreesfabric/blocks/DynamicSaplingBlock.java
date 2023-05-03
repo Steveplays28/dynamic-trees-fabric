@@ -3,7 +3,7 @@ package io.github.steveplays28.dynamictreesfabric.blocks;
 import java.util.Collections;
 import java.util.List;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import io.github.steveplays28.dynamictreesfabric.api.TreeHelper;
@@ -67,7 +67,7 @@ public class DynamicSaplingBlock extends Block implements Fertilizable, IPlantab
 	}
 
 	@Override
-	public boolean isFertilizable(@Nonnull BlockView world, @Nonnull BlockPos pos, @Nonnull BlockState state, boolean isClient) {
+	public boolean isFertilizable(@NotNull BlockView world, @NotNull BlockPos pos, @NotNull BlockState state, boolean isClient) {
 		return this.getSpecies().canSaplingConsumeBoneMeal((World) world, pos);
 	}
 
@@ -76,7 +76,7 @@ public class DynamicSaplingBlock extends Block implements Fertilizable, IPlantab
 	///////////////////////////////////////////
 
 	@Override
-	public boolean canGrow(@Nonnull World world, @Nonnull Random rand, @Nonnull BlockPos pos, @Nonnull BlockState state) {
+	public boolean canGrow(@NotNull World world, @NotNull Random rand, @NotNull BlockPos pos, @NotNull BlockState state) {
 		return this.getSpecies().canSaplingGrowAfterBoneMeal(world, rand, pos);
 	}
 
@@ -103,7 +103,7 @@ public class DynamicSaplingBlock extends Block implements Fertilizable, IPlantab
 	}
 
 	@Override
-	public void grow(@Nonnull ServerWorld world, @Nonnull Random rand, @Nonnull BlockPos pos, @Nonnull BlockState state) {
+	public void grow(@NotNull ServerWorld world, @NotNull Random rand, @NotNull BlockPos pos, @NotNull BlockState state) {
 		if (this.canPlaceAt(state, world, pos)) {
 			final Species species = this.getSpecies();
 			if (species.canSaplingGrow(world, pos)) {
@@ -136,13 +136,13 @@ public class DynamicSaplingBlock extends Block implements Fertilizable, IPlantab
 		world.removeBlock(pos, false);
 	}
 
-	@Nonnull
+	@NotNull
 	@Override
 	public ItemStack getPickStack(BlockView worldIn, BlockPos pos, BlockState state) {
 		return this.getSpecies().getSeedStack(1);
 	}
 
-	@Nonnull
+	@NotNull
 	@Override
 	public List<ItemStack> getDroppedStacks(@Nonnull BlockState state, @Nonnull LootContext.Builder builder) {
 		// If a loot table has been added load those drops instead (until drop creators).
@@ -165,7 +165,7 @@ public class DynamicSaplingBlock extends Block implements Fertilizable, IPlantab
 	// PHYSICAL BOUNDS
 	///////////////////////////////////////////
 
-	@Nonnull
+	@NotNull
 	@Override
 	public VoxelShape getOutlineShape(BlockState state, BlockView access, BlockPos pos, ShapeContext context) {
 		return this.getSpecies().getSaplingShape();

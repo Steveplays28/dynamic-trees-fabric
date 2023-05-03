@@ -4,12 +4,11 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import net.minecraftforge.registries.ForgeRegistry;
 
 import net.minecraft.util.Identifier;
 
 /**
- * A custom registry which can be safely unlocked at any point. Largely based off {@link ForgeRegistry}.
+ * A custom registry which can be safely unlocked at any point.
  *
  * @param <V> The {@link RegistryEntry} type that will be registered.
  * @author Harley O'Connor

@@ -22,6 +22,8 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.World;
+import net.fabricmc.api.Environment;
+import net.fabricmc.api.EnvType;
 
 public class FalloverAnimationHandler implements AnimationHandler {
 
@@ -253,8 +255,6 @@ public class FalloverAnimationHandler implements AnimationHandler {
 	}
 
 	@Override
-	import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 
 @Environment(EnvType.CLIENT)
 	public void renderTransform(FallingTreeEntity entity, float entityYaw, float partialTicks, MatrixStack matrixStack) {
@@ -279,8 +279,6 @@ import net.fabricmc.api.Environment;
 	}
 
 	@Override
-	import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 
 @Environment(EnvType.CLIENT)
 	public boolean shouldRender(FallingTreeEntity entity) {

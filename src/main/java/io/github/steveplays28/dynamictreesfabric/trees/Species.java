@@ -50,8 +50,6 @@ import io.github.steveplays28.dynamictreesfabric.blocks.leaves.LeavesProperties;
 import io.github.steveplays28.dynamictreesfabric.blocks.rootyblocks.RootyBlock;
 import io.github.steveplays28.dynamictreesfabric.blocks.rootyblocks.SoilHelper;
 import io.github.steveplays28.dynamictreesfabric.blocks.rootyblocks.SoilProperties;
-import io.github.steveplays28.dynamictreesfabric.compat.seasons.NormalSeasonManager;
-import io.github.steveplays28.dynamictreesfabric.compat.seasons.SeasonHelper;
 import io.github.steveplays28.dynamictreesfabric.data.DTBlockTags;
 import io.github.steveplays28.dynamictreesfabric.data.DTItemTags;
 import io.github.steveplays28.dynamictreesfabric.data.provider.DTBlockStateProvider;

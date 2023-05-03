@@ -5,7 +5,7 @@ import io.github.steveplays28.dynamictreesfabric.api.registry.RegistryEntry;
 import net.minecraft.util.crash.CrashException;
 import net.minecraft.util.crash.CrashReport;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -76,7 +76,7 @@ public abstract class Configuration<T extends Configuration<T, C>, C extends Con
 	 * @throws CrashException If the property is null. If a property is optional. {@link
 	 *                        #getAsOptional(ConfigurationProperty)} should be called instead.
 	 */
-	@Nonnull
+	@NotNull
 	public <V> V get(ConfigurationProperty<V> property) {
 		Optional<V> optionalProperty = getAsOptional(property);
 

@@ -53,7 +53,8 @@ import net.minecraft.world.BlockRenderView;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
-
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 /**
  * This class provides a means of holding individual properties for leaves.  This is necessary since leaves can contain
  * sub blocks that may behave differently.  Each leaves properties object must have a reference to a tree family.
@@ -171,8 +172,7 @@ public class LeavesProperties extends RegistryEntry<LeavesProperties> implements
 	// PRIMITIVE LEAVES BLOCK
 	///////////////////////////////////////////
 	private boolean canGrowOnGround = false;
-	import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+
 
 @Environment(EnvType.CLIENT)
 	private BlockColorProvider colorMultiplier;
@@ -199,9 +199,6 @@ import net.fabricmc.api.Environment;
 		this.setRegistryName(registryName);
 		this.blockRegistryName = ResourceLocationUtils.suffix(registryName, this.getBlockRegistryNameSuffix());
 	}
-
-	import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 
 @Environment(EnvType.CLIENT)
 	public static void postInitClient() {
@@ -383,7 +380,7 @@ import net.fabricmc.api.Environment;
 	 * @deprecated use {@link #setAgeingConfiguration(AgeingConfiguration)}
 	 */
 	@Deprecated
-	public void setDoesAge(String doesAge) {
+	public void setAgeingConfiguration(String doesAge) {
 		try {
 			this.ageingConfiguration = AgeingConfiguration.valueOf(doesAge.toUpperCase());
 		} catch (IllegalArgumentException e) {
@@ -483,16 +480,10 @@ import net.fabricmc.api.Environment;
 		this.colorString = colorString;
 	}
 
-	import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-
 @Environment(EnvType.CLIENT)
 	public int treeFallColorMultiplier(BlockState state, BlockRenderView world, BlockPos pos) {
 		return this.foliageColorMultiplier(state, world, pos);
 	}
-
-	import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 
 @Environment(EnvType.CLIENT)
 	public int foliageColorMultiplier(BlockState state, BlockRenderView world, BlockPos pos) {
@@ -501,9 +492,6 @@ import net.fabricmc.api.Environment;
 		}
 		return colorMultiplier.getColor(state, world, pos, -1);
 	}
-
-	import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 
 @Environment(EnvType.CLIENT)
 	private void processColor() {
@@ -515,7 +503,10 @@ import net.fabricmc.api.Environment;
 			if (code.startsWith("@")) {
 				code = code.substring(1);
 				if ("biome".equals(code)) { // Built in code since we need access to super.
-					this.colorMultiplier = (state, world, pos, t) -> ((WorldAccess) world).getBiome(pos).value().getFoliageColor();
+					this.colorMultiplier = (state, world, pos, t) -> {
+						assert world != null;
+						return ((WorldAccess) world).getBiome(pos).value().getFoliageColor();
+					};
 					return;
 				}
 

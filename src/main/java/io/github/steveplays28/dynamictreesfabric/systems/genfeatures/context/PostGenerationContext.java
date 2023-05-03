@@ -3,7 +3,6 @@ package io.github.steveplays28.dynamictreesfabric.systems.genfeatures.context;
 import java.util.List;
 
 import io.github.steveplays28.dynamictreesfabric.blocks.rootyblocks.RootyBlock;
-import io.github.steveplays28.dynamictreesfabric.compat.seasons.SeasonProvider;
 import io.github.steveplays28.dynamictreesfabric.systems.poissondisc.PoissonDisc;
 import io.github.steveplays28.dynamictreesfabric.trees.Species;
 import io.github.steveplays28.dynamictreesfabric.util.SafeChunkBounds;

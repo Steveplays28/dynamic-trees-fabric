@@ -1,7 +1,6 @@
 package io.github.steveplays28.dynamictreesfabric.event.handlers;
 
 import io.github.steveplays28.dynamictreesfabric.client.TooltipHandler;
-import io.github.steveplays28.dynamictreesfabric.compat.seasons.SeasonHelper;
 import io.github.steveplays28.dynamictreesfabric.event.FutureBreak;
 import io.github.steveplays28.dynamictreesfabric.init.DTClient;
 import net.minecraftforge.event.TickEvent;
@@ -9,6 +8,8 @@ import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.event.level.LevelEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.LogicalSide;
+import net.fabricmc.api.Environment;
+import net.fabricmc.api.EnvType;
 
 public class CommonEventHandler {
 
@@ -31,8 +32,6 @@ public class CommonEventHandler {
 	}
 
 	@SubscribeEvent
-	import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 
 @Environment(EnvType.CLIENT)
 	public void onItemTooltipAdded(ItemTooltipEvent event) {

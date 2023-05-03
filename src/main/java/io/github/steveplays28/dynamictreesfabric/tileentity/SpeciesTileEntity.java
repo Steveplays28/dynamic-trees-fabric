@@ -1,6 +1,6 @@
 package io.github.steveplays28.dynamictreesfabric.tileentity;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import io.github.steveplays28.dynamictreesfabric.api.TreeRegistry;
@@ -46,7 +46,7 @@ public class SpeciesTileEntity extends BlockEntity {
 		super.readNbt(tag);
 	}
 
-	@Nonnull
+	@NotNull
 	@Override
 	public void writeNbt(NbtCompound tag) {
 		tag.putString("species", species.getRegistryName().toString());

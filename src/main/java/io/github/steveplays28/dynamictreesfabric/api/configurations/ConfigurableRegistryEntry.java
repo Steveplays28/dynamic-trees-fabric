@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Set;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 
 import com.google.common.collect.Sets;
 import io.github.steveplays28.dynamictreesfabric.api.registry.RegistryEntry;
@@ -68,7 +68,7 @@ public abstract class ConfigurableRegistryEntry<T extends ConfigurableRegistryEn
 	 * @return {@code true} if it is registered, {@code false} if not.
 	 */
 	@Override
-	public boolean isPropertyRegistered(@Nonnull ConfigurationProperty<?> property) {
+	public boolean isPropertyRegistered(@NotNull ConfigurationProperty<?> property) {
 		return this.properties.contains(property);
 	}
 

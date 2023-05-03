@@ -32,7 +32,6 @@ import io.github.steveplays28.dynamictreesfabric.blocks.branches.ThickBranchBloc
 import io.github.steveplays28.dynamictreesfabric.blocks.leaves.DynamicLeavesBlock;
 import io.github.steveplays28.dynamictreesfabric.blocks.leaves.LeavesProperties;
 import io.github.steveplays28.dynamictreesfabric.cells.MetadataCell;
-import io.github.steveplays28.dynamictreesfabric.compat.waila.WailaOther;
 import io.github.steveplays28.dynamictreesfabric.data.DTBlockTags;
 import io.github.steveplays28.dynamictreesfabric.data.DTItemTags;
 import io.github.steveplays28.dynamictreesfabric.data.provider.BranchLoaderBuilder;
@@ -80,6 +79,8 @@ import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 import net.minecraft.world.WorldView;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 
 /**
  * This structure describes a Family whose member Species all have a common branch.
@@ -156,13 +157,9 @@ public class Family extends RegistryEntry<Family> implements Resettable<Family> 
 	 * Weather the branch can support cocoa pods on it's surface [default = false]
 	 */
 	public boolean canSupportCocoa = false;
-	import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 
 @Environment(EnvType.CLIENT)
 	public int woodRingColor; // For rooty blocks
-	import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 
 @Environment(EnvType.CLIENT)
 	public int woodBarkColor; // For rooty water
@@ -348,7 +345,6 @@ import net.fabricmc.api.Environment;
 				branch.stripBranch(state, world, pos, player, heldItem);
 				if (world.isClient) {
 					world.playSound(player, pos, SoundEvents.ITEM_AXE_STRIP, SoundCategory.BLOCKS, 1.0F, 1.0F);
-					WailaOther.invalidateWailaPosition();
 				}
 			});
 			return this.getBranch().isPresent();
@@ -480,8 +476,6 @@ import net.fabricmc.api.Environment;
 		this.maxBranchRadius = maxBranchRadius;
 	}
 
-	import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 
 @Environment(EnvType.CLIENT)
 	public int getRootColor(BlockState state, boolean getBark) {

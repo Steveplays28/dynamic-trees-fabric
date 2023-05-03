@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Function;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.google.common.collect.AbstractIterator;
@@ -362,7 +362,7 @@ public class BranchDestructionData {
 		}
 
 		return new Iterable<BlockPos>() {
-			@Nonnull
+			@NotNull
 			@Override
 			public Iterator<BlockPos> iterator() {
 				return new AbstractIterator<BlockPos>() {

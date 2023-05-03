@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 
 import com.google.common.collect.Iterables;
 import io.github.steveplays28.dynamictreesfabric.api.TreeHelper;
@@ -46,6 +46,8 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
+import net.fabricmc.api.Environment;
+import net.fabricmc.api.EnvType;
 
 /**
  * @author ferreusveritas
@@ -398,8 +400,6 @@ public class FallingTreeEntity extends Entity implements ModelTracker {
 	}
 
 	@Override
-	import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 
 @Environment(EnvType.CLIENT)
 	public void modelCleanup() {
@@ -424,9 +424,6 @@ import net.fabricmc.api.Environment;
 	public boolean shouldDie() {
 		return age > 20 && currentAnimationHandler.shouldDie(this); //Give the entity 20 ticks to receive it's data from the server.
 	}
-
-	import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 
 @Environment(EnvType.CLIENT)
 	public boolean shouldRender() {
@@ -496,7 +493,7 @@ import net.fabricmc.api.Environment;
 		}
 	}
 
-	@Nonnull
+	@NotNull
 	@Override
 	public Packet<?> createSpawnPacket() {
 		return NetworkHooks.getEntitySpawningPacket(this);
