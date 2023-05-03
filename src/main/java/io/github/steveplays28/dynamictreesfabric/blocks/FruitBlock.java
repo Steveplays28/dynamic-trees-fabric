@@ -10,13 +10,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
 
-import javax.annotation.Nonnull;
-import org.jetbrains.annotations.Nullable;
-
-import io.github.steveplays28.dynamictreesfabric.compat.seasons.SeasonHelper;
 import io.github.steveplays28.dynamictreesfabric.trees.Species;
 import io.github.steveplays28.dynamictreesfabric.util.BlockStates;
 import net.minecraftforge.common.ForgeHooks;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -51,7 +49,6 @@ import net.minecraft.world.WorldView;
 
 @SuppressWarnings({"deprecation", "unused"})
 public class FruitBlock extends Block implements Fertilizable {
-
 	public static final IntProperty AGE = Properties.AGE_3;
 	private static final Map<Species, Set<FruitBlock>> SPECIES_FRUIT_MAP = new HashMap<>();
 	/**
@@ -67,13 +64,14 @@ public class FruitBlock extends Block implements Fertilizable {
 	protected Supplier<Boolean> canBoneMeal = () -> false; // Q: Does dusting an apple with bone dust make it grow faster? A: Not by default.
 	protected Vec3d itemSpawnOffset = new Vec3d(0.5, 0.6, 0.5);
 	private Species species;
+
 	public FruitBlock() {
 		super(Settings.of(Material.PLANT)
 				.ticksRandomly()
 				.strength(0.3f));
 	}
 
-	@Nonnull
+	@NotNull
 	public static Set<FruitBlock> getFruitBlocksForSpecies(Species species) {
 		return SPECIES_FRUIT_MAP.getOrDefault(species, new HashSet<>());
 	}
@@ -122,7 +120,9 @@ public class FruitBlock extends Block implements Fertilizable {
 		}
 
 		final int age = state.get(AGE);
-		final Float season = SeasonHelper.getSeasonValue(world, pos);
+		// TODO: FABRIC PORT: Fabric Seasons compat should be re-added here
+//		final Float season = SeasonHelper.getSeasonValue(world, pos);
+		final Float season = null;
 		final Species species = this.getSpecies();
 
 		if (season != null && species.isValid()) { // Non-Null means we are season capable.
@@ -130,11 +130,9 @@ public class FruitBlock extends Block implements Fertilizable {
 				this.outOfSeasonAction(world, pos); // Destroy the block or similar action.
 				return;
 			}
-			if (age == 0 && species.testFlowerSeasonHold(season)) {
-				return; // Keep fruit at the flower stage.
-			}
 		}
 
+		// TODO: FABRIC PORT: Figure out how to replace crop grow Forge hooks
 		if (age < 3) {
 			final boolean doGrow = rand.nextFloat() < this.getGrowthChance(world, pos);
 			final boolean eventGrow = ForgeHooks.onCropsGrowPre(world, pos, state, doGrow);
@@ -185,7 +183,6 @@ public class FruitBlock extends Block implements Fertilizable {
 		this.onNeighborChange(state, world, pos, neighbor);
 	}
 
-	@Override
 	public void onNeighborChange(BlockState state, WorldView world, BlockPos pos, BlockPos neighbor) {
 		if (this.shouldBlockDrop(world, pos, state)) {
 			this.dropBlock((World) world, state, pos);
@@ -209,10 +206,11 @@ public class FruitBlock extends Block implements Fertilizable {
 		}
 	}
 
-	@Override
-	public ItemStack getCloneItemStack(BlockState state, HitResult target, BlockView world, BlockPos pos, PlayerEntity player) {
-		return this.getFruitDrop(1);
-	}
+	// TODO: FABRIC PORT: More ItemStack stuff that needs testing
+//	@Override
+//	public ItemStack getCloneItemStack(BlockState state, HitResult target, BlockView world, BlockPos pos, PlayerEntity player) {
+//		return this.getFruitDrop(1);
+//	}
 
 	/**
 	 * Checks if Leaves of any kind are above this block. Not picky.
@@ -227,13 +225,12 @@ public class FruitBlock extends Block implements Fertilizable {
 	}
 
 	@Override
-	public boolean isFertilizable(BlockView worldIn, BlockPos pos, BlockState state, boolean isClient) {
+	public boolean isFertilizable(WorldView world, BlockPos pos, BlockState state, boolean isClient) {
 		return state.get(AGE) < 3;
 	}
 
-
 	///////////////////////////////////////////
-	//BONEMEAL
+	// BONEMEAL
 	///////////////////////////////////////////
 
 	@Override
@@ -268,7 +265,6 @@ public class FruitBlock extends Block implements Fertilizable {
 
 		return drops;
 	}
-
 
 	///////////////////////////////////////////
 	//DROPS
@@ -341,5 +337,4 @@ public class FruitBlock extends Block implements Fertilizable {
 		ROT,
 		CUSTOM
 	}
-
 }

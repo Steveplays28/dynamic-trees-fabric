@@ -1,30 +1,17 @@
 package io.github.steveplays28.dynamictreesfabric.blocks;
 
-import java.util.Collections;
-import java.util.List;
-
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
 import io.github.steveplays28.dynamictreesfabric.api.TreeHelper;
 import io.github.steveplays28.dynamictreesfabric.init.DTConfigs;
 import io.github.steveplays28.dynamictreesfabric.trees.Species;
 import io.github.steveplays28.dynamictreesfabric.util.CoordUtils;
-import net.minecraftforge.common.IPlantable;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Fertilizable;
-import net.minecraft.block.Material;
-import net.minecraft.block.ShapeContext;
+import net.minecraft.block.*;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.loot.context.LootContext;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.BlockSoundGroup;
-import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.random.Random;
@@ -33,8 +20,14 @@ import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldView;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Collections;
+import java.util.List;
+
 @SuppressWarnings("deprecation")
-public class DynamicSaplingBlock extends Block implements Fertilizable, IPlantable {
+public class DynamicSaplingBlock extends PlantBlock implements Fertilizable {
 
 	protected Species species;
 
@@ -67,7 +60,7 @@ public class DynamicSaplingBlock extends Block implements Fertilizable, IPlantab
 	}
 
 	@Override
-	public boolean isFertilizable(@NotNull BlockView world, @NotNull BlockPos pos, @NotNull BlockState state, boolean isClient) {
+	public boolean isFertilizable(WorldView world, BlockPos pos, BlockState state, boolean isClient) {
 		return this.getSpecies().canSaplingConsumeBoneMeal((World) world, pos);
 	}
 
@@ -80,6 +73,7 @@ public class DynamicSaplingBlock extends Block implements Fertilizable, IPlantab
 		return this.getSpecies().canSaplingGrowAfterBoneMeal(world, rand, pos);
 	}
 
+	// TODO: FABRIC PORT: Replace using net.fabricmc.fabric.api.registry.FlammableBlockRegistry
 	@Override
 	public int getFireSpreadSpeed(BlockState state, BlockView world, BlockPos pos, Direction face) {
 		return this.getSpecies().saplingFireSpread();
@@ -144,22 +138,22 @@ public class DynamicSaplingBlock extends Block implements Fertilizable, IPlantab
 
 	@NotNull
 	@Override
-	public List<ItemStack> getDroppedStacks(@Nonnull BlockState state, @Nonnull LootContext.Builder builder) {
+	public List<ItemStack> getDroppedStacks(@NotNull BlockState state, @NotNull LootContext.Builder builder) {
 		// If a loot table has been added load those drops instead (until drop creators).
 		if (builder.getWorld().getServer().getLootManager().getTableIds().contains(this.getLootTableId())) {
 			return super.getDroppedStacks(state, builder);
 		}
 
-		return DTConfigs.DYNAMIC_SAPLING_DROPS.get() ?
+		return DTConfigs.DYNAMIC_SAPLING_DROPS ?
 				Collections.singletonList(this.getSpecies().getSeedStack(1)) :
 				Collections.emptyList();
 	}
 
-	@Override
-	public ItemStack getCloneItemStack(BlockState state, HitResult target, BlockView world, BlockPos pos, PlayerEntity player) {
-		return this.getSpecies().getSeedStack(1);
-	}
-
+	// TODO: FABRIC PORT: More ItemStack stuff
+//	@Override
+//	public ItemStack getCloneItemStack(BlockState state, HitResult target, BlockView world, BlockPos pos, PlayerEntity player) {
+//		return this.getSpecies().getSeedStack(1);
+//	}
 
 	///////////////////////////////////////////
 	// PHYSICAL BOUNDS
@@ -170,14 +164,4 @@ public class DynamicSaplingBlock extends Block implements Fertilizable, IPlantab
 	public VoxelShape getOutlineShape(BlockState state, BlockView access, BlockPos pos, ShapeContext context) {
 		return this.getSpecies().getSaplingShape();
 	}
-
-	///////////////////////////////////////////
-	// RENDERING
-	///////////////////////////////////////////
-
-	@Override
-	public BlockState getPlant(BlockView world, BlockPos pos) {
-		return this.getDefaultState();
-	}
-
 }

@@ -2,8 +2,8 @@ package io.github.steveplays28.dynamictreesfabric.blocks;
 
 import com.google.common.collect.ImmutableMap;
 import com.mojang.serialization.MapCodec;
-import io.github.steveplays28.dynamictreesfabric.mixin.BlockAccessor;
 import io.github.steveplays28.dynamictreesfabric.blocks.branches.BasicBranchBlock;
+import io.github.steveplays28.dynamictreesfabric.mixin.BlockAccessor;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -51,16 +51,13 @@ public abstract class BlockWithDynamicHardness extends Block {
 	 * Custom extension of {@link BlockState} to allow for dynamic hardness.
 	 */
 	protected final class DynamicHardnessBlockState extends BlockState {
-
 		public DynamicHardnessBlockState(Block block, ImmutableMap<Property<?>, Comparable<?>> propertiesToValueMap, MapCodec<BlockState> codec) {
 			super(block, propertiesToValueMap, codec);
 		}
 
 		@Override
 		public float getHardness(BlockView worldIn, BlockPos pos) {
-			return getHardness(this, worldIn, pos);
+			return 2.0f;
 		}
-
 	}
-
 }
