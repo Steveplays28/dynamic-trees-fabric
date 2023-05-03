@@ -2,6 +2,7 @@ package io.github.steveplays28.dynamictreesfabric.blocks;
 
 import com.google.common.collect.ImmutableMap;
 import com.mojang.serialization.MapCodec;
+import io.github.steveplays28.dynamictreesfabric.mixin.BlockAccessor;
 import io.github.steveplays28.dynamictreesfabric.blocks.branches.BasicBranchBlock;
 
 import net.minecraft.block.Block;
@@ -28,7 +29,7 @@ public abstract class BlockWithDynamicHardness extends Block {
 		this.appendProperties(builder);
 
 		// Set the state container to use our custom BlockState class.
-		this.stateManager = builder.build(Block::getDefaultState, DynamicHardnessBlockState::new);
+		((BlockAccessor) this).setStateManager(builder.build(Block::getDefaultState, DynamicHardnessBlockState::new));
 
 		// Sets the default state to the current default state, but with our new BlockState class.
 		this.setDefaultState(this.stateManager.getDefaultState());
