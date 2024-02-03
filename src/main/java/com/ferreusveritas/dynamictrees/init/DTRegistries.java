@@ -44,8 +44,11 @@ import com.google.common.base.Suppliers;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
@@ -82,14 +85,13 @@ import java.util.function.Supplier;
 
 @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
 public class DTRegistries {
-    public static final DeferredRegister<EntityType<?>> ENTITY_TYPES = DeferredRegister.create(ForgeRegistries.ENTITY_TYPES, DynamicTrees.MOD_ID);
+//    public static final DeferredRegister<EntityType<?>> ENTITY_TYPES = DeferredRegister.create(ForgeRegistries.ENTITY_TYPES, DynamicTrees.MOD_ID);
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, DynamicTrees.MOD_ID);
-    public static final DeferredRegister<PlacementModifierType<?>> PLACEMENT_MODIFIER_TYPES = DeferredRegister.create(Registries.PLACEMENT_MODIFIER_TYPE, DynamicTrees.MOD_ID);
-    public static final DeferredRegister<Feature<?>> FEATURES = DeferredRegister.create(ForgeRegistries.FEATURES, DynamicTrees.MOD_ID);
-    public static final DeferredRegister<SoundEvent> SOUND_EVENTS = DeferredRegister.create(ForgeRegistries.SOUND_EVENTS, DynamicTrees.MOD_ID);
+//    public static final DeferredRegister<PlacementModifierType<?>> PLACEMENT_MODIFIER_TYPES = DeferredRegister.create(Registries.PLACEMENT_MODIFIER_TYPE, DynamicTrees.MOD_ID);
+//    public static final DeferredRegister<SoundEvent> SOUND_EVENTS = DeferredRegister.create(ForgeRegistries.SOUND_EVENTS, DynamicTrees.MOD_ID);
     public static final DeferredRegister<Codec<? extends BiomeModifier>> BIOME_MODIFIER_SERIALIZERS = DeferredRegister.create(ForgeRegistries.Keys.BIOME_MODIFIER_SERIALIZERS, DynamicTrees.MOD_ID);
-    public static final DeferredRegister<HolderSetType> HOLDER_SET_TYPES = DeferredRegister.create(ForgeRegistries.Keys.HOLDER_SET_TYPES, DynamicTrees.MOD_ID);
-    public static final DeferredRegister<BlockStateProviderType<?>> BLOCK_STATE_PROVIDER_TYPES = DeferredRegister.create(Registries.BLOCK_STATE_PROVIDER_TYPE, DynamicTrees.MOD_ID);
+//    public static final DeferredRegister<HolderSetType> HOLDER_SET_TYPES = DeferredRegister.create(ForgeRegistries.Keys.HOLDER_SET_TYPES, DynamicTrees.MOD_ID);
+//    public static final DeferredRegister<BlockStateProviderType<?>> BLOCK_STATE_PROVIDER_TYPES = DeferredRegister.create(Registries.BLOCK_STATE_PROVIDER_TYPE, DynamicTrees.MOD_ID);
     public static final DeferredRegister<StructurePoolElementType<?>> STRUCTURE_POOL_ELEMENT_TYPES = DeferredRegister.create(Registries.STRUCTURE_POOL_ELEMENT, DynamicTrees.MOD_ID);
 
     public static final LinkedList<Item> CREATIVE_TAB_ITEMS = new LinkedList<>();
@@ -121,22 +123,23 @@ public class DTRegistries {
 
     public static void setup() {
         IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
-        ENTITY_TYPES.register(modBus);
+//        ENTITY_TYPES.register(modBus);
         CREATIVE_MODE_TABS.register(modBus);
-        FEATURES.register(modBus);
-        PLACEMENT_MODIFIER_TYPES.register(modBus);
-        SOUND_EVENTS.register(modBus);
+//        PLACEMENT_MODIFIER_TYPES.register(modBus);
+//        SOUND_EVENTS.register(modBus);
         BIOME_MODIFIER_SERIALIZERS.register(modBus);
-        HOLDER_SET_TYPES.register(modBus);
-        BLOCK_STATE_PROVIDER_TYPES.register(modBus);
+//        HOLDER_SET_TYPES.register(modBus);
+//        BLOCK_STATE_PROVIDER_TYPES.register(modBus);
         STRUCTURE_POOL_ELEMENT_TYPES.register(modBus);
-        DTLootPoolEntries.LOOT_POOL_ENTRY_TYPES.register(modBus);
-        DTLootConditions.LOOT_CONDITION_TYPES.register(modBus);
-        DTLootFunctions.LOOT_FUNCTION_TYPES.register(modBus);
+//        DTLootPoolEntries.LOOT_POOL_ENTRY_TYPES.register(modBus);
+//        DTLootConditions.LOOT_CONDITION_TYPES.register(modBus);
+//        DTLootFunctions.LOOT_FUNCTION_TYPES.register(modBus);
 
         setupBlocks();
         setupConnectables();
         setupItems();
+
+        Registry.register(Registries.FEATURE, EXAMPLE_FEATURE_ID, EXAMPLE_FEATURE);
     }
 
     private static void setupBlocks() {
@@ -243,8 +246,9 @@ public class DTRegistries {
     public static final RegistryObject<PlacementModifierType<CaveRootedTreePlacement>> CAVE_ROOTED_TREE_PLACEMENT_MODIFIER_TYPE = PLACEMENT_MODIFIER_TYPES.register("cave_rooted_tree",
             () -> () -> CaveRootedTreePlacement.CODEC);
 
-    public static final RegistryObject<DynamicTreeFeature> DYNAMIC_TREE_FEATURE = FEATURES.register("tree", DynamicTreeFeature::new);
-    public static final RegistryObject<CaveRootedTreeFeature> CAVE_ROOTED_TREE_FEATURE = FEATURES.register("cave_rooted_tree", CaveRootedTreeFeature::new);
+    public static final DynamicTreeFeature DYNAMIC_TREE_FEATURE = Registry.register(
+            BuiltInRegistries.FEATURE, new ResourceLocation(DynamicTrees.MOD_ID, "tree"), new DynamicTreeFeature());
+    public static final CaveRootedTreeFeature CAVE_ROOTED_TREE_FEATURE = Registry.register(BuiltInRegistries.FEATURE, new ResourceLocation(DynamicTrees.MOD_ID, "cave_rooted_tree"), new CaveRootedTreeFeature());
 
     public static final RegistryObject<Codec<AddDynamicTreesBiomeModifier>> ADD_DYNAMIC_TREES_BIOME_MODIFIER = BIOME_MODIFIER_SERIALIZERS.register("add_dynamic_trees",
             () -> Codec.unit(AddDynamicTreesBiomeModifier::new));

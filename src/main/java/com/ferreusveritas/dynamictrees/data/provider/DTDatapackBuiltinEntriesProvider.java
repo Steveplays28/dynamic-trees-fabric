@@ -87,9 +87,9 @@ public class DTDatapackBuiltinEntriesProvider extends DatapackBuiltinEntriesProv
 
     private static void bootstrapConfiguredFeatures(HolderLookup.Provider vanillaProvider, BootstapContext<ConfiguredFeature<?, ?>> context) {
         context.register(DTFeatures.DYNAMIC_TREE_CONFIGURED_FEATURE,
-                new ConfiguredFeature<>(DTRegistries.DYNAMIC_TREE_FEATURE.get(), NoneFeatureConfiguration.INSTANCE));
+                new ConfiguredFeature<>(DTRegistries.DYNAMIC_TREE_FEATURE, NoneFeatureConfiguration.INSTANCE));
         context.register(DTFeatures.CAVE_ROOTED_TREE_CONFIGURED_FEATURE,
-                new ConfiguredFeature<>(DTRegistries.CAVE_ROOTED_TREE_FEATURE.get(), NoneFeatureConfiguration.INSTANCE));
+                new ConfiguredFeature<>(DTRegistries.CAVE_ROOTED_TREE_FEATURE, NoneFeatureConfiguration.INSTANCE));
 
         // TODO 1.20: Verify this works
         replaceNyliumFungiFeatures(vanillaProvider, context);
