@@ -3,7 +3,7 @@ package com.ferreusveritas.dynamictrees.api.data;
 import com.ferreusveritas.dynamictrees.data.provider.DTDataProvider;
 import net.minecraft.data.DataProvider;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;

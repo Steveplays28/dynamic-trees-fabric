@@ -5,7 +5,7 @@ import com.ferreusveritas.dynamictrees.systems.genfeature.GenFeature;
 import com.google.common.collect.Sets;
 import net.minecraft.resources.ResourceLocation;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Set;
@@ -66,7 +66,7 @@ public abstract class ConfigurableRegistryEntry<T extends ConfigurableRegistryEn
      * @return {@code true} if it is registered, {@code false} if not.
      */
     @Override
-    public boolean isPropertyRegistered(@Nonnull ConfigurationProperty<?> property) {
+    public boolean isPropertyRegistered(@NotNull ConfigurationProperty<?> property) {
         return this.properties.contains(property);
     }
 

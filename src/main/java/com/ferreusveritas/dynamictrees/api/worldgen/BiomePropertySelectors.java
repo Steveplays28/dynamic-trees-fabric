@@ -10,7 +10,7 @@ import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import net.minecraftforge.common.world.BiomeGenerationSettingsBuilder;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Set;
@@ -25,7 +25,7 @@ public class BiomePropertySelectors {
 
     @FunctionalInterface
     public interface ChanceSelector {
-        Chance getChance(RandomSource random, @Nonnull Species species, int radius);
+        Chance getChance(RandomSource random, @NotNull Species species, int radius);
     }
 
     @FunctionalInterface
@@ -184,7 +184,7 @@ public class BiomePropertySelectors {
             species = Species.NULL_SPECIES;
         }
 
-        public SpeciesSelection(@Nonnull Species species) {
+        public SpeciesSelection(@NotNull Species species) {
             this.species = species;
             handled = true;
         }
@@ -205,7 +205,7 @@ public class BiomePropertySelectors {
             this.decision = decision;
         }
 
-        public StaticSpeciesSelector(@Nonnull Species species) {
+        public StaticSpeciesSelector(@NotNull Species species) {
             this(new SpeciesSelection(species));
         }
 
@@ -238,7 +238,7 @@ public class BiomePropertySelectors {
             return decisionTable.size();
         }
 
-        public RandomSpeciesSelector add(@Nonnull Species species, int weight) {
+        public RandomSpeciesSelector add(@NotNull Species species, int weight) {
             decisionTable.add(new Entry(new SpeciesSelection(species), weight));
             totalWeight += weight;
             return this;

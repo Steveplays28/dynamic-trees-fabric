@@ -2,7 +2,7 @@ package com.ferreusveritas.dynamictrees.api.applier;
 
 import com.google.gson.JsonElement;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Manages applying a property (of type <tt>V</tt>) to an object (of type <tt>T</tt>).

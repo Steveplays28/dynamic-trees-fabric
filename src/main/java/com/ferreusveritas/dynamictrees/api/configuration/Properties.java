@@ -2,7 +2,7 @@ package com.ferreusveritas.dynamictrees.api.configuration;
 
 import com.google.common.collect.Maps;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import java.util.Map;
 
 /**

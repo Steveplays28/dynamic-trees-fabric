@@ -17,8 +17,8 @@ import net.minecraftforge.client.model.data.ModelData;
 import net.minecraftforge.client.model.data.ModelProperty;
 import net.minecraftforge.registries.ForgeRegistries;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * A TileEntity that holds a species value.
@@ -106,7 +106,7 @@ public class PottedSaplingBlockEntity extends BlockEntity {
         tag.putString(SPECIES_TAG, this.species.getRegistryName().toString());
     }
 
-    @Nonnull
+    @NotNull
     @Override
     public ModelData getModelData() {
         return ModelData.builder().with(POT_MIMIC, potState).with(SPECIES, species).build();

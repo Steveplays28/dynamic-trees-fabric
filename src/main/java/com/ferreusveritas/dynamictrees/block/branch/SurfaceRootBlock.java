@@ -33,8 +33,8 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.ticks.ScheduledTick;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 @SuppressWarnings("deprecation")
 public class SurfaceRootBlock extends Block implements SimpleWaterloggedBlock {
@@ -159,7 +159,7 @@ public class SurfaceRootBlock extends Block implements SimpleWaterloggedBlock {
     // PHYSICAL BOUNDS
     ///////////////////////////////////////////
 
-    @Nonnull
+    @NotNull
     @Override
     public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         boolean connectionMade = false;

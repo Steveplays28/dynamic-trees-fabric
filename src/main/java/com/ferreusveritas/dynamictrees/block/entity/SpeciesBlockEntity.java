@@ -11,8 +11,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * A TileEntity that holds a species value.
@@ -45,7 +45,7 @@ public class SpeciesBlockEntity extends BlockEntity {
         super.load(tag);
     }
 
-    @Nonnull
+    @NotNull
     @Override
     public void saveAdditional(CompoundTag tag) {
         tag.putString("species", species.getRegistryName().toString());

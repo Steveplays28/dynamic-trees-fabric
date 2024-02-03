@@ -26,8 +26,8 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class ThickBranchBlock extends BasicBranchBlock implements Musable {
 
@@ -193,7 +193,7 @@ public class ThickBranchBlock extends BasicBranchBlock implements Musable {
     // PHYSICAL BOUNDS
     ///////////////////////////////////////////
 
-    @Nonnull
+    @NotNull
     @Override
     public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         final int thisRadius = getRadius(state);

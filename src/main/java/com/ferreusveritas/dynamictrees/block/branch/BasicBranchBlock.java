@@ -47,8 +47,8 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 @SuppressWarnings("deprecation")
 public class BasicBranchBlock extends BranchBlock implements SimpleWaterloggedBlock {
@@ -395,7 +395,7 @@ public class BasicBranchBlock extends BranchBlock implements SimpleWaterloggedBl
                 (!state.hasProperty(WATERLOGGED) || !state.getValue(WATERLOGGED));
     }
 
-    @Nonnull
+    @NotNull
     @Override
     public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         int thisRadiusInt = getRadius(state);

@@ -70,7 +70,7 @@ import net.minecraftforge.common.ForgeMod;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import java.util.*;
 import java.util.function.Function;
 
@@ -171,7 +171,7 @@ public class BasicRootsBlock extends BranchBlock implements SimpleWaterloggedBlo
     }
 
     @Override
-    public int setRadius(LevelAccessor level, BlockPos pos, int radius, @javax.annotation.Nullable Direction originDir, int flags) {
+    public int setRadius(LevelAccessor level, BlockPos pos, int radius, @org.jetbrains.annotations.Nullable Direction originDir, int flags) {
         destroyMode = DynamicTrees.DestroyMode.SET_RADIUS;
         BlockState currentState = level.getBlockState(pos);
         boolean replacingWater = currentState.getFluidState() == Fluids.WATER.getSource(false);
@@ -348,7 +348,7 @@ public class BasicRootsBlock extends BranchBlock implements SimpleWaterloggedBlo
         this.damageAxe(entity, heldItem, this.getRadius(state), woodVolume, true);
     }
 
-    public BranchDestructionData destroyBranchFromNode(Level level, BlockPos cutPos, Direction toolDir, boolean wholeTree, @javax.annotation.Nullable final LivingEntity entity) {
+    public BranchDestructionData destroyBranchFromNode(Level level, BlockPos cutPos, Direction toolDir, boolean wholeTree, @org.jetbrains.annotations.Nullable final LivingEntity entity) {
         final BlockState blockState = level.getBlockState(cutPos);
         final SpeciesNode speciesNode = new SpeciesNode();
         final MapSignal signal = analyse(blockState, level, cutPos, null, new MapSignal(speciesNode)); // Analyze entire tree network to find root node and species.
@@ -473,7 +473,7 @@ public class BasicRootsBlock extends BranchBlock implements SimpleWaterloggedBlo
         return super.getCollisionShape(pState, pLevel, pPos, pContext);
     }
 
-    @Nonnull
+    @NotNull
     @Override
     public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext pContext) {
         if (isFullBlock(state)) {
@@ -621,7 +621,7 @@ public class BasicRootsBlock extends BranchBlock implements SimpleWaterloggedBlo
     }
 
     @Override
-    public MapSignal analyse(BlockState blockState, LevelAccessor level, BlockPos pos, @javax.annotation.Nullable Direction fromDir, MapSignal signal) {
+    public MapSignal analyse(BlockState blockState, LevelAccessor level, BlockPos pos, @org.jetbrains.annotations.Nullable Direction fromDir, MapSignal signal) {
         // Note: fromDir will be null in the origin node
 
         if (signal.overflow || (signal.trackVisited && signal.doTrackingVisited(pos))) {

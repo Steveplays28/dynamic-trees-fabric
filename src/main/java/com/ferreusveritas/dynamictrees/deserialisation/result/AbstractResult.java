@@ -3,7 +3,7 @@ package com.ferreusveritas.dynamictrees.deserialisation.result;
 import com.ferreusveritas.dynamictrees.deserialisation.DeserialisationException;
 import com.google.common.collect.Lists;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.function.Consumer;

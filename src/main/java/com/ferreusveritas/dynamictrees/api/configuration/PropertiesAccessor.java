@@ -1,6 +1,6 @@
 package com.ferreusveritas.dynamictrees.api.configuration;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * @author Harley O'Connor

@@ -11,7 +11,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 
 public class CherryLeavesProperties extends LeavesProperties {
 
@@ -22,11 +22,11 @@ public class CherryLeavesProperties extends LeavesProperties {
     }
 
     @Override
-    @Nonnull
-    protected DynamicLeavesBlock createDynamicLeaves(@Nonnull BlockBehaviour.Properties properties) {
+    @NotNull
+    protected DynamicLeavesBlock createDynamicLeaves(@NotNull BlockBehaviour.Properties properties) {
         return new DynamicLeavesBlock(this, properties) {
 
-            public void animateTick(@Nonnull BlockState state, @Nonnull Level level, @Nonnull BlockPos pos, @Nonnull RandomSource random) {
+            public void animateTick(@NotNull BlockState state, @NotNull Level level, @NotNull BlockPos pos, @NotNull RandomSource random) {
                 super.animateTick(state, level, pos, random);
                 if (random.nextInt(10) == 0) {
                     BlockPos blockpos = pos.below();

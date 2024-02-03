@@ -28,8 +28,8 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.common.IPlantable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import java.util.Collections;
 import java.util.List;
 
@@ -53,12 +53,12 @@ public class DynamicSaplingBlock extends Block implements BonemealableBlock, IPl
     }
 
     @Override
-    public boolean isValidBonemealTarget(@Nonnull LevelReader level, @Nonnull BlockPos pos, @Nonnull BlockState state, boolean isClient) {
+    public boolean isValidBonemealTarget(@NotNull LevelReader level, @NotNull BlockPos pos, @NotNull BlockState state, boolean isClient) {
         return this.getSpecies().canSaplingConsumeBoneMeal(level, pos);
     }
 
     @Override
-    public boolean isBonemealSuccess(@Nonnull Level level, @Nonnull RandomSource rand, @Nonnull BlockPos pos, @Nonnull BlockState state) {
+    public boolean isBonemealSuccess(@NotNull Level level, @NotNull RandomSource rand, @NotNull BlockPos pos, @NotNull BlockState state) {
         return this.getSpecies().canSaplingGrowAfterBoneMeal(level, rand, pos);
     }
 
@@ -103,7 +103,7 @@ public class DynamicSaplingBlock extends Block implements BonemealableBlock, IPl
     }
 
     @Override
-    public void performBonemeal(@Nonnull ServerLevel level, @Nonnull RandomSource rand, @Nonnull BlockPos pos, @Nonnull BlockState state) {
+    public void performBonemeal(@NotNull ServerLevel level, @NotNull RandomSource rand, @NotNull BlockPos pos, @NotNull BlockState state) {
         if (this.canSurvive(state, level, pos)) {
             final Species species = this.getSpecies();
             if (species.canSaplingGrow(level, pos)) {
@@ -136,15 +136,15 @@ public class DynamicSaplingBlock extends Block implements BonemealableBlock, IPl
         level.removeBlock(pos, false);
     }
 
-    @Nonnull
+    @NotNull
     @Override
     public ItemStack getCloneItemStack(BlockGetter level, BlockPos pos, BlockState state) {
         return this.getSpecies().getSeedStack(1);
     }
 
-    @Nonnull
+    @NotNull
     @Override
-    public List<ItemStack> getDrops(@Nonnull BlockState state, @Nonnull LootParams.Builder builder) {
+    public List<ItemStack> getDrops(@NotNull BlockState state, @NotNull LootParams.Builder builder) {
         // If a loot table has been added load those drops instead (until drop creators).
         if (builder.getLevel().getServer().getLootData().getElement(LootDataType.TABLE, this.getLootTable()) != null) {
             return super.getDrops(state, builder);
@@ -165,7 +165,7 @@ public class DynamicSaplingBlock extends Block implements BonemealableBlock, IPl
     // PHYSICAL BOUNDS
     ///////////////////////////////////////////
 
-    @Nonnull
+    @NotNull
     @Override
     public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         return this.getSpecies().getSaplingShape();

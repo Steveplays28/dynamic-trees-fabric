@@ -31,8 +31,8 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.registries.ForgeRegistries;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import java.util.function.Supplier;
 
 import static com.ferreusveritas.dynamictrees.compat.season.SeasonHelper.isSeasonBetween;
@@ -309,7 +309,7 @@ public class Fruit extends RegistryEntry<Fruit> implements Resettable<Fruit> {
         return DTLootTableProvider.BlockLoot.createFruitDrops(block.get(), getItemStack().getItem(), ageProperty, maxAge);
     }
 
-    @Nonnull
+    @NotNull
     @Override
     public Fruit reset() {
         canBoneMeal = DTConfigs.SERVER_CONFIG.isLoaded() && DTConfigs.CAN_BONE_MEAL_FRUIT.get();

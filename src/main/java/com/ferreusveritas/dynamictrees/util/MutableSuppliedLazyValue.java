@@ -1,6 +1,6 @@
 package com.ferreusveritas.dynamictrees.util;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import java.util.Objects;
 import java.util.function.Supplier;
 
@@ -20,7 +20,7 @@ public final class MutableSuppliedLazyValue<T> extends SuppliedLazyValue<T> impl
     }
 
     @Override
-    public void set(@Nonnull T value) {
+    public void set(@NotNull T value) {
         Objects.requireNonNull(value);
         this.object = value;
     }

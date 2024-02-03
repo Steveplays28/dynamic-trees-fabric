@@ -37,8 +37,8 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.registries.ForgeRegistries;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import java.util.Map;
 import java.util.function.Supplier;
 
@@ -376,7 +376,7 @@ public class Pod extends RegistryEntry<Pod> implements Resettable<Pod> {
         return offsetProperty;
     }
 
-    @Nonnull
+    @NotNull
     @Override
     public Pod reset() {
         canBoneMeal =  DTConfigs.SERVER_CONFIG.isLoaded() && DTConfigs.CAN_BONE_MEAL_PODS.get();

@@ -3,7 +3,7 @@ package com.ferreusveritas.dynamictrees.deserialisation.result;
 import com.ferreusveritas.dynamictrees.deserialisation.NoSuchDeserialiserException;
 import com.google.gson.JsonElement;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.function.Predicate;
 

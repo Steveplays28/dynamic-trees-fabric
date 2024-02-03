@@ -5,7 +5,7 @@ import com.ferreusveritas.dynamictrees.deserialisation.NoSuchDeserialiserExcepti
 import com.ferreusveritas.dynamictrees.util.function.ThrowableBiFunction;
 import com.ferreusveritas.dynamictrees.util.function.ThrowableFunction;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;

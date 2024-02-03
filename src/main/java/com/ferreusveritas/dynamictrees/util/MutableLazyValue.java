@@ -1,6 +1,6 @@
 package com.ferreusveritas.dynamictrees.util;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import java.util.function.Supplier;
 
 /**
@@ -12,7 +12,7 @@ public interface MutableLazyValue<T> {
 
     void reset(Supplier<T> supplier);
 
-    void set(@Nonnull T value);
+    void set(@NotNull T value);
 
     static <T> MutableLazyValue<T> supplied(Supplier<T> supplier) {
         return new MutableSuppliedLazyValue<>(supplier);

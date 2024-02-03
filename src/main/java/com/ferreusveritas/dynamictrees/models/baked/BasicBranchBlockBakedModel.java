@@ -31,8 +31,8 @@ import net.minecraftforge.client.model.geometry.IGeometryBakingContext;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector3f;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
@@ -191,9 +191,9 @@ public class BasicBranchBlockBakedModel implements IDynamicBakedModel {
         }
     }
 
-    @Nonnull
+    @NotNull
     @Override
-    public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @Nonnull RandomSource rand, @Nonnull ModelData extraData, @Nullable RenderType renderType) {
+    public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @NotNull RandomSource rand, @NotNull ModelData extraData, @Nullable RenderType renderType) {
         if (state == null || side != null) {
             return Collections.emptyList();
         }
@@ -267,9 +267,9 @@ public class BasicBranchBlockBakedModel implements IDynamicBakedModel {
     /**
      * Checks all neighboring tree parts to determine the connection radius for each side of this branch block.
      */
-    @Nonnull
+    @NotNull
     @Override
-    public ModelData getModelData(@Nonnull BlockAndTintGetter world, @Nonnull BlockPos pos, @Nonnull BlockState state, @Nonnull ModelData tileData) {
+    public ModelData getModelData(@NotNull BlockAndTintGetter world, @NotNull BlockPos pos, @NotNull BlockState state, @NotNull ModelData tileData) {
         ModelConnections modelConnections;
         if (state.getBlock() instanceof BranchBlock branchBlock) {
             modelConnections = new ModelConnections(branchBlock.getConnectionData(world, pos, state)).setFamily(branchBlock.getFamily());
@@ -344,7 +344,7 @@ public class BasicBranchBlockBakedModel implements IDynamicBakedModel {
         return false;
     }
 
-    @Nonnull
+    @NotNull
     @Override
     public ItemOverrides getOverrides() {
         return ItemOverrides.EMPTY;

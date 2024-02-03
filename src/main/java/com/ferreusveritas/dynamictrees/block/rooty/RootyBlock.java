@@ -54,8 +54,8 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -165,9 +165,9 @@ public class RootyBlock extends BlockWithDynamicHardness implements TreePart, En
         return getPrimitiveSoilBlock().isFireSource(getDecayBlockState(state, level, pos), level, pos, side);
     }
 
-    @Nonnull
+    @NotNull
     @Override
-    public List<ItemStack> getDrops(@Nonnull BlockState state, @Nonnull LootParams.Builder builder) {
+    public List<ItemStack> getDrops(@NotNull BlockState state, @NotNull LootParams.Builder builder) {
         return getPrimitiveSoilState(state).getDrops(builder);
     }
 
@@ -314,7 +314,7 @@ public class RootyBlock extends BlockWithDynamicHardness implements TreePart, En
     }
 
     @Override
-    public void playerWillDestroy(Level level, @Nonnull BlockPos pos, BlockState state, @Nonnull Player player) {
+    public void playerWillDestroy(Level level, @NotNull BlockPos pos, BlockState state, @NotNull Player player) {
         this.destroyTree(level, pos, player);
         super.playerWillDestroy(level, pos, state, player);
     }

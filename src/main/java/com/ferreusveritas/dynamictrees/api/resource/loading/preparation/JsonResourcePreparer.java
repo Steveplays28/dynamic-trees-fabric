@@ -9,8 +9,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.util.GsonHelper;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import java.io.IOException;
 import java.io.Reader;
 
@@ -35,7 +35,7 @@ public final class JsonResourcePreparer extends AbstractResourcePreparer<JsonEle
         this.resourceCollector.put(new DTResource<>(resourceName, jsonElement));
     }
 
-    @Nonnull
+    @NotNull
     static JsonElement readResource(Resource resource) throws PreparationException, IOException {
         final Reader reader = resource.openAsReader();
         final JsonElement json = tryParseJson(reader);

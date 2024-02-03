@@ -15,7 +15,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.fml.ModLoader;
 import org.apache.logging.log4j.LogManager;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;

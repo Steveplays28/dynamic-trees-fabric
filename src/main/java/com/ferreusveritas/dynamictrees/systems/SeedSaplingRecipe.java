@@ -8,8 +8,8 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -75,17 +75,17 @@ public class SeedSaplingRecipe {
         return this.getSaplingItem().isPresent();
     }
 
-    @Nonnull
+    @NotNull
     public Optional<Block> getSaplingBlock() {
         return Optionals.ofBlock(saplingBlock);
     }
 
-    @Nonnull
+    @NotNull
     public List<Item> getIngredientsForSaplingToSeed() {
         return new LinkedList<>(extraIngredientsForSaplingToSeed);
     }
 
-    @Nonnull
+    @NotNull
     public List<Item> getIngredientsForSeedToSapling() {
         return new LinkedList<>(extraIngredientsForSeedToSapling);
     }

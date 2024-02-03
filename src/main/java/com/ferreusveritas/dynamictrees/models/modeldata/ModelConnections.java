@@ -7,7 +7,7 @@ import net.minecraft.core.Direction;
 import net.minecraftforge.client.model.data.ModelData;
 import net.minecraftforge.client.model.data.ModelProperty;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Extension of {@link Connections} for storing and transferring model data to baked models.

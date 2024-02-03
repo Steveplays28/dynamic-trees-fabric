@@ -31,8 +31,8 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import java.util.Iterator;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -348,7 +348,7 @@ public final class CoordUtils {
 
     public static Iterable<BlockPos> goHorSides(final BlockPos pos, @Nullable final Direction ignore) {
         return new Iterable<BlockPos>() {
-            @Nonnull
+            @NotNull
             @Override
             public Iterator<BlockPos> iterator() {
                 return new AbstractIterator<BlockPos>() {

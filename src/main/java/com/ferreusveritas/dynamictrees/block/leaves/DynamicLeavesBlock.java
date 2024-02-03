@@ -52,8 +52,8 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.*;
 import net.minecraftforge.fml.ModList;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -111,8 +111,8 @@ public class DynamicLeavesBlock extends LeavesBlock implements TreePart, Ageable
         return this.getFlammability(state, level, pos, face) > 0 || face == Direction.UP;
     }
 
-    @Nonnull
-    public BlockState updateShape(@Nonnull BlockState stateIn, Direction facing, BlockState facingState, @Nonnull LevelAccessor level, @Nonnull BlockPos currentPos, BlockPos facingPos) {
+    @NotNull
+    public BlockState updateShape(@NotNull BlockState stateIn, Direction facing, BlockState facingState, @NotNull LevelAccessor level, @NotNull BlockPos currentPos, BlockPos facingPos) {
         return stateIn;
     }
 
@@ -591,7 +591,7 @@ public class DynamicLeavesBlock extends LeavesBlock implements TreePart, Ageable
     }
 
     @Override
-    public boolean isShearable(@Nonnull ItemStack item, Level level, BlockPos pos) {
+    public boolean isShearable(@NotNull ItemStack item, Level level, BlockPos pos) {
         return this.getProperties(level.getBlockState(pos)).doRequireShears();
     }
 
