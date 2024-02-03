@@ -138,8 +138,6 @@ public class DTRegistries {
         setupBlocks();
         setupConnectables();
         setupItems();
-
-        Registry.register(Registries.FEATURE, EXAMPLE_FEATURE_ID, EXAMPLE_FEATURE);
     }
 
     private static void setupBlocks() {
