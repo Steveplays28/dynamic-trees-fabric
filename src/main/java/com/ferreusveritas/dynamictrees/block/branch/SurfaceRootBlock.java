@@ -81,7 +81,7 @@ public class SurfaceRootBlock extends Block implements SimpleWaterloggedBlock {
     }
 
     @Override
-    public ItemStack getCloneItemStack(BlockState state, HitResult target, BlockGetter level, BlockPos pos, Player player) {
+    public ItemStack getCloneItemStack(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState) {
         return this.family.getBranchItem().map(ItemStack::new).orElse(ItemStack.EMPTY);
     }
 
@@ -227,19 +227,19 @@ public class SurfaceRootBlock extends Block implements SimpleWaterloggedBlock {
     }
 
     @Override
-    public boolean onDestroyedByPlayer(BlockState state, Level level, BlockPos pos, Player player, boolean willHarvest, FluidState fluid) {
-        final BlockState upstate = level.getBlockState(pos.above());
+    public void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
+        final BlockState upstate = level.getBlockState(blockPos.above());
 
         if (upstate.getBlock() instanceof TrunkShellBlock) {
-            level.setBlockAndUpdate(pos, upstate);
+            level.setBlockAndUpdate(blockPos, upstate);
         }
 
         for (Direction dir : CoordUtils.HORIZONTALS) {
-            final BlockPos dPos = pos.relative(dir).below();
-            level.getBlockState(dPos).neighborChanged(level, dPos, this, pos, false);
+            final BlockPos dPos = blockPos.relative(dir).below();
+            level.getBlockState(dPos).neighborChanged(level, dPos, this, blockPos, false);
         }
 
-        return super.onDestroyedByPlayer(state, level, pos, player, willHarvest, fluid);
+        super.onRemove(blockState, level, blockPos, blockState2, bl);
     }
 
     @Override
