@@ -42,12 +42,15 @@ import com.ferreusveritas.dynamictrees.worldgen.structure.DTCancelVanillaTreePoo
 import com.ferreusveritas.dynamictrees.worldgen.structure.TreePoolElement;
 import com.google.common.base.Suppliers;
 import com.mojang.serialization.Codec;
+import net.fabricmc.fabric.api.biome.v1.BiomeModifications;
+import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.Mth;
@@ -60,6 +63,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.HugeFungusConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.HugeMushroomFeatureConfiguration;
@@ -89,7 +93,6 @@ public class DTRegistries {
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, DynamicTrees.MOD_ID);
 //    public static final DeferredRegister<PlacementModifierType<?>> PLACEMENT_MODIFIER_TYPES = DeferredRegister.create(Registries.PLACEMENT_MODIFIER_TYPE, DynamicTrees.MOD_ID);
 //    public static final DeferredRegister<SoundEvent> SOUND_EVENTS = DeferredRegister.create(ForgeRegistries.SOUND_EVENTS, DynamicTrees.MOD_ID);
-    public static final DeferredRegister<Codec<? extends BiomeModifier>> BIOME_MODIFIER_SERIALIZERS = DeferredRegister.create(ForgeRegistries.Keys.BIOME_MODIFIER_SERIALIZERS, DynamicTrees.MOD_ID);
 //    public static final DeferredRegister<HolderSetType> HOLDER_SET_TYPES = DeferredRegister.create(ForgeRegistries.Keys.HOLDER_SET_TYPES, DynamicTrees.MOD_ID);
 //    public static final DeferredRegister<BlockStateProviderType<?>> BLOCK_STATE_PROVIDER_TYPES = DeferredRegister.create(Registries.BLOCK_STATE_PROVIDER_TYPE, DynamicTrees.MOD_ID);
     public static final DeferredRegister<StructurePoolElementType<?>> STRUCTURE_POOL_ELEMENT_TYPES = DeferredRegister.create(Registries.STRUCTURE_POOL_ELEMENT, DynamicTrees.MOD_ID);
@@ -127,7 +130,6 @@ public class DTRegistries {
         CREATIVE_MODE_TABS.register(modBus);
 //        PLACEMENT_MODIFIER_TYPES.register(modBus);
 //        SOUND_EVENTS.register(modBus);
-        BIOME_MODIFIER_SERIALIZERS.register(modBus);
 //        HOLDER_SET_TYPES.register(modBus);
 //        BLOCK_STATE_PROVIDER_TYPES.register(modBus);
         STRUCTURE_POOL_ELEMENT_TYPES.register(modBus);
@@ -138,6 +140,20 @@ public class DTRegistries {
         setupBlocks();
         setupConnectables();
         setupItems();
+        addFeaturesToOverworld();
+    }
+
+    private static void addFeaturesToOverworld() {
+        BiomeModifications.addFeature(
+                BiomeSelectors.foundInOverworld(),
+                GenerationStep.Decoration.VEGETAL_DECORATION,
+                ResourceKey.create(Registries.PLACED_FEATURE, new ResourceLocation(DynamicTrees.MOD_ID, "tree"))
+        );
+	    BiomeModifications.addFeature(
+			    BiomeSelectors.foundInOverworld(),
+			    GenerationStep.Decoration.VEGETAL_DECORATION,
+			    ResourceKey.create(Registries.PLACED_FEATURE, new ResourceLocation(DynamicTrees.MOD_ID, "cave_rooted_tree"))
+	    );
     }
 
     private static void setupBlocks() {
@@ -248,10 +264,6 @@ public class DTRegistries {
             BuiltInRegistries.FEATURE, new ResourceLocation(DynamicTrees.MOD_ID, "tree"), new DynamicTreeFeature());
     public static final CaveRootedTreeFeature CAVE_ROOTED_TREE_FEATURE = Registry.register(BuiltInRegistries.FEATURE, new ResourceLocation(DynamicTrees.MOD_ID, "cave_rooted_tree"), new CaveRootedTreeFeature());
 
-    public static final RegistryObject<Codec<AddDynamicTreesBiomeModifier>> ADD_DYNAMIC_TREES_BIOME_MODIFIER = BIOME_MODIFIER_SERIALIZERS.register("add_dynamic_trees",
-            () -> Codec.unit(AddDynamicTreesBiomeModifier::new));
-    public static final RegistryObject<Codec<RunFeatureCancellersBiomeModifier>> RUN_FEATURE_CANCELLERS_BIOME_MODIFIER = BIOME_MODIFIER_SERIALIZERS.register("run_feature_cancellers",
-            () -> Codec.unit(RunFeatureCancellersBiomeModifier::new));
     public static final RegistryObject<HolderSetType> INCLUDES_EXCLUDES_HOLDER_SET_TYPE = HOLDER_SET_TYPES.register("includes_excludes", () -> IncludesExcludesHolderSet::codec);
     public static final RegistryObject<HolderSetType> NAME_REGEX_MATCH_HOLDER_SET_TYPE = HOLDER_SET_TYPES.register("name_regex_match", () -> NameRegexMatchHolderSet::codec);
     public static final RegistryObject<HolderSetType> TAGS_REGEX_MATCH_HOLDER_SET_TYPE = HOLDER_SET_TYPES.register("tags_regex_match", () -> NameRegexMatchHolderSet::codec);
