@@ -89,14 +89,14 @@ public class Seed extends Item implements IPlantable {
 
     @Override
     public boolean onEntityItemUpdate(ItemStack stack, ItemEntity entityItem) {
-        if (entityItem.lifespan == 6000) { // 6000 (5 minutes) is the default lifespan for an entity item
-            entityItem.lifespan = getTimeToLive(entityItem.getItem()) + 20; // override default lifespan with new value + 20 ticks (1 second)
-            if (entityItem.lifespan == 6000) {
-                entityItem.lifespan = 6001; // Ensure this isn't run again
+        if (entityItem.getAge() == 6000) { // 6000 (5 minutes) is the default lifespan for an entity item
+            entityItem.age = getTimeToLive(entityItem.getItem()) + 20; // override default lifespan with new value + 20 ticks (1 second)
+            if (entityItem.getAge() == 6000) {
+                entityItem.age = 6001; // Ensure this isn't run again
             }
         }
 
-        if (entityItem.tickCount >= entityItem.lifespan - 20) {//Perform this action 20 ticks(1 second) before dying
+        if (entityItem.tickCount >= entityItem.getAge() - 20) {//Perform this action 20 ticks(1 second) before dying
             final Level level = entityItem.level();
             if (!level.isClientSide) {//Server side only
                 final ItemStack seedStack = entityItem.getItem();

@@ -32,8 +32,6 @@ import com.ferreusveritas.dynamictrees.util.holderset.NameRegexMatchHolderSet;
 import com.ferreusveritas.dynamictrees.worldgen.CaveRootedTreeFeature;
 import com.ferreusveritas.dynamictrees.worldgen.CaveRootedTreePlacement;
 import com.ferreusveritas.dynamictrees.worldgen.DynamicTreeFeature;
-import com.ferreusveritas.dynamictrees.worldgen.biomemodifiers.AddDynamicTreesBiomeModifier;
-import com.ferreusveritas.dynamictrees.worldgen.biomemodifiers.RunFeatureCancellersBiomeModifier;
 import com.ferreusveritas.dynamictrees.worldgen.feature.DTReplaceNyliumFungiBlockStateProvider;
 import com.ferreusveritas.dynamictrees.worldgen.featurecancellation.FungusFeatureCanceller;
 import com.ferreusveritas.dynamictrees.worldgen.featurecancellation.MushroomFeatureCanceller;
